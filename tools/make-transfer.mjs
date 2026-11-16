@@ -52,9 +52,32 @@ console.log(`transfer/ built: ${n} functions, entities, frontend, engine bundle`
   // bundle frontend: lib files first, then components, then pages; strip local imports; one React import
   const fe = `${out}frontend/src/`;
   const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}${e.name}/`) : [`${d}${e.name}`]));
-  const files = walk(fe).filter((p) => /\.(jsx?|mjs)$/.test(p) && !/main\.jsx$|App\.jsx$/.test(p));
+  const files = walk(fe).filter((p) => /\.(jsx?|mjs)$/.test(p) && !/\/(main|App)\.jsx$/.test(p));
   const rank = (p) => (p.includes("/lib/") ? 0 : p.includes("/components/") ? 1 : 2);
   files.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  // Order files so every file comes AFTER the files it imports. In one big file, a top-level
+  // `const X = [{ color: SYSTEM_TINT.CRM }]` crashes ("Cannot access before initialization")
+  // if SYSTEM_TINT is defined further down, so alphabetical order is not enough.
+  {
+    const set = new Set(files);
+    const resolve = (from, spec) => {
+      const base = spec.startsWith("@/") ? `${fe}${spec.slice(2)}` : new URL(spec, `file://${from}`).pathname;
+      for (const c of [base, `${base}.js`, `${base}.jsx`, `${base}/index.js`]) if (set.has(c)) return c;
+      return null;
+    };
+    const deps = new Map(files.map((f) => [f, [...readFileSync(f, "utf8").matchAll(/^import\s+[^;]*?from\s+"((?:@\/|\.\.?\/)[^"]*)";/gm)].map((m) => resolve(f, m[1])).filter(Boolean)]));
+    const ordered = [], state = new Map();
+    const visit = (f) => {
+      if (state.get(f) === 2) return;
+      if (state.get(f) === 1) return; // import cycle: keep current order
+      state.set(f, 1);
+      for (const d of deps.get(f) || []) visit(d);
+      state.set(f, 2);
+      ordered.push(f);
+    };
+    files.forEach(visit);
+    files.splice(0, files.length, ...ordered);
+  }
   const reactNames = new Set(), seen = new Map(), dups = [];
   let body = "";
   for (const p of files) {

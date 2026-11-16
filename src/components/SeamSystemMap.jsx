@@ -20,6 +20,7 @@ const SeamMapNodes = {
 const SeamMapSpareSlots = [
   { x: 40, y: 300 },
   { x: 600, y: 20 },
+  { x: 320, y: 0 },
 ];
 const SEAM_MAP_NODE_W = 130;
 const SEAM_MAP_NODE_H = 50;
@@ -62,7 +63,7 @@ function seamMapCurve(a, b) {
 
 export function seamMapAriaLabel(rows) {
   return `System map of where money slipped: ${rows
-    .map((r) => `${seamLabel(r.seam).replace("→", "to")} ${fmt(r.cents)}${r.overdue ? " late" : ""}, ${r.n} findings`)
+    .map((r) => `${seamLabel(r.seam).replace("→", "to")} ${fmt(r.cents)}${r.overdue ? " late" : r.creditOnly ? " we owe" : ""}, ${r.n} findings`)
     .join("; ")}.`;
 }
 
@@ -91,8 +92,8 @@ export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onS
         if (!a || !b) return null;
         const known = SeamMapPaths[r.seam];
         const geo = known || seamMapCurve(a, b);
-        const colors = r.seam === SEAM_FLOW_OVERDUE_SEAM ? SEAM_FLOW_COLORS.overdue : SEAM_FLOW_COLORS.owed;
-        const text = `${fmt(r.cents)}${r.overdue ? " late" : ""}`;
+        const colors = r.seam === SEAM_FLOW_OVERDUE_SEAM ? SEAM_FLOW_COLORS.overdue : r.creditOnly ? SEAM_FLOW_COLORS.credit : SEAM_FLOW_COLORS.owed;
+        const text = `${fmt(r.cents)}${r.overdue ? " late" : r.creditOnly ? " we owe" : ""}`;
         const w = seamFlowTextWidth(text) + 20;
         const cx = geo.mid[0];
         const cy = geo.mid[1] - geo.lift;

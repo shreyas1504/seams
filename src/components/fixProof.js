@@ -50,9 +50,39 @@ export function fixPatternFor(flagsInScope, patterns) {
 /** Root-cause sentence for one flag: the pattern that includes it, else its rule name. */
 export function fixRootCause(flag, seamFlags, patterns) {
   if (!flag) return "";
-  const containing = (patterns || []).filter((p) => (p.keys || []).includes(flag.stable_key));
+  const containing = (patterns || []).filter((p) => fixIsCausePattern(p) && (p.keys || []).includes(flag.stable_key));
   const p = fixPatternFor(seamFlags, containing);
   return p ? p.title : flag.rule || flag.rule_id;
+}
+
+/** Short cause for one card: the pattern that explains it (data-driven root cause), else a plain rule label. */
+const FIX_CAUSE_BY_RULE = {
+  dup_payment: "paid twice",
+  over_po: "billed over PO",
+  unbilled: "never invoiced",
+  short_billed: "fewer units billed than shipped",
+  below_contract: "billed below contract",
+  above_contract: "billed above contract",
+  freight: "freight not rebilled",
+  overdue: "late, not lost",
+  dup_credit_memo: "credit memo applied twice",
+  missing_credit: "credit never issued",
+};
+/** Party patterns ("X: repeat issues") describe a customer, not a cause; keep them out of cause labels. */
+export function fixIsCausePattern(p) {
+  return !String(p?.key || "").startsWith("repeat_") && !/: repeat issues$/.test(String(p?.title || ""));
+}
+/** The data-driven pattern behind one card, or null when only the rule explains it (the title already says that). */
+export function fixCausePattern(flag, seamFlags, patterns) {
+  if (!flag) return null;
+  const containing = (patterns || []).filter((p) => fixIsCausePattern(p) && (p.keys || []).includes(flag.stable_key));
+  return fixPatternFor(seamFlags || [flag], containing);
+}
+export function fixCauseLabel(flag, seamFlags, patterns) {
+  if (!flag) return "";
+  const containing = (patterns || []).filter((p) => fixIsCausePattern(p) && (p.keys || []).includes(flag.stable_key));
+  const p = fixPatternFor(seamFlags || [flag], containing);
+  return p ? p.title : FIX_CAUSE_BY_RULE[flag.rule_id] || String(flag.rule || flag.rule_id || "").toLowerCase();
 }
 
 // ---------- records side by side ----------

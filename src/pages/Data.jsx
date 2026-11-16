@@ -53,8 +53,11 @@ export default function Data({ role = "admin", onApproved }) {
       return next;
     });
   }
+  const [confirmReset, setConfirmReset] = useState(false);
   async function resetDemo() {
     if (controllerOnly || pipelineLock.current) return;
+    if (!confirmReset) { setConfirmReset(true); return; }
+    setConfirmReset(false);
     pipelineLock.current = true; setBusy(true); setError(""); setLog([]); setJoinHealth([]); setParsed(null); setImported(null);
     try { const checks = await loadDemoData(say); setJoinHealth(checks.needs_review || []); }
     catch (e) { setError(dataErrorMessage(e)); }
@@ -112,27 +115,28 @@ export default function Data({ role = "admin", onApproved }) {
   const returnFirst = ["return_id","customer","sku","qty_returned","credit_amount"];
   const shownFields = entity==="Return" ? [...returnFirst.filter(f=>mappedFields.includes(f)),...mappedFields.filter(f=>!returnFirst.includes(f))] : mappedFields;
   return <div className="upload-workspace">
-    <div className="upload-file-heading"><div><p className="brief-label">Upload new data</p><h1 className="font-display text-[22px] mt-1">{parsed?.file_name || "Connect the next file"}</h1></div><p className="text-xs text-muted">{parsed ? `rows in file ${parsed.rows.length} · imported ${imported??0}` : "CSV · parsed in code"}</p></div>
+    <div className="upload-file-heading"><div><p className="brief-label">Upload new data</p><h1 className="font-display text-[22px] mt-1">{parsed?.file_name || "Connect the next file"}</h1></div><p className="text-xs text-[#6B635A]">{parsed ? `rows in file ${parsed.rows.length} · imported ${imported??0}` : "CSV · parsed in code"}</p></div>
     <ol className="upload-steps" aria-label="Import steps">{["Read file","Match columns","Preview the change"].map((s,i)=><li key={s} className={(i===0&&parsed)||(i===1&&imported!=null)||(i===2&&(ruleApproved||(imported!=null&&entity!=="Return")))?"is-complete":""}><span>{i+1}</span> {s}{((i===0&&parsed)||(i===1&&imported!=null)||(i===2&&(ruleApproved||(imported!=null&&entity!=="Return"))))?" ✓":""}</li>)}</ol>
     <div className="flex flex-wrap gap-2">
       <label className={`btn-forest ${busy?"opacity-50":""}`}>Choose a file<input aria-label="Choose CSV file" type="file" accept=".csv" className="sr-only" onChange={onChooseFile} disabled={busy} /></label>
-      <button className="seam-chip" onClick={resetDemo} disabled={busy||controllerOnly}>{busy?"Working…":"Reset demo"}</button>
+      <button className="seam-chip" onClick={resetDemo} disabled={busy||controllerOnly} aria-live="polite">{busy?"Working…":confirmReset?"Replace all data with the demo? Click to confirm":"Reset demo"}</button>
+      {confirmReset && !busy ? <button className="fix-quiet" onClick={()=>setConfirmReset(false)}>Cancel</button> : null}
     </div>
-    {controllerOnly ? <p className="text-xs text-muted mt-2">Controller approval needed to import or reset data</p> : null}
+    {controllerOnly ? <p className="text-xs text-[#6B635A] mt-2">Controller approval needed to import or reset data</p> : null}
     {error || preview.error ? <p className="upload-error" role="alert">{error||preview.error}</p> : null}
     {parsed ? <>
       <section className="mt-5">
-        <div className="flex flex-wrap items-center gap-2"><h2 className="text-[13px] font-medium">Columns matched</h2><span className="chip chip-neutral">{source}</span><span className="text-xs text-muted">{mappingNote}</span></div>
-        <label className="block text-xs text-muted mt-3">Recognised as <select aria-label="Target entity" disabled={busy} value={entity} onChange={(e)=>{setEntity(e.target.value);setColumnMap(fuzzyMapHeaders(parsed.header,e.target.value));setImported(null);}}>{DATA_ENTITY_OPTIONS.map((o)=><option key={o}>{o}</option>)}</select></label>
+        <div className="flex flex-wrap items-center gap-2"><h2 className="text-[13px] font-medium">Columns matched</h2><span className="chip chip-neutral">{source}</span><span className="text-xs text-[#6B635A]">{mappingNote}</span></div>
+        <label className="block text-xs text-[#6B635A] mt-3">Recognised as <select aria-label="Target entity" disabled={busy} value={entity} onChange={(e)=>{setEntity(e.target.value);setColumnMap(fuzzyMapHeaders(parsed.header,e.target.value));setImported(null);}}>{DATA_ENTITY_OPTIONS.map((o)=><option key={o}>{o}</option>)}</select></label>
         <div className="upload-mappings mt-3">{parsed.header.map(h=><label key={h}><span>{h} →</span><select aria-label={`Map ${h}`} value={columnMap.find(m=>m.source_col===h)?.maps_to||""} disabled={busy} onChange={e=>setMapForSource(h,e.target.value)}><option value="">Skip</option>{fields.map(f=><option key={f} value={f}>{f}{required.has(f)?" *":""}</option>)}</select></label>)}</div>
-        <p className="text-[11px] text-muted mt-2">Required fields marked *. Date columns: {(ENTITY_DATE_FIELDS[entity]||[]).join(", ")||"none"}.</p>
-        {needDateChoice ? <div className="card p-3 mt-3"><p className="text-xs mb-2">Choose the date format for ambiguous dates.</p><button className="seam-chip mr-2" onClick={()=>{setDateFormat("MDY");setNeedDateChoice(false);}}>MM/DD</button><button className="seam-chip" onClick={()=>{setDateFormat("DMY");setNeedDateChoice(false);}}>DD/MM</button></div> : <p className="text-xs text-muted mt-2">Date format: {dateFormat==="DMY"?"DD/MM":"MM/DD"} → ISO</p>}
+        <p className="text-[11px] text-[#6B635A] mt-2">Required fields marked *. Date columns: {(ENTITY_DATE_FIELDS[entity]||[]).join(", ")||"none"}.</p>
+        {needDateChoice ? <div className="card p-3 mt-3"><p className="text-xs mb-2">Choose the date format for ambiguous dates.</p><button className="seam-chip mr-2" onClick={()=>{setDateFormat("MDY");setNeedDateChoice(false);}}>MM/DD</button><button className="seam-chip" onClick={()=>{setDateFormat("DMY");setNeedDateChoice(false);}}>DD/MM</button></div> : <p className="text-xs text-[#6B635A] mt-2">Date format: {dateFormat==="DMY"?"DD/MM":"MM/DD"} → ISO</p>}
       </section>
-      <section className="mt-5"><h2 className="text-xs text-muted mb-2">First rows · {entity}</h2><div className="upload-table-wrap"><table className="upload-table"><thead><tr>{shownFields.map(f=><th key={f}>{f.replace(/_/g," ")}</th>)}</tr></thead><tbody>{preview.rows.map((r,i)=><tr key={i}>{shownFields.map(f=><td key={f}>{dataPreviewValue(f,r[f])}</td>)}</tr>)}</tbody></table></div></section>
-      {imported==null ? <div className="mt-4"><button className="btn-forest" disabled={busy||needDateChoice||controllerOnly} onClick={confirmImport}>{busy?<><span className="seams-spinner"/> Importing…</>:"Confirm import"}</button>{needDateChoice?<p className="text-xs text-muted mt-2">Choose a date format before importing</p>:null}</div> : <p className="text-xs text-credit mt-3">Imported {imported} rows. Checks updated.</p>}
-    </> : <p className="text-sm text-muted my-6">Choose a CSV to match its columns and preview the changes. Your existing systems stay in place.</p>}
+      <section className="mt-5"><h2 className="text-xs text-[#6B635A] mb-2">First rows · {entity}</h2><div className="upload-table-wrap"><table className="upload-table"><thead><tr>{shownFields.map(f=><th key={f}>{f.replace(/_/g," ")}</th>)}</tr></thead><tbody>{preview.rows.map((r,i)=><tr key={i}>{shownFields.map(f=><td key={f}>{dataPreviewValue(f,r[f])}</td>)}</tr>)}</tbody></table></div></section>
+      {imported==null ? <div className="mt-4"><button className="btn-forest" disabled={busy||needDateChoice||controllerOnly} onClick={confirmImport}>{busy?<><span className="seams-spinner"/> Importing…</>:"Confirm import"}</button>{needDateChoice?<p className="text-xs text-[#6B635A] mt-2">Choose a date format before importing</p>:null}</div> : <p className="text-xs text-[#0F766E] mt-3">Imported {imported} rows. Checks updated.</p>}
+    </> : <p className="text-sm text-[#6B635A] my-6">Choose a CSV to match its columns and preview the changes. Your existing systems stay in place.</p>}
     {showTwist ? <TwistCard key={`${parsed?.hash||"existing"}-${imported??returns.length}`} fileName={parsed?.file_name||"twist_returns_log.csv"} rowsParsed={parsed?.rows.length||returns.length} rowsImported={imported??returns.length} role={role} approved={ruleApproved} onDone={(data,mode)=>{if(mode==="approve")onApproved?.(data);}}/> : null}
-    {joinHealth.length ? <section className="card p-3 mt-4"><h2 className="text-sm font-semibold">Join health</h2>{joinHealth.map((n,i)=><p className="text-xs text-muted" key={i}>{typeof n==="string"?n:`${n.type}: ${n.id||n.name||"check the source column"}`}</p>)}</section> : null}
+    {joinHealth.length ? <section className="card p-3 mt-4"><h2 className="text-sm font-semibold">Join health</h2>{joinHealth.map((n,i)=><p className="text-xs text-[#6B635A]" key={i}>{typeof n==="string"?n:`${n.type}: ${n.id||n.name||"check the source column"}`}</p>)}</section> : null}
     <div className="upload-log" role="log">{log.map((m,i)=><p key={i}>{m}</p>)}</div>
   </div>;
 }

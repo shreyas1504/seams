@@ -71,10 +71,10 @@ export default function TwistCard({
 
       {dry ? (
         <div className="twist-numbers" aria-label="Dry run preview">
-          <p className="text-xs text-muted col-span-full">Dry run · nothing changes until you approve</p>
+          <p className="text-xs text-[#6B635A] col-span-full">Dry run · nothing changes until you approve</p>
           <div><strong className="money">{dry.cleared?.length || 0}</strong><small>cleared ({fmt((dry.cleared || []).reduce((a,f)=>a+f.amount_cents,0))})</small></div>
-          <div><strong className="money text-owed">+{fmt((dry.new_recoverable || []).reduce((a,f)=>a+f.amount_cents,0))}</strong><small>owed to us</small></div>
-          <div><strong className="money text-credit">+{fmt((dry.new_credit || []).reduce((a,f)=>a+f.amount_cents,0))}</strong><small>we owe</small></div>
+          <div><strong className="money text-[#C2410C]">+{fmt((dry.new_recoverable || []).reduce((a,f)=>a+f.amount_cents,0))}</strong><small>owed to us</small></div>
+          <div><strong className="money text-[#0F766E]">+{fmt((dry.new_credit || []).reduce((a,f)=>a+f.amount_cents,0))}</strong><small>we owe</small></div>
           <div><strong className="money">{dry.trap_hits?.length || 0}</strong><small>look-alikes hit</small></div>
         </div>
       ) : null}

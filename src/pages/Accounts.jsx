@@ -5,6 +5,7 @@ import { rankParties, buildLetterDraft, DEFAULT_SETTINGS, fmt } from "@/lib/engi
 import { onSeamsDataChanged, announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { seamLabel, seamTint, SYSTEM_TINT } from "@/components/systems.js";
 import { fixTitle } from "@/components/fixProof.js";
+import { displayText } from "@/lib/displayText.js";
 import SeamsSheet from "@/components/SeamsSheet.jsx";
 import LetterDrawer from "@/components/LetterDrawer.jsx";
 import RefundDrawer from "@/components/RefundDrawer.jsx";
@@ -56,17 +57,17 @@ export default function Accounts({ role = "admin", onOpenFlag }) {
   }, [shown, cursor]);
   const afterSend = (data) => { setDrawer(false); setSelected(null); if (!data?.dismissed) setTab("Sent"); announceSeamsDataChanged(); };
   const timeline = party ? audits.filter((a) => a.after?.party === party.party || party.flags.some((f) => a.entity_type === "Flag" && a.entity_id === f.id) || letters.some((l) => l.party === party.party && l.id === a.entity_id) || actions.some((s) => s.params?.party === party.party && s.id === a.entity_id)).sort((a,b) => String(b.created_at || b.created_date).localeCompare(String(a.created_at || a.created_date))) : [];
-  const threshold = settings[0]?.four_eyes_threshold_cents ?? 500000;
+  const threshold = settings[0]?.four_eyes_threshold_cents ?? DEFAULT_SETTINGS.four_eyes_threshold_cents;
   const primary = party ? party.pending ? `Request approval · ${fmt(party.total)}` : Math.abs(party.total) >= threshold ? `Request approval · ${fmt(party.total)}` : party.lane === "vendor" ? `Request refund ${fmt(party.total)}` : `Settle ${fmt(party.total)}` : "";
   return <div className="space-y-5">
     <header><p className="brief-label">Every party · one letter total</p><h1 className="font-display text-[32px] font-medium mt-2">Accounts</h1></header>
     <div className="segmented w-fit" role="group" aria-label="Account filters">{["All","Customers","Vendors","Sent"].map((t) => <button key={t} className="segmented-option" aria-pressed={tab === t} onClick={() => setTab(t)}>{t}</button>)}</div>
-    <div ref={listRef} className="card divide-y divide-line" aria-label="Accounts list">
-      {!shown.length ? <p className="p-8 text-muted text-center">No accounts in this view.</p> : shown.map((p, i) => <button key={p.party} className="account-row" onFocus={() => setCursor(i)} onClick={() => setSelected(p.party)}>
+    <div ref={listRef} className="card divide-y divide-[#ECE4D8]" aria-label="Accounts list">
+      {!shown.length ? <p className="p-8 text-[#6B635A] text-center">No accounts in this view.</p> : shown.map((p, i) => <button key={p.party} className="account-row" onFocus={() => setCursor(i)} onClick={() => setSelected(p.party)}>
         <span className="account-initials" style={{background:seamTint(p.flags[0]?.seam).bg,color:seamTint(p.flags[0]?.seam).ink}}>{p.party.split(" ").slice(0,2).map((s) => s[0]).join("")}</span>
-        <span className="account-name"><strong>{p.party}</strong><small>{p.shownFlags.length} issues</small><span className="flex flex-wrap gap-1 mt-1">{[...new Set(p.shownFlags.map((f) => f.seam))].map((s) => <span key={s} className="account-seam" style={{background:seamTint(s).bg,color:seamTint(s).ink}}>{seamLabel(s)}</span>)}</span></span>
+        <span className="account-name"><strong>{p.party}</strong><small>{p.shownFlags.length} issue{p.shownFlags.length === 1 ? "" : "s"}</small><span className="flex flex-wrap gap-1 mt-1">{[...new Set(p.shownFlags.map((f) => f.seam))].map((s) => <span key={s} className="account-seam" style={{background:seamTint(s).bg,color:seamTint(s).ink}}>{seamLabel(s)}</span>)}</span></span>
         <span className={`chip ${p.sent ? "chip-credit" : p.pending ? "account-pending" : p.total < 0 ? "chip-credit" : "chip-neutral"}`}>{p.status}</span>
-        <span className={`money account-total ${p.total < 0 ? "text-credit" : "text-ink"}`}>{fmt(p.total)}</span>
+        <span className={`money account-total ${p.total < 0 ? "text-[#0F766E]" : "text-[#1C1917]"}`}>{fmt(p.total)}</span>
       </button>)}
     </div>
     {party && !drawer ? <SeamsSheet title={party.party} eyebrow="Account" onClose={() => setSelected(null)}>
@@ -74,16 +75,16 @@ export default function Accounts({ role = "admin", onOpenFlag }) {
         <p className="money text-[32px] font-semibold">{fmt(party.total)}</p>
         <div className="account-breakdown">{[["Owed to us","recoverable"],["Overdue","overdue"],["We owe","credit_owed"]].map(([label,bucket]) => <div key={bucket}><p>{label}</p><strong className="money">{fmt(party.shownFlags.filter((f)=>f.bucket===bucket).reduce((s,f)=>s+f.amount_cents,0))}</strong></div>)}</div>
         <button className="btn-forest w-full justify-center mt-4" disabled={party.sent || !party.draft.flag_keys.length} onClick={() => setDrawer(true)}>{primary}</button>
-        {party.sent || !party.draft.flag_keys.length ? <p className="text-xs text-muted mt-2">Nothing left to send</p> : null}
+        {party.sent || !party.draft.flag_keys.length ? <p className="text-xs text-[#6B635A] mt-2">Nothing left to send</p> : null}
         <h3 className="font-display text-xl mt-7 mb-3">Issues · {party.shownFlags.length}</h3>
         <div className="space-y-3">{party.shownFlags.map((f) => <article key={f.stable_key} className="card p-3">
-          <div className="flex justify-between gap-3"><strong className="text-[13px]">{fixTitle(f)}</strong><span className={`money text-[13px] ${f.bucket==="credit_owed"?"text-credit":"text-owed"}`}>{fmt(f.amount_cents)}</span></div>
-          <p className="text-xs text-muted mt-1">{f.why}</p>
+          <div className="flex justify-between gap-3"><strong className="text-[13px]">{fixTitle(f)}</strong><span className={`money text-[13px] ${f.bucket==="credit_owed"?"text-[#0F766E]":"text-[#C2410C]"}`}>{fmt(f.amount_cents)}</span></div>
+          <p className="text-xs text-[#6B635A] mt-1">{displayText(f.why)}</p>
           <div className="flex flex-wrap gap-1 mt-2">{(f.evidence || []).filter((e)=>e.id&&e.id!=="—").map((e,i)=><button key={i} className="record-chip" style={{background:SYSTEM_TINT[e.system]?.bg,color:SYSTEM_TINT[e.system]?.ink}} onClick={()=>onOpenFlag(f)}>{e.id}</button>)}</div>
         </article>)}</div>
         <h3 className="font-display text-xl mt-7 mb-3">Activity</h3>
         <ol className="mini-timeline">{timeline.map((e)=><li key={e.id}><p>{seamsAuditSentence(e)}</p><time>{new Date(e.created_at||e.created_date).toLocaleString()}</time></li>)}</ol>
-        {!timeline.length ? <p className="text-xs text-muted">No activity for this account yet.</p> : null}
+        {!timeline.length ? <p className="text-xs text-[#6B635A]">No activity for this account yet.</p> : null}
       </div>
     </SeamsSheet> : null}
     {party && drawer ? party.lane === "vendor" ? <RefundDrawer party={party.party} role={role} pendingAction={party.pending?.id} onClose={()=>setDrawer(false)} onSent={afterSend} onPending={()=>announceSeamsDataChanged()} /> : <LetterDrawer party={party.party} kind={party.kind} role={role} pendingAction={party.pending?.id} onClose={()=>setDrawer(false)} onSent={afterSend} onPending={()=>announceSeamsDataChanged()} /> : null}

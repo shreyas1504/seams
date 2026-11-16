@@ -2,9 +2,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
+import { useEntity } from "@/lib/useEntity";
+import SettleReceipt from "@/components/SettleReceipt.jsx";
+import { displayText } from "@/lib/displayText.js";
+import { DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
 import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 
 export default function RefundDrawer({ party, role = "admin", pendingAction = null, onClose, onSent, onPending }) {
+  const [settingRows] = useEntity("Setting");
   const [draft, setDraft] = useState(null);
   const [exclude, setExclude] = useState([]);
   const [subject, setSubject] = useState("");
@@ -89,22 +94,25 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
     }
   };
 
+  const limit = settingRows[0]?.four_eyes_threshold_cents ?? DEFAULT_SETTINGS.four_eyes_threshold_cents;
+  const overLimit = Boolean(draft) && Math.abs(draft.total_cents) >= limit;
+
   if (!draft) {
     return (
-      <div className="fixed inset-0 z-40 flex justify-end bg-ink/30">
+      <div className="fixed inset-0 z-40 flex justify-end bg-[#1C1917]/30">
         <div className="seams-settle-sheet seams-settle-sheet__loading h-full w-full max-w-lg" role="dialog" aria-label="Refund letter">
           <header className="seams-settle-sheet__header">
             <div><div className="seams-settle-sheet__eyebrow">Settle · vendor</div><h2 className="seams-settle-sheet__title">{party}</h2></div>
             <button type="button" onClick={onClose} className="seams-settle-sheet__close" aria-label="Close">×</button>
           </header>
-          {err ? <p className="seams-settle-sheet__error" role="alert">{err}</p> : <><p className="text-xs text-muted">Building refund preview…</p><div className="seams-skeleton mt-4 h-32" /></>}
+          {err ? <p className="seams-settle-sheet__error" role="alert">{err}</p> : <><p className="text-xs text-[#6B635A]">Building refund preview…</p><div className="seams-skeleton mt-4 h-32" /></>}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-ink/30" role="dialog" aria-label="Refund letter">
+    <div className="fixed inset-0 z-40 flex justify-end bg-[#1C1917]/30" role="dialog" aria-label="Refund letter">
       <button type="button" className="flex-1" aria-label="Close" onClick={onClose} />
       <div className="seams-settle-sheet flex h-full w-full max-w-lg flex-col">
         <header className="seams-settle-sheet__header">
@@ -130,7 +138,7 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
                   {sec.lines.map((line) => (
                     <div className="seams-settle-sheet__line" key={line.key}>
                       <input type="checkbox" checked={!exclude.includes(line.key)} onChange={() => toggleKey(line.key)} aria-label={`Include ${line.text}`} />
-                      <span className="seams-settle-sheet__line-copy">{line.text}</span>
+                      <span className="seams-settle-sheet__line-copy">{displayText(line.text)}</span>
                       <span className="seams-settle-sheet__line-amount">{fmt(line.signed_cents ?? line.amount_cents)}</span>
                     </div>
                   ))}
@@ -140,23 +148,7 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
             <p className="seams-settle-sheet__closing">{draft.closing}</p>
             <p className="seams-settle-sheet__fineprint">{draft.footer}</p>
           </article>
-          <section className="seams-settle-sheet__receipt-section">
-            <h3 className="seams-settle-sheet__receipt-title">Receipt · records behind each line</h3>
-            <div className="seams-settle-sheet__receipt-wrap">
-              <table className="seams-settle-sheet__receipt">
-                <thead><tr><th>System</th><th>Record</th><th>Fields</th></tr></thead>
-                <tbody>
-                  {draft.receipt.map((r, i) => (
-                    <tr key={i}>
-                      <td>{r.system}</td>
-                      <td>{r.id}</td>
-                      <td>{Object.entries(r.fields || {}).map(([k, v]) => `${k}=${v}`).join(" · ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <SettleReceipt receipt={draft.receipt} />
         </main>
         <footer className="seams-settle-sheet__footer">
           <div className="seams-settle-sheet__total-row">
@@ -179,12 +171,12 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
               onClick={send}
               className="seams-settle-sheet__send"
             >
-              {busy ? <><span className="seams-spinner" /> Sending…</> : role !== "admin" ? "Controller only" : `Request ${fmt(draft.total_cents)} refund`}
+              {busy ? <><span className="seams-spinner" /> Sending…</> : role !== "admin" ? "Controller only" : overLimit ? `Send for second approval · ${fmt(draft.total_cents)}` : `Request refund · ${fmt(draft.total_cents)}`}
             </button>
             <button type="button" disabled={busy} onClick={onClose} className="seams-settle-sheet__cancel">Cancel</button>
           </div>
           <p className="seams-settle-sheet__status" role="status">
-            {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : Math.abs(draft.total_cents) >= 500000 ? "Needs a second Controller over $5,000" : ""}
+            {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : overLimit ? `A second Controller approves sends over ${fmt(limit)}` : ""}
           </p>
         </footer>
       </div>

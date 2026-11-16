@@ -10,7 +10,7 @@ const JOURNEY_BAND = { x: 40, y: 58, w: 1220, h: 34 };
 const JOURNEY_VENDOR_BAND = { x: 40, y: 294, w: 1220, h: 14 };
 
 // The 1300-wide view renders at about half size, so type is set larger than the map's.
-const JOURNEY_TYPE = { band: 15, gate: 20, cardLabel: 15, cardAmount: 18 };
+const JOURNEY_TYPE = { band: 19, gate: 23, cardLabel: 19, cardAmount: 23 };
 
 const JourneyGates = [
   { key: "contracted", label: "Contracted", x: 180, color: SYSTEM_TINT.CRM.ink },

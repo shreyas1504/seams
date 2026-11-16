@@ -1,9 +1,35 @@
 import { useEffect, useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-/** Live list of an entity: same code works with the local stand-in and the real Base44 SDK (list + subscribe). */
+import { onSeamsDataChanged } from "@/actions/dataChanged.js";
+
+/**
+ * Live list of an entity: same code works with the local stand-in and the real Base44 SDK (list + subscribe).
+ * Returns [rows, reload, { loaded, error }]. `loaded` stays false until the first list returns, so screens can
+ * tell "still loading" apart from "nothing there". Every list also refetches on the app-wide data-changed event
+ * (import, approve, revoke, reset), so no screen keeps stale contracts, invoices, returns or settings.
+ */
 export function useEntity(name) {
   const [rows, setRows] = useState([]);
-  const reload = useCallback(() => base44.entities[name].list(undefined, 5000).then(setRows), [name]);
-  useEffect(() => { reload(); const un = base44.entities[name].subscribe?.(() => reload()); return () => un && un(); }, [name, reload]);
-  return [rows, reload];
+  const [meta, setMeta] = useState({ loaded: false, error: null });
+  const reload = useCallback(
+    () =>
+      base44.entities[name]
+        .list(undefined, 5000)
+        .then((r) => {
+          setRows(r || []);
+          setMeta({ loaded: true, error: null });
+        })
+        .catch((e) => setMeta({ loaded: true, error: e?.message || "Could not load " + name })),
+    [name],
+  );
+  useEffect(() => {
+    reload();
+    const un = base44.entities[name].subscribe?.(() => reload());
+    const off = onSeamsDataChanged(() => reload());
+    return () => {
+      if (typeof un === "function") un();
+      off();
+    };
+  }, [name, reload]);
+  return [rows, reload, meta];
 }

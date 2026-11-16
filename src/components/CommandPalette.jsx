@@ -6,6 +6,7 @@ import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 import { loadDemoData } from "@/actions/loadDemoData.js";
 import { paletteApprovalBlock } from "@/components/paletteActionGate.js";
+import { displayText } from "@/lib/displayText.js";
 
 const PALETTE_EXAMPLE_QUESTIONS = ["Which customers do we owe money to?", "Why wasn't the Bronx Realty rent flagged?", "Fix the Chelsea towels", "What changed after the returns file?"];
 
@@ -21,6 +22,10 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
   const [error, setError] = useState("");
   const [cursor, setCursor] = useState(-1);
   const [actionBlocked, setActionBlocked] = useState("");
+  const [hasData, setHasData] = useState(false);
+  useEffect(() => {
+    base44.entities.Invoice.list(undefined, 1).then((r) => setHasData((r || []).length > 0)).catch(() => {});
+  }, []);
   const root = useRef(null);
   const input = useRef(null);
   const generation = useRef(0);
@@ -94,22 +99,24 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
       <div className="palette-search"><input ref={input} value={query} onChange={(e)=>setQuery(e.target.value)} aria-label="Look up a record or ask Seams" placeholder="Look up a record, ask, or act…" /><button aria-label="Close command palette" className="chip chip-neutral" onClick={onClose}>esc</button></div>
       <div className="palette-results">
         <h2 className="brief-label mb-2">Records</h2>
-        {busy ? <p className="text-xs text-muted" role="status">Looking through checked records…</p> : lookup?.kind==="flagged" ? lookup.flags.map((f)=><button data-command key={f.stable_key} className="palette-record" onClick={()=>openFlag(f)}>Flagged: {f.title} · <span className="money">{fmt(f.amount_cents)}</span></button>) : lookup?.kind==="ruled_out" ? lookup.ruled.map((r,i)=><p className="palette-record" key={i}>Ruled out: {r.reason}</p>) : query.trim() && lookup ? <p className="palette-record">Not found in any of the 4 systems</p> : <p className="text-xs text-muted">Search a business ID such as INV-5078 or SH-3058.</p>}
+        {busy ? <p className="text-xs text-[#6B635A]" role="status">Looking through checked records…</p> : lookup?.kind==="flagged" ? lookup.flags.map((f)=><button data-command key={f.stable_key} className="palette-record" onClick={()=>openFlag(f)}>Flagged: {displayText(f.title)} · <span className="money">{fmt(f.amount_cents)}</span></button>) : lookup?.kind==="ruled_out" ? lookup.ruled.map((r,i)=><p className="palette-record" key={i}>Ruled out: {displayText(r.reason)}</p>) : query.trim() && lookup ? <p className="palette-record">Not found in any loaded system</p> : <p className="text-xs text-[#6B635A]">Search a business ID such as INV-5078 or SH-3058.</p>}
         <h2 className="brief-label mt-5 mb-2">Ask Seams</h2>
         {!query.trim() ? <div className="grid gap-1">{PALETTE_EXAMPLE_QUESTIONS.map(q=><button data-command className="palette-action" key={q} onClick={()=>setQuery(q)}>{q}</button>)}</div> : answer ? <div className="card p-3 text-[13px]">
-          <p>{answer.answer}</p>
+          <p>{displayText(answer.answer)}</p>
           <div className="flex flex-wrap gap-1 mt-2">{[...new Set(answer.ids||[])].map(id=><button data-command className="record-chip" key={id} onClick={()=>openRecord(id)}>{id}</button>)}</div>
           {answer.suggested_action_id ? <div className="flex gap-2 mt-3"><button data-command className="fix-pill" disabled={working||role!=="admin"||Boolean(actionBlocked)} onClick={()=>act(true)}>{working?"Sending…":"Approve"}</button><button data-command className="seam-chip" disabled={working} onClick={()=>act(false)}>Reject</button></div> : null}
-          {answer.suggested_action_id && actionBlocked ? <p className="text-xs text-muted mt-2">{actionBlocked}</p> : null}
-          {answer.suggested_action_id && role!=="admin" ? <p className="text-xs text-muted mt-2">Controller approval needed</p> : null}
+          {answer.suggested_action_id && actionBlocked ? <p className="text-xs text-[#6B635A] mt-2">{actionBlocked}</p> : null}
+          {answer.suggested_action_id && role!=="admin" ? <p className="text-xs text-[#6B635A] mt-2">Controller approval needed</p> : null}
         </div> : null}
-        {error ? <p role="status" className="text-[12px] text-overdue mt-2">{error}</p> : null}
+        {error ? <p role="status" className="text-[12px] text-[#9F1239] mt-2">{error}</p> : null}
         <h2 className="brief-label mt-5 mb-2">Actions</h2>
         <button data-command className="palette-action" onClick={()=>{onClose();onUpload();}}>Upload new data <kbd>U</kbd></button>
-        <button data-command className="palette-action" disabled={working||role!=="admin"} onClick={load}>{working?"Working…":"Load demo data"} <kbd>D</kbd></button>
-        {role!=="admin" ? <p className="text-xs text-muted">Controller approval needed to load demo data</p> : null}
+        {hasData
+          ? <button data-command className="palette-action" disabled={role!=="admin"} onClick={()=>{onNavigate("Data");onClose();}}>Reset demo data (on the Data page) <kbd>D</kbd></button>
+          : <button data-command className="palette-action" disabled={working||role!=="admin"} onClick={load}>{working?"Working…":"Load demo data"} <kbd>D</kbd></button>}
+        {role!=="admin" ? <p className="text-xs text-[#6B635A]">Controller approval needed to load demo data</p> : null}
         <button data-command className="palette-action" onClick={async()=>setRuled(await base44.entities.RuledOut.list(undefined,5000))}>Show look-alikes ruled out <kbd>R</kbd></button>
-        {ruled ? <div className="mt-2"><p className="font-display text-lg">{ruled.length} look-alikes ruled out</p>{ruled.map((r,i)=><p className="text-xs text-muted border-t border-line py-2" key={r.id||i}>{r.reason}</p>)}</div> : null}
+        {ruled ? <div className="mt-2"><p className="font-display text-lg">{ruled.length} look-alikes ruled out</p>{ruled.map((r,i)=><p className="text-xs text-[#6B635A] border-t border-[#ECE4D8] py-2" key={r.id||i}>{displayText(r.reason)}</p>)}</div> : null}
       </div>
       <footer className="palette-footer">Numbers come from records. AI only routes your question.</footer>
     </section>

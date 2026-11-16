@@ -12,7 +12,7 @@ const SLIPPED_VIEWS = [
   { id: "journey", label: "Money journey" },
 ];
 
-export default function WhereItSlipped({ flags, ruledCount, stages }) {
+export default function WhereItSlipped({ flags, ruledCount, stages, onPicked }) {
   const { selectedSeam, setSelectedSeam } = useSelectedSeam();
   const [view, setView] = useState("map");
   const [hovered, setHovered] = useState(null);
@@ -27,11 +27,15 @@ export default function WhereItSlipped({ flags, ruledCount, stages }) {
   }, [rows, selectedSeam, setSelectedSeam]);
 
   const activeSeam = hovered || selectedSeam;
+  const pick = (seam) => {
+    setSelectedSeam(seam);
+    onPicked?.();
+  };
 
   return (
     <section className="card rise flex flex-col p-5 lg:col-span-8" aria-label="Where it slipped">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-[18px] font-semibold text-ink">Where it slipped</h2>
+        <h2 className="font-display text-[18px] font-semibold text-[#1C1917]">Where it slipped</h2>
         {rows.length ? (
           <div className="segmented" role="group" aria-label="Choose view">
             {SLIPPED_VIEWS.map((v) => (
@@ -50,19 +54,19 @@ export default function WhereItSlipped({ flags, ruledCount, stages }) {
       </div>
 
       {!rows.length ? (
-        <p className="flex min-h-[260px] items-center justify-center text-center font-display text-[20px] text-ink">
+        <p className="flex min-h-[260px] items-center justify-center text-center font-display text-[20px] text-[#1C1917]">
           Nothing slipped through. {ruledCount} look-alikes checked.
         </p>
       ) : (
         <>
-          <div key={view} className="rise mt-3">
+          <div key={view} className="slip-visual rise mt-3">
             {view === "map" ? (
               <SeamSystemMap
                 rows={rows}
                 maxCents={maxCents}
                 activeSeam={activeSeam}
                 onHover={setHovered}
-                onSelect={setSelectedSeam}
+                onSelect={pick}
               />
             ) : (
               <MoneyJourney
@@ -71,25 +75,36 @@ export default function WhereItSlipped({ flags, ruledCount, stages }) {
                 stages={stages}
                 activeSeam={activeSeam}
                 onHover={setHovered}
-                onSelect={setSelectedSeam}
+                onSelect={pick}
               />
             )}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Seams">
+          <p className="slip-legend mt-2" aria-hidden="true">
+            <span><i className="legend-dot legend-owed" /> Owed to us</span>
+            <span><i className="legend-dot legend-late" /> Late, not lost</span>
+            <span><i className="legend-dot legend-credit" /> We owe customers</span>
+            <span>Wider line = more money · click a seam to see its fixes</span>
+          </p>
+          <div className="slip-rows mt-3 flex flex-wrap gap-2" role="group" aria-label="Seams">
             {rows.map((r) => (
               <button
                 key={r.seam}
                 type="button"
                 className="seam-chip"
                 aria-pressed={selectedSeam === r.seam}
-                onClick={() => setSelectedSeam(r.seam)}
+                onClick={() => pick(r.seam)}
                 onMouseEnter={() => setHovered(r.seam)}
                 onMouseLeave={() => setHovered(null)}
                 onFocus={() => setHovered(r.seam)}
                 onBlur={() => setHovered(null)}
               >
-                {seamLabel(r.seam)} · <span className="money">{fmt(r.cents)}</span> · {r.n}
+                <span className="seam-chip-name">{seamLabel(r.seam)}</span>
+                <span className="seam-chip-sep"> · </span>
+                <span className="money">{fmt(r.cents)}{r.overdue ? " late" : r.creditOnly ? " we owe" : ""}</span>
+                <span className="seam-chip-sep"> · </span>
+                <span className="seam-chip-count">{r.n} finding{r.n === 1 ? "" : "s"}</span>
+                <span className="seam-chip-chevron" aria-hidden="true">›</span>
               </button>
             ))}
           </div>

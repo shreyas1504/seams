@@ -4,11 +4,15 @@ import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
 import { useEntity } from "@/lib/useEntity";
 import { settleCreditCopy } from "@/components/settleCreditCopy.js";
+import SettleReceipt from "@/components/SettleReceipt.jsx";
+import { displayText } from "@/lib/displayText.js";
+import { DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
 import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 
 export default function LetterDrawer({ party, kind = "customer", role = "admin", pendingAction = null, onClose, onSent, onPending }) {
   const [returnRows] = useEntity("Return");
   const [invoiceRows] = useEntity("Invoice");
+  const [settingRows] = useEntity("Setting");
   const [draft, setDraft] = useState(null);
   const [exclude, setExclude] = useState([]);
   const [subject, setSubject] = useState("");
@@ -122,22 +126,24 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
 
   if (!draft) {
     return (
-      <div className="fixed inset-0 z-40 flex justify-end bg-ink/30">
+      <div className="fixed inset-0 z-40 flex justify-end bg-[#1C1917]/30">
         <div className="seams-settle-sheet seams-settle-sheet__loading h-full w-full max-w-lg" role="dialog" aria-label="Letter">
           <header className="seams-settle-sheet__header">
             <div><div className="seams-settle-sheet__eyebrow">Settle</div><h2 className="seams-settle-sheet__title">{party}</h2></div>
             <button type="button" onClick={onClose} className="seams-settle-sheet__close" aria-label="Close">×</button>
           </header>
-          {err ? <p className="seams-settle-sheet__error" role="alert">{err}</p> : <><p className="text-xs text-muted">Building letter preview…</p><div className="seams-skeleton mt-4 h-32" /></>}
+          {err ? <p className="seams-settle-sheet__error" role="alert">{err}</p> : <><p className="text-xs text-[#6B635A]">Building letter preview…</p><div className="seams-skeleton mt-4 h-32" /></>}
         </div>
       </div>
     );
   }
 
-  const primary = `Send ${fmt(draft.total_cents)}`;
+  const limit = settingRows[0]?.four_eyes_threshold_cents ?? DEFAULT_SETTINGS.four_eyes_threshold_cents;
+  const overLimit = Math.abs(draft.total_cents) >= limit;
+  const primary = overLimit ? `Send for second approval · ${fmt(draft.total_cents)}` : `Send ${fmt(draft.total_cents)}`;
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-ink/30" role="dialog" aria-label="Letter">
+    <div className="fixed inset-0 z-40 flex justify-end bg-[#1C1917]/30" role="dialog" aria-label="Letter">
       <button type="button" className="flex-1" aria-label="Close" onClick={onClose} />
       <div className="seams-settle-sheet flex h-full w-full max-w-lg flex-col">
         <header className="seams-settle-sheet__header">
@@ -183,7 +189,7 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
                           aria-label={`Include ${line.text}`}
                         />
                       )}
-                       <span className="seams-settle-sheet__line-copy">{settleCreditCopy(line, returnRows, invoiceRows)}</span>
+                       <span className="seams-settle-sheet__line-copy">{displayText(settleCreditCopy(line, returnRows, invoiceRows))}</span>
                        {line.amount_cents ? <span className="seams-settle-sheet__line-amount">{fmt(line.signed_cents ?? line.amount_cents).replace(/^-/, "−")}</span> : null}
                     </div>
                   ))}
@@ -194,23 +200,7 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
             <p className="seams-settle-sheet__fineprint">{draft.footer}</p>
           </article>
 
-          <section className="seams-settle-sheet__receipt-section">
-            <h3 className="seams-settle-sheet__receipt-title">Receipt · records behind each line</h3>
-            <div className="seams-settle-sheet__receipt-wrap">
-              <table className="seams-settle-sheet__receipt">
-                <thead><tr><th>System</th><th>Record</th><th>Fields</th></tr></thead>
-                <tbody>
-                  {draft.receipt.map((r, i) => (
-                    <tr key={i}>
-                      <td>{r.system}</td>
-                      <td>{r.id}</td>
-                      <td>{Object.entries(r.fields || {}).map(([k, v]) => `${k}=${v}`).join(" · ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <SettleReceipt receipt={draft.receipt} />
         </main>
 
         <footer className="seams-settle-sheet__footer">
@@ -244,7 +234,7 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
             <button type="button" disabled={busy} onClick={() => dismiss("Already handled")} className="seams-settle-sheet__quiet">Already handled</button>
           </div>
           <p className="seams-settle-sheet__status" role="status">
-            {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : Math.abs(draft.total_cents) >= 500000 ? "Needs a second Controller over $5,000" : ""}
+            {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : overLimit ? `A second Controller approves sends over ${fmt(limit)}` : ""}
           </p>
         </footer>
       </div>

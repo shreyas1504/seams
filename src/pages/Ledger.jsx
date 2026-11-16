@@ -5,6 +5,7 @@ import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { useEntity } from "@/lib/useEntity";
 import { seamsActorName, seamsAuditSentence } from "@/components/auditPresentation.js";
 import { seamsNotifyFeedback } from "@/components/InteractionFeedback.jsx";
+import { displayText } from "@/lib/displayText.js";
 
 export default function Ledger({ role = "admin" }) {
   const [events, reload] = useEntity("AuditEvent");
@@ -45,7 +46,7 @@ export default function Ledger({ role = "admin" }) {
       <header>
         <p className="brief-label">A record of every decision</p>
         <h1 className="font-display text-[32px] font-medium mt-2">Activity</h1>
-        <p className="text-sm text-muted">Every change, newest first</p>
+        <p className="text-sm text-[#6B635A]">Every change, newest first</p>
       </header>
 
       <div className="flex flex-wrap gap-2">
@@ -86,7 +87,7 @@ export default function Ledger({ role = "admin" }) {
                   {seamsActorName(ev.actor_email)} · {ev.actor_role === "admin" ? "Controller" : ev.actor_role === "user" ? "Analyst" : ev.actor_role}
                   {ev.entity_type ? ` · ${ev.entity_type}` : ""}
                 </p>
-                {ev.reason ? <p className="mt-1 text-xs text-[#111]">{ev.reason}</p> : null}
+                {ev.reason ? <p className="mt-1 text-xs text-[#111]">{displayText(ev.reason)}</p> : null}
               </div>
               <div className="text-right">
                 <p className="font-mono text-[11px] text-[#6B6B76]">{(ev.created_at || ev.created_date || "").slice(0, 19)}</p>
@@ -101,13 +102,13 @@ export default function Ledger({ role = "admin" }) {
                     {role !== "admin" ? "Controller only" : busy === ev.id ? "Undoing…" : "Undo"}
                   </button>
                 ) : null}
-                {ev.reversible && !ev.undone && role !== "admin" ? <p className="text-xs text-muted mt-1">Controller approval needed</p> : null}
+                {ev.reversible && !ev.undone && role !== "admin" ? <p className="text-xs text-[#6B635A] mt-1">Controller approval needed</p> : null}
               </div>
             </div>
           </li>
         ))}
       </ul>
-      {!filtered.length ? <p className="card p-8 text-muted text-center">No activity matches these filters.</p> : null}
+      {!filtered.length ? <p className="card p-8 text-[#6B635A] text-center">No activity matches these filters.</p> : null}
     </div>
   );
 }

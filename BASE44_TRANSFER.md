@@ -19,7 +19,11 @@ The order is: **data model → backend → golden numbers on mock data → scree
 Three pastes instead of ~40:
 1. **ENTITIES_PROMPT.md** → paste the whole file into the Base44 builder chat as one prompt (creates all 13 entities). Verify the names.
 2. **FUNCTIONS.md** → create each backend function listed, in order (runChecks first), pasting its code block. Test runChecks.
-3. **SeamsAll.jsx** → create one page file `src/pages/SeamsAll.jsx` with the whole file, then prompt: "Route `/` to the exported `Home` component and `/data` to the exported `Data` component from src/pages/SeamsAll.jsx (and any other exported pages). Do not modify the file."
+3. **SeamsAll.jsx** → create one page file `src/pages/SeamsAll.jsx` with the whole file, then prompt: "Route `/` to the exported `SeamsApp` component from src/pages/SeamsAll.jsx. It is the whole app: header, navigation, ⌘K, upload, all pages and its own styles. Do not modify the file, do not add a layout, sidebar or navigation around it."
+   - The file carries its own fonts and colours (`SeamsTheme`), so it looks the same without our index.css or tailwind config. Every custom colour is a plain Tailwind arbitrary value such as `text-[#6B635A]`, so Base44's shadcn `muted`/`card` names cannot clash.
+   - Identity: in Base44 the signed-in user decides the role (admin = Controller, user = Analyst). The demo identity switcher only appears in the local app. To show four-eyes approval, sign in as a second admin in another browser.
+   - "Load demo data" needs `/seed/*.csv`, which Base44 does not serve. It fails safely ("Nothing was changed"). Use **Upload new data** with the four files from `transfer/seed/` instead.
+   - Check before going further: headline **$18,280.94**, and the seam pills add up to it (AP → Vendors $11,360.40 + Warehouse → Billing $4,887.54 + CRM → Billing $2,033.00).
 Then the golden-number check (B4 step 2–3) and real data (B6). Fall back to the per-file steps below only if a single big paste fails.
 
 ## Path B: paste and prompt (default)
@@ -50,11 +54,11 @@ Gate: Flag records total **$18,280.94** recoverable, **$13,977.99** overdue, **$
 
 ### B5. Screens (40 min)
 Paste the remaining files from `transfer/frontend/src/` (pages and components). Then tell the builder:
-> "Make Home.jsx the home page (/) and add routes for Data, Ledger and Settings. Use the files exactly as written; they already import `base44` from `@/api/base44Client`. Don't restyle; the Tailwind classes use literal hex colors on purpose."
+> "Make `src/pages/SeamsApp.jsx` the home page (/). It already contains every page (Today, Accounts, Activity, Data, Settings) and its own styles. Use the files exactly as written; they import `base44` from `@/api/base44Client`. Don't restyle and don't wrap it in another layout."
 
 If the builder rewrites a file, paste it again with "replace the file content exactly with this".
 
-Gate: Home matches the local app on the mock data (hero, board, customer order, patterns, ruled-out 13).
+Gate: Today matches the local app on the mock data (headline $18,280.94, four seam pills, 13 look-alikes ruled out with reasons).
 
 ### B6. Real data (30 min)
 1. Data → Reset demo (clears mock data and findings; the AuditEvent log stays).
