@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import Home from "./pages/Home.jsx";
 import Data from "./pages/Data.jsx";
 import Ledger from "./pages/Ledger.jsx";
+import Settings from "./pages/Settings.jsx";
 import { setLocalUser } from "./lib/local/localBase44.js";
 
 const NAV_TABS = [
   { id: "Home", label: "Home", icon: "⌂" },
   { id: "Data", label: "Data", icon: "▦" },
   { id: "Ledger", label: "Ledger", icon: "☰" },
+  { id: "Settings", label: "Settings", icon: "⚙" },
 ];
 
 export default function App() {
@@ -46,7 +48,15 @@ export default function App() {
               <option value="user">Analyst (user)</option>
             </select>
           </div>
-          {tab === "Home" ? <Home role={role} /> : tab === "Ledger" ? <Ledger role={role} /> : <Data />}
+          {tab === "Home" ? (
+            <Home role={role} />
+          ) : tab === "Ledger" ? (
+            <Ledger role={role} />
+          ) : tab === "Settings" ? (
+            <Settings role={role} />
+          ) : (
+            <Data role={role} />
+          )}
         </div>
 
         <aside className="hidden w-16 shrink-0 md:flex md:flex-col md:items-center md:gap-3 md:pt-2">
