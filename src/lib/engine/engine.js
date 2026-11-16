@@ -379,3 +379,69 @@ export function reconcileFlags(existing, fresh) {
   }
   return { create, update, counts };
 }
+
+/** Allowed flag status transitions (§3.3). */
+export const FLAG_TRANSITIONS = {
+  open: ["dismissed", "sent"],
+  sent: ["disputed", "recovered", "credited", "needs_review"],
+  disputed: ["recovered"],
+  dismissed: [],
+  recovered: [],
+  credited: [],
+  cleared: ["open"],
+  needs_review: [],
+};
+
+/** Role: user may dismiss/dispute; admin may do the rest. */
+export function flagTransitionAllowed(from, to, role) {
+  const ok = (FLAG_TRANSITIONS[from] || []).includes(to);
+  if (!ok) return { ok: false, error: `Cannot transition ${from} → ${to}` };
+  if (role === "user" && !["dismissed", "disputed"].includes(to)) {
+    return { ok: false, error: "Controller role required" };
+  }
+  return { ok: true };
+}
+
+/** Dollar buckets for the H3 settlement bar. */
+export function settlementBuckets(flags) {
+  const buckets = {
+    open: { cents: 0, count: 0 },
+    sent: { cents: 0, count: 0 },
+    recovered: { cents: 0, count: 0 },
+    cleared: { cents: 0, count: 0 },
+  };
+  for (const f of flags || []) {
+    if (f.status === "open" || f.status === "disputed") {
+      buckets.open.cents += f.amount_cents; buckets.open.count++;
+    } else if (f.status === "sent") {
+      buckets.sent.cents += f.amount_cents; buckets.sent.count++;
+    } else if (f.status === "recovered" || f.status === "credited") {
+      buckets.recovered.cents += f.amount_cents; buckets.recovered.count++;
+    } else if (f.status === "cleared") {
+      buckets.cleared.cents += f.amount_cents; buckets.cleared.count++;
+    }
+  }
+  return buckets;
+}
+
+/** Count AuditEvent deltas after last_seen_at for the visit scorecard. */
+export function visitDeltasSince(events, lastSeenAt) {
+  const since = { new: 0, cleared: 0, sent: 0, recovered: 0 };
+  const cut = lastSeenAt ? Date.parse(lastSeenAt) : 0;
+  for (const ev of events || []) {
+    const t = Date.parse(ev.created_at || ev.created_date || 0);
+    if (cut && !(t > cut)) continue;
+    if (ev.action === "run_checks" && ev.after) {
+      since.new += ev.after.new || 0;
+      since.cleared += ev.after.cleared || 0;
+    } else if (ev.action === "transition_flag") {
+      const to = ev.after?.status;
+      if (to === "sent") since.sent++;
+      if (to === "recovered" || to === "credited") since.recovered++;
+      if (to === "cleared") since.cleared++;
+    } else if (ev.action === "send_letter") {
+      since.sent += (ev.after?.flag_keys || []).length || (ev.after?.count || 0);
+    }
+  }
+  return since;
+}

@@ -1,5 +1,6 @@
 // Home: laptop 5/7 sticky layout; phone stacks with Square up visible at 390px.
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { useEntity } from "@/lib/useEntity";
 import { rankParties } from "@/lib/engine/engine.js";
 import Hero from "@/components/Hero.jsx";
@@ -12,6 +13,8 @@ import RuledOutList from "@/components/RuledOutList.jsx";
 import RewardState from "@/components/RewardState.jsx";
 import LookupBox from "@/components/LookupBox.jsx";
 import FlagDetail from "@/components/FlagDetail.jsx";
+import SettlementBar from "@/components/SettlementBar.jsx";
+import NeedsReview from "@/components/NeedsReview.jsx";
 
 const LIVE_STATUSES = new Set(["open", "sent", "disputed"]);
 
@@ -32,13 +35,28 @@ function partyMatchesFilter(party, filterKey) {
   return party.flags.some((f) => f.seam === filterKey);
 }
 
-export default function Home() {
-  const [flags] = useEntity("Flag");
+export default function Home({ role = "admin" }) {
+  const [flags, reloadFlags] = useEntity("Flag");
   const [ruled] = useEntity("RuledOut");
   const [patterns] = useEntity("Pattern");
   const [settings] = useEntity("Setting");
+  const [audits, reloadAudits] = useEntity("AuditEvent");
   const [filterKey, setFilterKey] = useState(null);
   const [detailFlag, setDetailFlag] = useState(null);
+  const [since, setSince] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await base44.functions.invoke("recordVisit", {});
+        if (!cancelled) setSince(data.since);
+      } catch {
+        /* visit is best-effort */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const live = useMemo(() => flags.filter((f) => LIVE_STATUSES.has(f.status)), [flags]);
   const sumBucket = (b) => live.filter((f) => f.bucket === b).reduce((a, f) => a + f.amount_cents, 0);
@@ -50,6 +68,18 @@ export default function Home() {
   const overturned = flags.filter((f) => f.status === "dismissed" && f.dismiss_reason === "Not a leak").length;
   const asOf = settings[0]?.as_of_date || "2026-10-01";
   const showReward = flags.length > 0 && openRecoverableOrCredit.length === 0;
+  const timeline = useMemo(() => {
+    if (!detailFlag) return [];
+    return [...audits]
+      .filter((e) => e.entity_type === "Flag" && e.entity_id === detailFlag.id)
+      .sort((a, b) => Date.parse(b.created_at || b.created_date || 0) - Date.parse(a.created_at || a.created_date || 0));
+  }, [audits, detailFlag]);
+
+  const onTransition = async (payload) => {
+    await base44.functions.invoke("transitionFlag", payload);
+    reloadFlags();
+    reloadAudits();
+  };
 
   if (!flags.length) {
     return (
@@ -76,15 +106,18 @@ export default function Home() {
           customerCount={customers.length}
           vendorCount={vendors.length}
         />
+        <SettlementBar flags={flags} />
         <Scorecard
           flagged={live.filter((f) => f.bucket === "recoverable").length}
           ruledOut={ruled.length}
           overturned={overturned}
+          since={since}
         />
         <LineStatusBoard rows={boardRows} activeKey={filterKey} onSelect={setFilterKey} />
       </section>
 
       <section className="space-y-4 md:col-span-7">
+        <NeedsReview flags={flags} onOpenFlag={setDetailFlag} />
         {showReward ? (
           <RewardState claimedCents={sumBucket("recoverable")} returnedCents={sumBucket("credit_owed")} />
         ) : (
@@ -112,7 +145,13 @@ export default function Home() {
       </section>
 
       {detailFlag ? (
-        <FlagDetail flag={detailFlag} timeline={[]} onClose={() => setDetailFlag(null)} />
+        <FlagDetail
+          flag={flags.find((f) => f.id === detailFlag.id) || detailFlag}
+          timeline={timeline}
+          role={role}
+          onClose={() => setDetailFlag(null)}
+          onTransition={onTransition}
+        />
       ) : null}
     </div>
   );
