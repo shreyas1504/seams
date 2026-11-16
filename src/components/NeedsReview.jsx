@@ -15,7 +15,7 @@ export default function NeedsReview({ flags, joinIssues = [], onOpenFlag }) {
               <button
                 type="button"
                 onClick={() => onOpenFlag?.(f)}
-                className="flex w-full items-center justify-between rounded-2xl bg-white px-3 py-2 text-left text-xs"
+                className="flex min-h-[44px] w-full items-center justify-between rounded-2xl bg-white px-3 py-2 text-left text-xs"
               >
                 <span className="text-[#14171F]">
                   {f.party}: {f.review_reason || "Correction owed"}

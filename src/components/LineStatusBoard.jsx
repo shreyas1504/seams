@@ -12,20 +12,29 @@ export const LINE_STATUS_ROWS = [
 ];
 
 export default function LineStatusBoard({ rows, activeKey, onSelect }) {
-  const max = Math.max(1, ...rows.map((r) => r.cents));
+  const visible = rows.filter((r) => r.count);
+  const max = Math.max(1, ...visible.map((r) => r.cents));
   return (
     <div className="rounded-[28px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-base font-semibold text-[#14171F]">Line status</h2>
         {activeKey ? (
-          <button type="button" onClick={() => onSelect(null)} className="text-xs text-[#3B5BDB]">
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            className="min-h-[44px] px-2 text-xs text-[#3B5BDB]"
+          >
             Clear filter
           </button>
         ) : null}
       </div>
+      {!visible.length ? (
+        <p className="text-sm text-[#5B5F68]" role="status">
+          No live lines to show.
+        </p>
+      ) : null}
       <div className="space-y-3">
-        {rows.map((r) => {
-          if (!r.count) return null;
+        {visible.map((r) => {
           const active = activeKey === r.key;
           const bar =
             r.kind === "amber" ? "bg-[#8A5A00]" : r.kind === "green" ? "bg-[#17734B]" : "bg-[#C22A25]";
@@ -36,7 +45,7 @@ export default function LineStatusBoard({ rows, activeKey, onSelect }) {
               key={r.key}
               type="button"
               onClick={() => onSelect(active ? null : r.key)}
-              className={`block w-full rounded-2xl p-2 text-left transition-colors ${
+              className={`block min-h-[44px] w-full rounded-2xl p-2 text-left ${
                 active ? "bg-[#E8EEFF]" : "hover:bg-[#F5F5F5]"
               }`}
             >

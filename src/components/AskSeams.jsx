@@ -91,7 +91,7 @@ export default function AskSeams({ role = "admin", onOpenId }) {
             key={q}
             type="button"
             onClick={() => ask(q)}
-            className="rounded-full bg-[#E8EEFF] px-3 py-1.5 text-xs text-[#3B5BDB]"
+            className="min-h-[44px] rounded-2xl bg-[#E8EEFF] px-3 py-1.5 text-xs text-[#3B5BDB]"
           >
             {q}
           </button>
@@ -99,7 +99,7 @@ export default function AskSeams({ role = "admin", onOpenId }) {
       </div>
 
       {answer ? (
-        <div className="mt-4 rounded-2xl bg-[#F5F5F5] p-4 text-sm">
+        <div className="mt-4 rounded-2xl bg-[#F5F5F5] p-4 text-sm" role="status">
           <p className="text-[#14171F]">{answer.answer}</p>
           {answer.ids?.length ? (
             <div className="mt-2 flex flex-wrap gap-2">
@@ -108,7 +108,7 @@ export default function AskSeams({ role = "admin", onOpenId }) {
                   key={id}
                   type="button"
                   onClick={() => onOpenId?.(id)}
-                  className="rounded-full bg-white px-2 py-1 font-mono text-[11px] text-[#3B5BDB]"
+                  className="min-h-[44px] rounded-2xl bg-white px-2 py-1 font-mono text-[11px] text-[#3B5BDB]"
                 >
                   {id}
                 </button>

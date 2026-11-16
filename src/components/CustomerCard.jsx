@@ -77,7 +77,9 @@ export default function CustomerCard({ party, onSquareUp, onOpenFlag }) {
               <button
                 type="button"
                 onClick={() => (onOpenFlag ? onOpenFlag(f) : null)}
-                className="flex w-full items-center justify-between text-left text-xs"
+                className={`flex min-h-[44px] w-full items-center justify-between text-left text-xs fade-on-clear${
+                  f.status === "cleared" ? " is-cleared" : ""
+                }`}
               >
                 <span className="text-[#5B5F68]">{f.rule}</span>
                 <span className="font-mono text-[#14171F]">{fmt(f.amount_cents)}</span>

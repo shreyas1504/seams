@@ -1,8 +1,9 @@
 // M1: board values by seam and customer order from rankParties.
+// M9: reconcile — sum of flags by bucket matches totalsOf.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { runEngine, rankParties } from "../src/lib/engine/engine.js";
+import { runEngine, rankParties, totalsOf } from "../src/lib/engine/engine.js";
 import { parseCsv } from "../src/lib/csv.js";
 
 const DATA = new URL("../tools/data/", import.meta.url).pathname;
@@ -30,4 +31,21 @@ test("home board values by seam and customer order", () => {
   const tribeca = customers.find((c) => c.party === "Tribeca Grill");
   assert.ok(tribeca);
   assert.equal(tribeca.net, -12000);
+});
+
+test("reconcile: sum of flags by bucket matches totalsOf", () => {
+  const out = runEngine(data());
+  const totals = totalsOf(out.flags, out.ruledOut);
+  for (const bucket of ["recoverable", "overdue", "credit_owed"]) {
+    const sum = out.flags
+      .filter((f) => f.bucket === bucket)
+      .reduce((a, f) => a + f.amount_cents, 0);
+    assert.equal(sum, totals[bucket].cents, `${bucket} cents`);
+    assert.equal(
+      out.flags.filter((f) => f.bucket === bucket).length,
+      totals[bucket].n,
+      `${bucket} count`,
+    );
+  }
+  assert.equal(totals.ruled_out, out.ruledOut.length);
 });

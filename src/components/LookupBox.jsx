@@ -66,7 +66,7 @@ export default function LookupBox({ onOpenFlag }) {
               <button
                 type="button"
                 onClick={() => onOpenFlag?.(f)}
-                className="flex w-full items-center justify-between text-left text-xs"
+                className="flex min-h-[44px] w-full items-center justify-between text-left text-xs"
               >
                 <span className="text-[#14171F]">{f.rule} · {f.party}</span>
                 <span className="font-mono text-[#C22A25]">{fmt(f.amount_cents)}</span>

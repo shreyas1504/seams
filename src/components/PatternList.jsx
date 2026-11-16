@@ -4,16 +4,24 @@ import { fmt } from "@/lib/engine/engine.js";
 
 export default function PatternList({ patterns, onSuggestFix }) {
   const [openKey, setOpenKey] = useState(null);
-  const sorted = [...patterns].sort((a, b) => b.amount_cents - a.amount_cents);
-  if (!sorted.length) return null;
+  const sorted = [...(patterns || [])].sort((a, b) => b.amount_cents - a.amount_cents);
   return (
     <section className="space-y-3">
       <h2 className="text-base font-semibold text-[#14171F]">Patterns</h2>
+      {!sorted.length ? (
+        <p className="rounded-[28px] bg-white p-4 text-sm text-[#5B5F68] shadow-[0_8px_24px_rgba(0,0,0,0.04)]" role="status">
+          No patterns yet.
+        </p>
+      ) : null}
       {sorted.map((p) => {
         const open = openKey === p.key;
         return (
           <article key={p.key} className="rounded-[28px] bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-            <button type="button" onClick={() => setOpenKey(open ? null : p.key)} className="flex w-full items-start justify-between gap-3 text-left">
+            <button
+              type="button"
+              onClick={() => setOpenKey(open ? null : p.key)}
+              className="flex min-h-[44px] w-full items-start justify-between gap-3 text-left"
+            >
               <div>
                 <h3 className="text-sm font-semibold text-[#14171F]">{p.title}</h3>
                 <p className="mt-1 text-xs text-[#5B5F68]">{p.detail}</p>

@@ -59,7 +59,11 @@ export default function FlagDetail({ flag, timeline = [], onClose, onTransition,
   return (
     <div className="fixed inset-0 z-40 flex justify-end bg-black/30" role="dialog" aria-label="Flag detail">
       <button type="button" className="flex-1 cursor-default" aria-label="Close drawer" onClick={onClose} />
-      <div className="flex h-full w-full max-w-lg flex-col overflow-y-auto bg-[#F6F3EC] shadow-xl">
+      <div
+        className={`fade-on-clear flex h-full w-full max-w-lg flex-col overflow-y-auto bg-[#F6F3EC] shadow-xl${
+          flag.status === "cleared" ? " is-cleared" : ""
+        }`}
+      >
         <div className="flex items-start justify-between gap-3 border-b border-[#E2DDD2] bg-white p-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-[#5B5F68]">{flag.status}</p>

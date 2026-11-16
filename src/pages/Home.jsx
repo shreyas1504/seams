@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useEntity } from "@/lib/useEntity";
-import { rankParties } from "@/lib/engine/engine.js";
+import { rankParties, totalsOf } from "@/lib/engine/engine.js";
 import Hero from "@/components/Hero.jsx";
 import Scorecard from "@/components/Scorecard.jsx";
 import LineStatusBoard, { LINE_STATUS_ROWS } from "@/components/LineStatusBoard.jsx";
@@ -39,6 +39,10 @@ function partyMatchesFilter(party, filterKey) {
   return party.flags.some((f) => f.seam === filterKey);
 }
 
+function sumFlagsByBucket(flags, bucket) {
+  return flags.filter((f) => f.bucket === bucket).reduce((a, f) => a + f.amount_cents, 0);
+}
+
 export default function Home({ role = "admin" }) {
   const [flags, reloadFlags] = useEntity("Flag");
   const [ruled] = useEntity("RuledOut");
@@ -66,16 +70,24 @@ export default function Home({ role = "admin" }) {
     return () => { cancelled = true; };
   }, []);
 
-  const live = useMemo(() => flags.filter((f) => LIVE_STATUSES.has(f.status)), [flags]);
-  const sumBucket = (b) => live.filter((f) => f.bucket === b).reduce((a, f) => a + f.amount_cents, 0);
+  const live = useMemo(() => flags.filter((f) => LIVE_STATUSES.has(f.status || "open")), [flags]);
+  const heroTotals = useMemo(() => totalsOf(live), [live]);
+  const sumBucket = (b) => sumFlagsByBucket(live, b);
+  const reconciled =
+    sumBucket("recoverable") === heroTotals.recoverable.cents &&
+    sumBucket("overdue") === heroTotals.overdue.cents &&
+    sumBucket("credit_owed") === heroTotals.credit_owed.cents;
   const { customers, vendors } = useMemo(() => rankParties(live), [live]);
   const boardRows = useMemo(() => buildBoardRows(live), [live]);
   const filteredCustomers = customers.filter((p) => partyMatchesFilter(p, filterKey));
   const filteredVendors = vendors.filter((p) => partyMatchesFilter(p, filterKey));
+  // H12: reward when no open recoverable / credit_owed flags remain (sent/disputed still count as open work).
   const openRecoverableOrCredit = live.filter((f) => f.bucket === "recoverable" || f.bucket === "credit_owed");
   const overturned = flags.filter((f) => f.status === "dismissed" && f.dismiss_reason === "Not a leak").length;
   const asOf = settings[0]?.as_of_date || "2026-10-01";
   const showReward = flags.length > 0 && openRecoverableOrCredit.length === 0;
+  const claimedCents = flags.filter((f) => f.status === "recovered").reduce((a, f) => a + f.amount_cents, 0);
+  const returnedCents = flags.filter((f) => f.status === "credited").reduce((a, f) => a + f.amount_cents, 0);
   const timeline = useMemo(() => {
     if (!detailFlag) return [];
     return [...audits]
@@ -91,7 +103,7 @@ export default function Home({ role = "admin" }) {
 
   if (!flags.length) {
     return (
-      <div className="rounded-[28px] bg-white p-6 text-[#5B5F68] shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+      <div className="rounded-[28px] bg-white p-6 text-[#5B5F68] shadow-[0_8px_24px_rgba(0,0,0,0.04)]" role="status">
         No data yet. Go to Data → Reset demo.
       </div>
     );
@@ -106,11 +118,19 @@ export default function Home({ role = "admin" }) {
             Seams <span className="font-normal text-[#5B5F68]">· Mind the gap</span>
           </h1>
         </header>
+        {!reconciled ? (
+          <div
+            className="rounded-2xl border border-[#C22A25] bg-[#F8E8E8] px-4 py-3 text-sm font-medium text-[#C22A25]"
+            role="alert"
+          >
+            Totals don&apos;t reconcile
+          </div>
+        ) : null}
         <LookupBox onOpenFlag={setDetailFlag} />
         <Hero
-          recoverableCents={sumBucket("recoverable")}
-          overdueCents={sumBucket("overdue")}
-          creditCents={sumBucket("credit_owed")}
+          recoverableCents={heroTotals.recoverable.cents}
+          overdueCents={heroTotals.overdue.cents}
+          creditCents={heroTotals.credit_owed.cents}
           customerCount={customers.length}
           vendorCount={vendors.length}
         />
@@ -145,33 +165,45 @@ export default function Home({ role = "admin" }) {
         ) : null}
         <NeedsReview flags={flags} onOpenFlag={setDetailFlag} />
         {showReward ? (
-          <RewardState claimedCents={sumBucket("recoverable")} returnedCents={sumBucket("credit_owed")} />
+          <RewardState claimedCents={claimedCents} returnedCents={returnedCents} />
         ) : (
           <>
             <div>
               <h2 className="mb-3 text-base font-semibold text-[#14171F]">Customers to square up</h2>
               <div className="space-y-3">
-                {filteredCustomers.map((p) => (
-                  <CustomerCard
-                    key={p.party}
-                    party={p}
-                    onOpenFlag={setDetailFlag}
-                    onSquareUp={() => setLetterParty(p)}
-                  />
-                ))}
+                {filteredCustomers.length ? (
+                  filteredCustomers.map((p) => (
+                    <CustomerCard
+                      key={p.party}
+                      party={p}
+                      onOpenFlag={setDetailFlag}
+                      onSquareUp={() => setLetterParty(p)}
+                    />
+                  ))
+                ) : (
+                  <p className="rounded-[28px] bg-white p-4 text-sm text-[#5B5F68] shadow-[0_8px_24px_rgba(0,0,0,0.04)]" role="status">
+                    No customers match this filter.
+                  </p>
+                )}
               </div>
             </div>
             <div>
               <h2 className="mb-3 text-base font-semibold text-[#14171F]">Vendors to recover</h2>
               <div className="space-y-3">
-                {filteredVendors.map((p) => (
-                  <VendorCard
-                    key={p.party}
-                    party={p}
-                    onOpenFlag={setDetailFlag}
-                    onRequestRefund={() => setRefundParty(p)}
-                  />
-                ))}
+                {filteredVendors.length ? (
+                  filteredVendors.map((p) => (
+                    <VendorCard
+                      key={p.party}
+                      party={p}
+                      onOpenFlag={setDetailFlag}
+                      onRequestRefund={() => setRefundParty(p)}
+                    />
+                  ))
+                ) : (
+                  <p className="rounded-[28px] bg-white p-4 text-sm text-[#5B5F68] shadow-[0_8px_24px_rgba(0,0,0,0.04)]" role="status">
+                    No vendors match this filter.
+                  </p>
+                )}
               </div>
             </div>
           </>

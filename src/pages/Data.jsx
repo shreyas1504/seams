@@ -21,7 +21,7 @@ const SEED = {
 const ENTITY_OPTIONS = Object.keys(ENTITY_CANONICAL_FIELDS);
 const errMsg = (e) => e?.response?.data?.error || e.message;
 
-export default function Data() {
+export default function Data({ role = "admin" }) {
   const [log, setLog] = useState([]);
   const [entity, setEntity] = useState("Contract");
   const [parsed, setParsed] = useState(null);
@@ -32,6 +32,7 @@ export default function Data() {
   const [joinHealth, setJoinHealth] = useState([]);
   const [busy, setBusy] = useState(false);
 
+  const controllerOnly = role !== "admin";
   const say = (m) => setLog((l) => [...l, m]);
   const fields = ENTITY_CANONICAL_FIELDS[entity] || [];
   const required = new Set(ENTITY_REQUIRED_FIELDS[entity] || []);
@@ -50,6 +51,10 @@ export default function Data() {
   }
 
   async function resetDemo() {
+    if (controllerOnly) {
+      say("Controller only");
+      return;
+    }
     setLog([]);
     setJoinHealth([]);
     setParsed(null);
@@ -129,6 +134,10 @@ export default function Data() {
 
   async function confirmImport() {
     if (!parsed) return;
+    if (controllerOnly) {
+      say("Controller only");
+      return;
+    }
     setBusy(true);
     try {
       const missing = (ENTITY_REQUIRED_FIELDS[entity] || []).filter(
@@ -175,7 +184,9 @@ export default function Data() {
           <button
             type="button"
             onClick={resetDemo}
-            className="min-h-[44px] rounded-2xl bg-[#000000] px-4 text-sm font-medium text-white"
+            disabled={controllerOnly}
+            title={controllerOnly ? "Controller only" : undefined}
+            className="min-h-[44px] rounded-2xl bg-[#000000] px-4 text-sm font-medium text-white disabled:opacity-40"
           >
             Reset demo
           </button>
@@ -184,6 +195,7 @@ export default function Data() {
             <input type="file" accept=".csv" className="hidden" onChange={onChooseFile} disabled={busy} />
           </label>
         </div>
+        {controllerOnly ? <p className="mt-2 text-xs text-[#8A5A00]">Controller only</p> : null}
       </div>
 
       {parsed ? (
@@ -279,14 +291,19 @@ export default function Data() {
 
           <button
             type="button"
-            disabled={busy || needDateChoice}
+            disabled={busy || needDateChoice || controllerOnly}
+            title={controllerOnly ? "Controller only" : undefined}
             onClick={confirmImport}
             className="mt-4 min-h-[44px] rounded-2xl bg-[#000000] px-4 text-sm font-medium text-white disabled:opacity-40"
           >
             Confirm import
           </button>
         </div>
-      ) : null}
+      ) : (
+        <div className="rounded-[28px] bg-white p-5 text-sm text-[#5B5F68] shadow-[0_8px_24px_rgba(0,0,0,0.04)]" role="status">
+          No file loaded. Choose a CSV or Reset demo to seed the clean dataset.
+        </div>
+      )}
 
       {joinHealth.length ? (
         <div className="rounded-[28px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
@@ -301,7 +318,7 @@ export default function Data() {
         </div>
       ) : null}
 
-      <pre className="whitespace-pre-wrap rounded-[28px] bg-white p-4 font-mono text-xs shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+      <pre className="whitespace-pre-wrap rounded-[28px] bg-white p-4 font-mono text-xs shadow-[0_8px_24px_rgba(0,0,0,0.04)]" role="log">
         {log.join("\n") || "Log appears here."}
       </pre>
     </div>

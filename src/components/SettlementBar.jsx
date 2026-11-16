@@ -13,7 +13,7 @@ export default function SettlementBar({ flags }) {
         <div className="border border-[#C22A25] bg-transparent" style={{ width: `${pct(b.sent.cents)}%` }} title={`Sent ${fmt(b.sent.cents)}`} />
         <div className="bg-[#17734B]" style={{ width: `${pct(b.recovered.cents)}%` }} title={`Recovered ${fmt(b.recovered.cents)}`} />
         <div
-          className="bg-[#B8B8B8]"
+          className="fade-on-clear bg-[#B8B8B8]"
           style={{
             width: `${pct(b.cleared.cents)}%`,
             backgroundImage: "repeating-linear-gradient(45deg,#B8B8B8 0,#B8B8B8 2px,#E5E5E5 2px,#E5E5E5 6px)",
