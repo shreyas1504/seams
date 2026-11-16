@@ -3,7 +3,7 @@
 // Edit styles HERE, not in a .css file. CSS variables are prefixed --s- so they never clash with shadcn.
 import React from "react";
 
-export const SEAMS_THEME_CSS = String.raw`@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+export const SEAMS_THEME_CSS = String.raw`@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
 
 /* ---- from src/index.css ---- */
 
@@ -36,8 +36,8 @@ export const SEAMS_THEME_CSS = String.raw`@import url("https://fonts.googleapis.
   --s-sys-ret-ink: #9a4a00;
   --s-radius-card: 16px;
   --s-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --s-font-display: "Fraunces", Georgia, serif;
-  --s-font-ui: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --s-font-display: "Figtree", system-ui, -apple-system, sans-serif;
+  --s-font-ui: "Figtree", system-ui, -apple-system, sans-serif;
   --s-font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
@@ -54,13 +54,14 @@ body {
 
 .font-display {
   font-family: var(--s-font-display);
-  font-optical-sizing: auto;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .font-mono,
 .font-mono *,
 .money {
-  font-family: var(--s-font-mono);
+  font-family: var(--s-font-ui);
   font-variant-numeric: tabular-nums;
 }
 
@@ -168,7 +169,8 @@ body {
 
 .search-input {
   min-height: 36px;
-  width: 240px;
+  width: 250px;
+  transition: width 200ms var(--s-ease), box-shadow 200ms var(--s-ease);
   border-radius: 999px;
   border: 1px solid var(--s-line);
   background: var(--s-card);
@@ -178,6 +180,12 @@ body {
 }
 .search-input::placeholder {
   color: var(--s-muted);
+}
+.search-input:focus {
+  width: 300px;
+  outline: none;
+  border-color: var(--s-forest);
+  box-shadow: 0 0 0 3px rgba(31, 77, 58, 0.12);
 }
 
 .btn-forest {
@@ -1146,10 +1154,6 @@ button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
 .settings-input:focus { outline: 2px solid var(--s-forest); outline-offset: 1px; }
 .settings-input:disabled { background: var(--s-paper); color: var(--s-muted); }
 .settings-check { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; cursor: pointer; }
-.ask-input { flex: 1; min-width: 0; min-height: 36px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; padding: 0 12px; font: inherit; font-size: 13px; color: var(--s-ink); }
-.ask-input:focus { outline: 2px solid var(--s-forest); outline-offset: 1px; }
-.ask-chip { border-radius: 999px; border: 1px solid var(--s-line); background: #fff; padding: 3px 10px; font-size: 11.5px; color: #44403c; cursor: pointer; }
-.ask-chip:hover { border-color: var(--s-ink); color: var(--s-ink); }
 `;
 
 export default function SeamsTheme() {

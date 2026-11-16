@@ -82,8 +82,8 @@ export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onS
       {Object.entries(nodes).map(([key, n]) => (
         <g key={key}>
           <rect x={n.x} y={n.y} width={SEAM_MAP_NODE_W} height={SEAM_MAP_NODE_H} rx={14} fill={n.tint.bg} stroke={n.tint.ink} strokeOpacity={0.18} />
-          <text x={n.x + SEAM_MAP_NODE_W / 2} y={n.sub ? n.y + 22 : n.y + 30} textAnchor="middle" fontFamily="IBM Plex Sans, system-ui, sans-serif" fontSize="14" fontWeight="600" fill={n.tint.ink}>{n.label}</text>
-          {n.sub ? <text x={n.x + SEAM_MAP_NODE_W / 2} y={n.y + 38} textAnchor="middle" fontFamily="IBM Plex Sans, system-ui, sans-serif" fontSize="11" fill={n.tint.ink} fillOpacity={0.8}>{n.sub}</text> : null}
+          <text x={n.x + SEAM_MAP_NODE_W / 2} y={n.sub ? n.y + 22 : n.y + 30} textAnchor="middle" fontFamily="Figtree, system-ui, sans-serif" fontSize="14" fontWeight="600" fill={n.tint.ink}>{n.label}</text>
+          {n.sub ? <text x={n.x + SEAM_MAP_NODE_W / 2} y={n.y + 38} textAnchor="middle" fontFamily="Figtree, system-ui, sans-serif" fontSize="11" fill={n.tint.ink} fillOpacity={0.8}>{n.sub}</text> : null}
         </g>
       ))}
       {rows.map((r) => {
@@ -128,7 +128,7 @@ export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onS
               x={cx}
               y={cy + 4.5}
               textAnchor="middle"
-              fontFamily="IBM Plex Mono, ui-monospace, monospace"
+              fontFamily="Figtree, system-ui, sans-serif" fontWeight="600"
               fontSize="13"
               fontWeight="500"
               fill={colors.label}
@@ -142,7 +142,7 @@ export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onS
                   x={cx + w / 2 + 21}
                   y={cy + 3.5}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Sans, system-ui, sans-serif"
+                  fontFamily="Figtree, system-ui, sans-serif"
                   fontSize="10"
                   fontWeight="600"
                   fill="#FAF7F2"

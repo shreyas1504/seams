@@ -201,6 +201,7 @@ function SeamsAppShell() {
   const [palette, setPalette] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState("");
   const [paletteAsk, setPaletteAsk] = useState(false);
+  const [headerAsk, setHeaderAsk] = useState("");
   useEffect(() => onSeamsLookup((q, ask) => { setPaletteQuery(q); setPaletteAsk(ask); setPalette(true); }), []);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [twistNotice, setTwistNotice] = useState(null);
@@ -316,14 +317,24 @@ function SeamsAppShell() {
                 <label htmlFor="global-search" className="sr-only">
                   Ask Seams or find a record
                 </label>
-                <button
-                  type="button"
+                <input
                   id="global-search"
                   ref={searchRef}
-                  onClick={()=>setPalette(true)}
-                  className="search-input text-left"
-                  aria-label="Ask Seams or find a record"
-                >Ask Seams or find a record</button>
+                  value={headerAsk}
+                  onChange={(e) => setHeaderAsk(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const q = headerAsk.trim();
+                      if (q) { setPaletteQuery(q); setPaletteAsk(true); setPalette(true); setHeaderAsk(""); }
+                      else setPalette(true);
+                    }
+                  }}
+                  className="search-input"
+                  placeholder="Ask Seams anything…"
+                  aria-label="Ask Seams a question or find a record. Press Enter."
+                  autoComplete="off"
+                />
                 <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#6B635A]">
                   ⌘K
                 </kbd>

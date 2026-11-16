@@ -14,7 +14,6 @@ import RefundDrawer from "@/components/RefundDrawer.jsx";
 import { fixPatternFor, fixRootCause } from "@/components/fixProof.js";
 import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { SeamsSkeleton } from "@/components/InteractionFeedback.jsx";
-import AskSeamsBar from "@/components/AskSeamsBar.jsx";
 import { fixCauseLabel, fixCausePattern, fixIsCausePattern, fixPatternName } from "@/components/fixProof.js";
 
 // Every number on Today (headline, chips, map, pills, root cause) counts OPEN flags only, so they always add up.
@@ -278,16 +277,6 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
     return counts.size === 1 ? `Cause: ${parts[0]}` : `${counts.size} causes: ${parts.join(", ")}`;
   }, [seamOpen, patterns, selectedSeam]);
   // Cause tag on a card only when a pattern explains it; otherwise the card title already names the rule.
-  // Suggested questions built from today's data, so they work on any dataset.
-  const askSuggestions = useMemo(() => {
-    const byParty = new Map();
-    for (const f of live) if (f.lane !== "vendor") byParty.set(f.party, (byParty.get(f.party) || 0) + (f.bucket === "credit_owed" ? 0 : f.amount_cents || 0));
-    const top = [...byParty.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
-    const out = ["What did we lose this month?", "Which customer owes the most?"];
-    if (top) out.push(`Why is ${top.split(" ")[0]} flagged?`, `Fix ${top}`);
-    out.push(returns.length ? "What changed after the returns file?" : "Which customers do we owe money to?");
-    return out;
-  }, [live, returns]);
   const cardCauses = useMemo(
     () => new Map(fixCards.map((f) => [f.stable_key, fixPatternName(fixCausePattern(f, seamOpen, patterns)) || null])),
     [fixCards, seamOpen, patterns],
@@ -505,7 +494,6 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
             <span>Recovered {tracker.recovered}</span>
           </p>
         </article>
-        <AskSeamsBar suggestions={askSuggestions} />
       </section>
 
       <WhereItSlipped flags={flags} ruledCount={lookAlikes} stages={stages} onPicked={scrollToFixes} />

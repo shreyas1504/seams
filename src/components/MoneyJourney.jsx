@@ -56,7 +56,7 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
     >
       {hasCustomerBand ? (
         <g>
-          <text x={JOURNEY_BAND.x} y={22} fontFamily="IBM Plex Sans, system-ui, sans-serif" fontSize={JOURNEY_TYPE.band} letterSpacing="1.5" fill="#6B635A">
+          <text x={JOURNEY_BAND.x} y={22} fontFamily="Figtree, system-ui, sans-serif" fontSize={JOURNEY_TYPE.band} letterSpacing="1.5" fill="#6B635A">
             SELLING TO CUSTOMERS
           </text>
           <rect {...{ x: JOURNEY_BAND.x, y: JOURNEY_BAND.y, width: JOURNEY_BAND.w, height: JOURNEY_BAND.h }} rx={17} fill="#E9F0EC" />
@@ -67,7 +67,7 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
                 x={g.x}
                 y={JOURNEY_BAND.y - 14}
                 textAnchor="middle"
-                fontFamily="IBM Plex Sans, system-ui, sans-serif"
+                fontFamily="Figtree, system-ui, sans-serif"
                 fontSize={JOURNEY_TYPE.gate}
                 fontWeight="600"
                 fill="#1C1917"
@@ -81,7 +81,7 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
 
       {vendorRow ? (
         <g>
-          <text x={JOURNEY_VENDOR_BAND.x} y={JOURNEY_VENDOR_BAND.y - 12} fontFamily="IBM Plex Sans, system-ui, sans-serif" fontSize={JOURNEY_TYPE.band} letterSpacing="1.5" fill="#6B635A">
+          <text x={JOURNEY_VENDOR_BAND.x} y={JOURNEY_VENDOR_BAND.y - 12} fontFamily="Figtree, system-ui, sans-serif" fontSize={JOURNEY_TYPE.band} letterSpacing="1.5" fill="#6B635A">
             PAYING VENDORS
           </text>
           <rect
@@ -117,13 +117,13 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
             <path className="seam-drip" d={d} fill="none" stroke={colors.drip} strokeWidth={2} strokeLinecap="round" strokeDasharray="3 15" />
             <path d={d} fill="none" stroke="transparent" strokeWidth={28} pointerEvents="stroke" />
             <rect x={cardX} y={cardY} width={cardW} height={cardH} rx={12} fill="#FFFFFF" stroke="#E0D8CB" />
-            <text x={cardX + 12} y={cardY + 22} fontFamily="IBM Plex Sans, system-ui, sans-serif" fontSize={JOURNEY_TYPE.cardLabel} fill="#6B635A">
+            <text x={cardX + 12} y={cardY + 22} fontFamily="Figtree, system-ui, sans-serif" fontSize={JOURNEY_TYPE.cardLabel} fill="#6B635A">
               {t.label}
             </text>
             <text
               x={cardX + 12}
               y={cardY + 46}
-              fontFamily="IBM Plex Mono, ui-monospace, monospace"
+              fontFamily="Figtree, system-ui, sans-serif" fontWeight="600"
               fontSize={JOURNEY_TYPE.cardAmount}
               fontWeight="500"
               fill={colors.label}
