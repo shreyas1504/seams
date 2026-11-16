@@ -1,21 +1,41 @@
-// LOCAL shell: tabs + role switcher + bento chrome matching the product mock.
-import React, { useState } from "react";
+// CRMEdge-style shell: left sidebar + top search header + main canvas.
+import React, { useCallback, useState } from "react";
 import Home from "./pages/Home.jsx";
 import Data from "./pages/Data.jsx";
 import Ledger from "./pages/Ledger.jsx";
 import Settings from "./pages/Settings.jsx";
+import SplashScreen from "./components/SplashScreen.jsx";
 import { setLocalUser } from "./lib/local/localBase44.js";
 
-const NAV_TABS = [
-  { id: "Home", label: "Home", icon: "⌂" },
+const NAV = [
+  { id: "Home", label: "Overview", icon: "▣" },
   { id: "Data", label: "Data", icon: "▦" },
   { id: "Ledger", label: "Ledger", icon: "☰" },
   { id: "Settings", label: "Settings", icon: "⚙" },
 ];
 
 export default function App() {
+  const [splash, setSplash] = useState(() => {
+    try {
+      return sessionStorage.getItem("seams_splash_done") !== "1";
+    } catch {
+      return true;
+    }
+  });
   const [tab, setTab] = useState("Home");
   const [role, setRole] = useState("admin");
+  const [lookupQ, setLookupQ] = useState("");
+  const [lookupSignal, setLookupSignal] = useState(0);
+
+  const finishSplash = useCallback(() => {
+    try {
+      sessionStorage.setItem("seams_splash_done", "1");
+    } catch {
+      /* ignore */
+    }
+    setSplash(false);
+  }, []);
+
   const switchRole = (r) => {
     setRole(r);
     setLocalUser({
@@ -24,77 +44,153 @@ export default function App() {
     });
   };
 
-  return (
-    <div className="min-h-screen bg-[#F5F5F5] text-[#14171F]">
-      <div className="mx-auto flex max-w-6xl gap-4 p-4 pb-24 md:pb-4">
-        <div className="min-w-0 flex-1">
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <div className="mr-auto flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3B5BDB] text-sm font-semibold text-white">
-                S
-              </span>
-              <div>
-                <div className="text-sm font-semibold">Seams</div>
-                <div className="text-xs text-[#5B5F68]">Mind the gap</div>
-              </div>
-            </div>
-            <span className="text-xs text-[#5B5F68]">Local only · role</span>
-            <select
-              value={role}
-              onChange={(e) => switchRole(e.target.value)}
-              className="min-h-[44px] rounded-2xl border border-[#E2DDD2] bg-white px-3 text-sm"
-            >
-              <option value="admin">Controller (admin)</option>
-              <option value="user">Analyst (user)</option>
-            </select>
-          </div>
-          {tab === "Home" ? (
-            <Home role={role} />
-          ) : tab === "Ledger" ? (
-            <Ledger role={role} />
-          ) : tab === "Settings" ? (
-            <Settings role={role} />
-          ) : (
-            <Data role={role} />
-          )}
-        </div>
+  const runHeaderSearch = (e) => {
+    e.preventDefault();
+    setTab("Home");
+    setLookupSignal((n) => n + 1);
+  };
 
-        <aside className="hidden w-16 shrink-0 md:flex md:flex-col md:items-center md:gap-3 md:pt-2">
-          <div className="rounded-full bg-white px-3 py-2 font-mono text-sm shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-            {new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+  if (splash) return <SplashScreen onDone={finishSplash} />;
+
+  const userLabel = role === "admin" ? "Dana Controller" : "Analyst";
+  const userEmail = role === "admin" ? "dana@northline.example" : "analyst@northline.example";
+
+  return (
+    <div className="min-h-screen bg-[#F7F7F8] text-[#111111]">
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
+
+      <div className="mx-auto flex min-h-screen max-w-[1440px]">
+        {/* Sidebar */}
+        <aside
+          className="sticky top-0 hidden h-screen w-[240px] shrink-0 flex-col border-r border-[#ECECEF] bg-[#F7F7F8] px-4 py-5 md:flex"
+          aria-label="Primary"
+        >
+          <div className="mb-8 flex items-center gap-2.5 px-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#C6F135] text-sm font-black text-[#111]">
+              S
+            </span>
+            <div>
+              <p className="text-base font-bold leading-none">Seams</p>
+              <p className="text-[11px] font-medium text-[#6B6B76]">Mind the gap</p>
+            </div>
           </div>
-          <nav className="mt-auto flex flex-col items-center gap-3 rounded-[28px] bg-[#000000] p-2 shadow-[0_12px_32px_rgba(0,0,0,0.18)]">
-            {NAV_TABS.map((t) => (
+
+          <nav className="flex flex-1 flex-col gap-1">
+            {NAV.map((item) => (
               <button
-                key={t.id}
+                key={item.id}
                 type="button"
-                onClick={() => setTab(t.id)}
-                aria-label={t.label}
-                className={`flex h-11 w-11 items-center justify-center rounded-full text-lg ${
-                  tab === t.id ? "bg-[#3B5BDB] text-white" : "text-[#B8B8B8] hover:text-white"
-                }`}
+                className="crm-nav-item"
+                aria-current={tab === item.id ? "page" : undefined}
+                onClick={() => setTab(item.id)}
               >
-                {t.icon}
+                <span aria-hidden className="w-4 text-center">
+                  {item.icon}
+                </span>
+                {item.label}
               </button>
             ))}
           </nav>
-        </aside>
-      </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-2 border-t border-[#EAEAEA] bg-white/95 p-2 backdrop-blur md:hidden">
-        {NAV_TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            className={`min-h-[44px] flex-1 rounded-2xl text-sm font-medium ${
-              tab === t.id ? "bg-[#3B5BDB] text-white" : "bg-[#F5F5F5] text-[#14171F]"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+          <div className="mt-4 rounded-2xl border border-[#ECECEF] bg-white p-3">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111] text-xs font-bold text-white"
+                aria-hidden
+              >
+                {userLabel.slice(0, 1)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{userLabel}</p>
+                <p className="truncate text-[11px] text-[#6B6B76]">{userEmail}</p>
+              </div>
+            </div>
+            <label className="mt-2 block text-[11px] font-semibold text-[#6B6B76]">
+              Role
+              <select
+                value={role}
+                onChange={(e) => switchRole(e.target.value)}
+                className="mt-1 min-h-[40px] w-full rounded-xl border border-[#E4E4E8] bg-[#F7F7F8] px-2 text-sm font-semibold text-[#111]"
+              >
+                <option value="admin">Controller</option>
+                <option value="user">Analyst</option>
+              </select>
+            </label>
+          </div>
+        </aside>
+
+        {/* Main column */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-10 flex flex-wrap items-center gap-3 border-b border-[#ECECEF] bg-[#F7F7F8]/95 px-4 py-3 backdrop-blur md:px-6">
+            <form onSubmit={runHeaderSearch} className="relative min-w-[200px] flex-1" role="search">
+              <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B6B76]" aria-hidden>
+                ⌕
+              </span>
+              <label htmlFor="global-search" className="sr-only">
+                Search records
+              </label>
+              <input
+                id="global-search"
+                value={lookupQ}
+                onChange={(e) => setLookupQ(e.target.value)}
+                placeholder="Search invoice, shipment, bill…"
+                className="crm-input"
+              />
+            </form>
+            <button
+              type="button"
+              className="crm-btn-black"
+              onClick={() => setTab("Data")}
+            >
+              <span aria-hidden>+</span> Reset / import data
+            </button>
+            <button
+              type="button"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#E4E4E8] bg-white text-[#111]"
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              ⌂
+            </button>
+          </header>
+
+          {/* Mobile nav */}
+          <nav className="flex gap-1 overflow-x-auto border-b border-[#ECECEF] px-3 py-2 md:hidden" aria-label="Mobile">
+            {NAV.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTab(item.id)}
+                aria-current={tab === item.id ? "page" : undefined}
+                className={`min-h-[40px] shrink-0 rounded-full px-3 text-xs font-semibold ${
+                  tab === item.id ? "bg-[#111] text-white" : "bg-white text-[#6B6B76] border border-[#E4E4E8]"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          <main id="main" className="flex-1 px-4 py-5 md:px-6 md:py-6">
+            {tab === "Home" ? (
+              <Home
+                role={role}
+                headerLookup={lookupQ}
+                headerLookupSignal={lookupSignal}
+                onGoData={() => setTab("Data")}
+              />
+            ) : tab === "Ledger" ? (
+              <Ledger role={role} />
+            ) : tab === "Settings" ? (
+              <Settings role={role} />
+            ) : (
+              <Data role={role} />
+            )}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

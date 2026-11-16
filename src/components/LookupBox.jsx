@@ -1,4 +1,4 @@
-// H1 lookup box + results (flagged / ruled out / not found).
+// Lookup — compact, AA contrast, labeled controls.
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
@@ -26,50 +26,61 @@ export default function LookupBox({ onOpenFlag }) {
   };
 
   return (
-    <div className="rounded-[24px] border border-[#E2DDD2] bg-white p-3 shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-      <form onSubmit={run} className="flex gap-2">
+    <div className="seam-card p-3">
+      <form onSubmit={run} className="flex gap-2" role="search" aria-label="Record lookup">
+        <label className="sr-only" htmlFor="lookup-q">
+          Look up invoice, shipment, bill or order
+        </label>
         <input
+          id="lookup-q"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Look up any invoice, shipment, bill or order"
-          className="min-h-[44px] flex-1 rounded-2xl border border-[#E2DDD2] bg-[#F6F3EC] px-3 text-sm"
-          aria-label="Record lookup"
+          placeholder="INV-5076, SH-3060, SO-1060…"
+          className="min-h-[44px] flex-1 rounded-xl border border-[#C8C8D0] bg-white px-3 text-sm font-medium text-[#0A0A0A] placeholder:text-[#4A4A52]"
         />
         <button
           type="submit"
           disabled={busy || !q.trim()}
-          className="min-h-[44px] rounded-2xl bg-[#3B5BDB] px-4 text-sm font-medium text-white disabled:opacity-40"
+          className="seam-btn-blue min-w-[88px] px-3 text-sm disabled:opacity-45"
         >
           Look up
         </button>
       </form>
-      {err ? <p className="mt-2 text-xs text-[#C22A25]">{err}</p> : null}
+      {err ? (
+        <p className="mt-2 text-xs font-semibold text-[#B42318]" role="alert">
+          {err}
+        </p>
+      ) : null}
       {result?.kind === "not_found" ? (
-        <p className="mt-3 text-sm text-[#5B5F68]">Not found in any of the 4 systems</p>
+        <p className="mt-2 text-sm font-medium text-[#4A4A52]" role="status">
+          Not found in any of the 4 systems
+        </p>
       ) : null}
       {result?.kind === "ruled_out" ? (
-        <div className="mt-3 space-y-2">
-          <p className="text-sm font-semibold text-[#14171F]">Ruled out</p>
+        <div className="mt-2 space-y-1.5" role="region" aria-label="Ruled out results">
+          <p className="text-sm font-bold">Ruled out</p>
           {result.ruled.map((r, i) => (
-            <div key={i} className="rounded-2xl border border-[#E2DDD2] bg-[#F6F3EC] px-3 py-2 text-xs text-[#5B5F68]">
-              <span className="font-medium text-[#14171F]">{r.rule}:</span> {r.reason}
+            <div key={i} className="rounded-xl bg-[#ECECF0] px-2.5 py-2 text-xs font-medium text-[#4A4A52]">
+              <span className="font-bold text-[#0A0A0A]">{r.rule}:</span> {r.reason}
               {r.ids?.length ? <p className="mt-1 font-mono">{r.ids.join(" · ")}</p> : null}
             </div>
           ))}
         </div>
       ) : null}
       {result?.kind === "flagged" ? (
-        <div className="mt-3 space-y-3">
-          <p className="text-sm font-semibold text-[#14171F]">Flagged</p>
+        <div className="mt-2 space-y-2" role="region" aria-label="Flagged results">
+          <p className="text-sm font-bold">Flagged</p>
           {result.flags.map((f) => (
             <div key={f.id || f.stable_key}>
               <button
                 type="button"
                 onClick={() => onOpenFlag?.(f)}
-                className="flex min-h-[44px] w-full items-center justify-between text-left text-xs"
+                className="flex min-h-[40px] w-full items-center justify-between text-left text-xs font-medium"
               >
-                <span className="text-[#14171F]">{f.rule} · {f.party}</span>
-                <span className="font-mono text-[#C22A25]">{fmt(f.amount_cents)}</span>
+                <span>
+                  {f.rule} · {f.party}
+                </span>
+                <span className="font-mono font-bold text-[#B42318]">{fmt(f.amount_cents)}</span>
               </button>
               <SideBySide flag={f} />
             </div>

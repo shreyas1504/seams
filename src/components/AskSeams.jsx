@@ -65,23 +65,18 @@ export default function AskSeams({ role = "admin", onOpenId }) {
   }
 
   return (
-    <section className="rounded-[28px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-      <h2 className="text-base font-semibold text-[#14171F]">Ask Seams</h2>
-      <p className="mt-1 text-xs text-[#5B5F68]">Answers from checked records only. Nothing runs until you approve.</p>
+    <section className="crm-card p-5">
+      <h2 className="text-base font-bold text-[#111]">Ask Seams</h2>
+      <p className="mt-1 text-xs text-[#6B6B76]">Answers from checked records only. Nothing runs until you approve.</p>
       <div className="mt-3 flex gap-2">
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && ask()}
           placeholder="Ask about a customer, flag, or change…"
-          className="min-h-[44px] flex-1 rounded-2xl border border-[#E2DDD2] bg-[#F5F5F5] px-3 text-sm"
+          className="min-h-[44px] flex-1 rounded-full border border-[#E4E4E8] bg-[#F7F7F8] px-4 text-sm"
         />
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => ask()}
-          className="min-h-[44px] rounded-2xl bg-[#000000] px-4 text-sm font-medium text-white"
-        >
+        <button type="button" disabled={busy} onClick={() => ask()} className="crm-btn-black">
           Ask
         </button>
       </div>
@@ -91,7 +86,7 @@ export default function AskSeams({ role = "admin", onOpenId }) {
             key={q}
             type="button"
             onClick={() => ask(q)}
-            className="min-h-[44px] rounded-2xl bg-[#E8EEFF] px-3 py-1.5 text-xs text-[#3B5BDB]"
+            className="min-h-[40px] rounded-full bg-[#E8F6D8] px-3 text-xs font-semibold text-[#3D5C12]"
           >
             {q}
           </button>

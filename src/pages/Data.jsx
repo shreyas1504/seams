@@ -177,25 +177,25 @@ export default function Data({ role = "admin" }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[28px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-        <h1 className="text-2xl font-semibold text-[#14171F]">Data</h1>
-        <p className="mt-1 text-sm text-[#5B5F68]">Parse in code, map columns, normalize dates, then run checks.</p>
+      <div className="crm-card p-5">
+        <h1 className="text-[28px] font-bold tracking-tight text-[#111]">Data</h1>
+        <p className="mt-1 text-sm text-[#6B6B76]">Parse in code, map columns, normalize dates, then run checks.</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
             onClick={resetDemo}
             disabled={controllerOnly}
             title={controllerOnly ? "Controller only" : undefined}
-            className="min-h-[44px] rounded-2xl bg-[#000000] px-4 text-sm font-medium text-white disabled:opacity-40"
+            className="crm-btn-black disabled:opacity-40"
           >
             Reset demo
           </button>
-          <label className="inline-flex min-h-[44px] cursor-pointer items-center rounded-2xl bg-[#3B5BDB] px-4 text-sm font-medium text-white">
+          <label className="crm-btn-lime cursor-pointer">
             Choose a file
             <input type="file" accept=".csv" className="hidden" onChange={onChooseFile} disabled={busy} />
           </label>
         </div>
-        {controllerOnly ? <p className="mt-2 text-xs text-[#8A5A00]">Controller only</p> : null}
+        {controllerOnly ? <p className="mt-2 text-xs font-semibold text-[#8A4B12]">Controller only</p> : null}
       </div>
 
       {parsed ? (
