@@ -110,6 +110,8 @@ def add(fid, problem, amount, month, cause, ev, party="", category="", explanati
 
 # ---------------- customer side ----------------
 inv["did"] = inv.memo.str.extract(r"(D-\d{6}-\d{4})", expand=False).fillna("")
+# A mistyped delivery ID in the memo (digits swapped) points nowhere: treat it like no memo and match on customer + date.
+inv.loc[~inv.did.isin(set(dl.delivery_id)), "did"] = ""
 # Invoices with no delivery ID in the memo: match on customer + delivery date (ship_date, else invoice date).
 _dl_key = {}
 for r in dl.drop_duplicates("delivery_id").itertuples():
@@ -287,6 +289,19 @@ for no, g in invl.groupby("invoice_no"):
                     ("products.csv", r.item, f"taxable {p.taxable}", ""),
                     ("customers.csv", cname, f"tax exempt {c.tax_exempt if c is not None else ''} until {c.exempt_cert_expires if c is not None else ''}", "")],
                     party=cname, category="CRM→Billing", explanation=why.capitalize() + ".", action="catch_up_invoice" if exp_tax > charged else "credit_memo", invoice_no=no, sku=r.item)
+    # delivered items left off the invoice entirely (only on the delivery's first invoice)
+    if sorted(inv_by_delivery.get(did, [no]))[0] == no:
+        billed = set(g.item)
+        for dr in dg.itertuples():
+            if dr.qd <= 0 or dr.sku in billed: continue
+            exp, basis, kind = expected_price(dcid, dr.sku, d)
+            if exp is None: continue
+            amt = C(exp * dr.qd); merch_expected += amt
+            add(f"MISSLINE-{no}-{dr.sku}", "Delivered item left off invoice", amt, mon, "Delivered cases left off the invoice", [
+                ("delivery_log.csv", f"delivery {did}, {dr.sku}", f"{dr.qd} cases delivered {d:%b %d}", "Billed on the invoice"),
+                ("invoices.csv", f"invoice {no}", f"No {dr.sku} line", f"{dr.qd} x ${exp} = ${amt}"),
+                ("products.csv" if kind == "tier" else "contract_prices.csv", dr.sku, basis, "")],
+                party=cname, category="Warehouse→Billing", explanation=f"{cname} received {dr.qd} cases of {dr.sku} that are not on invoice {no}.", action="catch_up_invoice", invoice_no=no, sku=dr.sku)
     # 5) delivery fee
     in_free = c is not None and dt(c.free_delivery_from) and dt(c.free_delivery_from) <= d and (not dt(c.free_delivery_to) or d <= dt(c.free_delivery_to))
     due = merch_expected < 300 and not in_free and not fee_waived(dcid, d)
