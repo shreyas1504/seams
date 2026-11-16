@@ -10,6 +10,8 @@ import VendorCard from "@/components/VendorCard.jsx";
 import PatternList from "@/components/PatternList.jsx";
 import RuledOutList from "@/components/RuledOutList.jsx";
 import RewardState from "@/components/RewardState.jsx";
+import LookupBox from "@/components/LookupBox.jsx";
+import FlagDetail from "@/components/FlagDetail.jsx";
 
 const LIVE_STATUSES = new Set(["open", "sent", "disputed"]);
 
@@ -36,6 +38,7 @@ export default function Home() {
   const [patterns] = useEntity("Pattern");
   const [settings] = useEntity("Setting");
   const [filterKey, setFilterKey] = useState(null);
+  const [detailFlag, setDetailFlag] = useState(null);
 
   const live = useMemo(() => flags.filter((f) => LIVE_STATUSES.has(f.status)), [flags]);
   const sumBucket = (b) => live.filter((f) => f.bucket === b).reduce((a, f) => a + f.amount_cents, 0);
@@ -65,6 +68,7 @@ export default function Home() {
             Seams <span className="font-normal text-[#5B5F68]">· Mind the gap</span>
           </h1>
         </header>
+        <LookupBox onOpenFlag={setDetailFlag} />
         <Hero
           recoverableCents={sumBucket("recoverable")}
           overdueCents={sumBucket("overdue")}
@@ -89,7 +93,7 @@ export default function Home() {
               <h2 className="mb-3 text-base font-semibold text-[#14171F]">Customers to square up</h2>
               <div className="space-y-3">
                 {filteredCustomers.map((p) => (
-                  <CustomerCard key={p.party} party={p} />
+                  <CustomerCard key={p.party} party={p} onOpenFlag={setDetailFlag} />
                 ))}
               </div>
             </div>
@@ -97,15 +101,19 @@ export default function Home() {
               <h2 className="mb-3 text-base font-semibold text-[#14171F]">Vendors to recover</h2>
               <div className="space-y-3">
                 {filteredVendors.map((p) => (
-                  <VendorCard key={p.party} party={p} />
+                  <VendorCard key={p.party} party={p} onOpenFlag={setDetailFlag} />
                 ))}
               </div>
             </div>
           </>
         )}
         <PatternList patterns={patterns} />
-        <RuledOutList ruled={ruled} />
+        <RuledOutList ruled={ruled} onOpenId={(id) => setDetailFlag(flags.find((f) => (f.ids || []).includes(id)) || null)} />
       </section>
+
+      {detailFlag ? (
+        <FlagDetail flag={detailFlag} timeline={[]} onClose={() => setDetailFlag(null)} />
+      ) : null}
     </div>
   );
 }

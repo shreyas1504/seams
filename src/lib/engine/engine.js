@@ -65,6 +65,13 @@ export function dayNum(s) {
   return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
 }
 const iso = (n) => new Date(n * 86400000).toISOString().slice(0, 10);
+/** Attach import lineage to evidence fields when the source row has it (amounts/keys unchanged). */
+const evFields = (row, fields) => {
+  const f = { ...fields };
+  if (row?.import_batch_id) f.import_batch = row.import_batch_id;
+  if (row?.source_row != null && row.source_row !== "") f.source_row = String(row.source_row);
+  return f;
+};
 
 // ---------- main ----------
 /**
@@ -132,7 +139,7 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
     const day = dayNum(s.ship_date), c = contractFor(s.cust, s.sku, day);
     if (!c) { needsReview.push({ type: "no_contract", id: s.shipment_id }); continue; }
     const price = toCents(c.contract_price), rebill = c.rebill_freight === "Y", fc = toCents(s.freight_cost), qty = +s.qty;
-    const shipEv = { system: "Warehouse", id: s.shipment_id, fields: { order: s.order_no, sku: s.sku, qty: String(qty), ship_date: s.ship_date, freight_cost: money(fc) } };
+    const shipEv = { system: "Warehouse", id: s.shipment_id, fields: evFields(s, { order: s.order_no, sku: s.sku, qty: String(qty), ship_date: s.ship_date, freight_cost: money(fc) }) };
     if (s.ship_type !== "standard") { rule("Shipped, not invoiced", `${s.shipment_id} is a ${s.ship_type} shipment, not billable`, [s.shipment_id]); continue; }
     const linv = invByOrder.get(digits(s.order_no)) || [];
     if (!linv.length) {
@@ -140,7 +147,7 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
         const amt = qty * price + (rebill ? fc : 0);
         flag("unbilled", [s.shipment_id], s.cust, amt,
           `Warehouse shipped ${qty} ${s.sku} on ${s.ship_date} (${s.shipment_id}). Billing has no invoice for order ${s.order_no}. ${qty} × $${money(price)}${rebill ? ` + freight $${money(fc)}` : ""} = $${money(amt)} unbilled.`,
-          [shipEv, { system: "Billing", id: "—", fields: { invoice: "none found" } }, { system: "CRM", id: c.contract_id, fields: { price: money(price), rebill_freight: c.rebill_freight } }],
+          [shipEv, { system: "Billing", id: "—", fields: { invoice: "none found" } }, { system: "CRM", id: c.contract_id, fields: evFields(c, { price: money(price), rebill_freight: c.rebill_freight }) }],
           { diff_field: "invoice" });
       }
       continue;
@@ -154,7 +161,7 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
         const miss = qty - ret - billedQ, amt = miss * price;
         flag("short_billed", [s.shipment_id, ...linv.map((i) => i.invoice_no)], s.cust, amt,
           `Warehouse shipped ${qty} (${s.shipment_id})${ret ? `, ${ret} returned` : ""}; invoice ${linv.map((i) => i.invoice_no).join(" + ")} bills ${billedQ}: ${miss} × $${money(price)} = $${money(amt)} missing.`,
-          [shipEv, ...linv.map((i) => ({ system: "Billing", id: i.invoice_no, fields: { qty: i.qty, unit_price: i.unit_price, date: i.invoice_date } }))],
+          [shipEv, ...linv.map((i) => ({ system: "Billing", id: i.invoice_no, fields: evFields(i, { qty: i.qty, unit_price: i.unit_price, date: i.invoice_date }) }))],
           { diff_field: "qty" });
       }
     } else if (ret && billedQ === qty - ret) {
@@ -164,7 +171,7 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
     if (rebill && fc - fb > 0) {
       if (on("freight")) flag("freight", [s.shipment_id, linv[0].invoice_no], s.cust, fc - fb,
         `Contract ${c.contract_id} says rebill freight. Carrier cost $${money(fc)} (${s.shipment_id}); invoice ${linv[0].invoice_no} billed $${money(fb)}: $${money(fc - fb)} not passed on.`,
-        [shipEv, { system: "Billing", id: linv[0].invoice_no, fields: { freight_billed: money(fb) } }, { system: "CRM", id: c.contract_id, fields: { rebill_freight: "Y" } }],
+        [shipEv, { system: "Billing", id: linv[0].invoice_no, fields: evFields(linv[0], { freight_billed: money(fb) }) }, { system: "CRM", id: c.contract_id, fields: evFields(c, { rebill_freight: "Y" }) }],
         { diff_field: "freight" });
     }
     if (!rebill && fc > 0)
@@ -176,8 +183,8 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
     const idt = dayNum(i.invoice_date), c = contractFor(i.customer, i.sku, idt);
     if (!c) { needsReview.push({ type: "no_contract", id: i.invoice_no }); continue; }
     const cp = toCents(c.contract_price), up = toCents(i.unit_price), q = +i.qty;
-    const invEv = { system: "Billing", id: i.invoice_no, fields: { date: i.invoice_date, sku: i.sku, qty: String(q), unit_price: money(up) } };
-    const ctEv = { system: "CRM", id: c.contract_id, fields: { price: money(cp), from: c.start_date, to: c.end_date } };
+    const invEv = { system: "Billing", id: i.invoice_no, fields: evFields(i, { date: i.invoice_date, sku: i.sku, qty: String(q), unit_price: money(up) }) };
+    const ctEv = { system: "CRM", id: c.contract_id, fields: evFields(c, { price: money(cp), from: c.start_date, to: c.end_date }) };
     if (up < cp) {
       if (on("below_contract")) flag("below_contract", [i.invoice_no, c.contract_id], i.customer, (cp - up) * q,
         `Contract ${c.contract_id} says $${money(cp)} from ${c.start_date}; invoice ${i.invoice_no} on ${i.invoice_date} charged $${money(up)}: ${q} × $${money(cp - up)} = $${money((cp - up) * q)}.`,
@@ -206,7 +213,7 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
   for (const [, bs] of groups) for (const extra of bs.slice(1)) if (on("dup_payment"))
     flag("dup_payment", bs.map((b) => b.bill_id), extra.vendor, toCents(extra.amount),
       `Invoice ${bs[0].vendor_invoice_no} and ${extra.vendor_invoice_no} from ${extra.vendor} are the same bill written differently, paid ${bs[0].paid_date} and ${extra.paid_date}: $${money(toCents(extra.amount))} paid twice.`,
-      bs.map((b) => ({ system: "AP", id: b.bill_id, fields: { invoice_no: b.vendor_invoice_no, amount: b.amount, paid: b.paid_date } })),
+      bs.map((b) => ({ system: "AP", id: b.bill_id, fields: evFields(b, { invoice_no: b.vendor_invoice_no, amount: b.amount, paid: b.paid_date }) })),
       { lane: "vendor", diff_field: "invoice_no" });
   const byVendAmt = new Map();
   for (const b of bills) { const k = `${b.vendor}|${b.amount}`; if (!byVendAmt.has(k)) byVendAmt.set(k, new Set()); byVendAmt.get(k).add(keynorm(b.vendor_invoice_no)); }
@@ -223,7 +230,7 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
     if (diff > Math.max(S.po_abs_cents, Math.round(po * S.po_pct))) {
       if (on("over_po")) flag("over_po", [b.bill_id, b.po_no], b.vendor, diff,
         `PO ${b.po_no} approved $${money(po)}; bill ${b.bill_id} paid $${money(a)}: $${money(diff)} over.`,
-        [{ system: "AP", id: b.bill_id, fields: { amount: money(a) } }, { system: "AP", id: b.po_no, fields: { po_amount: money(po) } }],
+        [{ system: "AP", id: b.bill_id, fields: evFields(b, { amount: money(a) }) }, { system: "AP", id: b.po_no, fields: { po_amount: money(po) } }],
         { lane: "vendor", diff_field: "amount" });
     } else if (diff > 0) rule("Vendor over PO", `${b.bill_id} is ${money(diff)} over PO, under the max(25, 1%) tolerance`, [b.bill_id]);
   }
@@ -244,7 +251,7 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
       const retIds = returns.filter((r) => digits(r.order_ref) === digits(s.order_no)).map((r) => r.return_id);
       if (due > 0) flag("missing_credit", [s.shipment_id, ...retIds], s.cust, due,
         `Customer returned ${ret} ${s.sku} (${[...new Set(retIds)].join(", ")}) on a billed order ${s.order_no}; credits issued $${money(credited.get(key) || 0)}: we owe $${money(due)}.`,
-        [{ system: "Returns", id: retIds[0], fields: { qty_returned: String(ret), credit_memo: "none" } }, { system: "Billing", id: s.order_no, fields: { billed_qty: String(billed) } }],
+        [{ system: "Returns", id: retIds[0], fields: { qty_returned: String(ret), credit_memo: "none" } }, { system: "Billing", id: s.order_no, fields: evFields(s, { billed_qty: String(billed) }) }],
         { diff_field: "credit_memo" });
       else rule("Credit never issued", `${s.order_no}: ${excess} returned units already credited (${money(credited.get(key) || 0)})`, [s.order_no]);
     }
@@ -255,12 +262,44 @@ export function runEngine(data, settings = DEFAULT_SETTINGS) {
     for (const [, rs] of cm) for (const extra of rs.slice(1))
       flag("dup_credit_memo", rs.map((r) => `${r.return_id}/${r.credit_memo_no}`), rs[0].customer, toCents(extra.credit_amount),
         `Credit memo ${rs[0].credit_memo_no} and ${extra.credit_memo_no} are the same credit applied twice: $${money(toCents(extra.credit_amount))} over-credited.`,
-        rs.map((r) => ({ system: "Returns", id: r.return_id, fields: { credit_memo: r.credit_memo_no, amount: r.credit_amount } })),
+        rs.map((r) => ({ system: "Returns", id: r.return_id, fields: evFields(r, { credit_memo: r.credit_memo_no, amount: r.credit_amount }) })),
         { diff_field: "credit_memo" });
   }
 
   const patterns = findPatterns(flags);
   return { flags, ruledOut, patterns, needsReview, totals: totalsOf(flags, ruledOut) };
+}
+
+/** Case-insensitive / digits-only id match for lookup ("so 1060" → SO-1060). */
+export function idMatchesQuery(id, query) {
+  const q = String(query ?? "").trim();
+  if (!q) return false;
+  const idS = String(id ?? "");
+  if (!idS || idS === "—") return false;
+  if (idS.toLowerCase() === q.toLowerCase()) return true;
+  if (idS.toLowerCase().includes(q.toLowerCase())) return true;
+  const qd = digits(q), idd = digits(idS);
+  if (qd && idd && (idd === qd || idS.toLowerCase().includes(qd))) return true;
+  return false;
+}
+
+function evidenceMatchesQuery(ev, q) {
+  if (idMatchesQuery(ev?.id, q)) return true;
+  return Object.values(ev?.fields || {}).some((v) => idMatchesQuery(v, q));
+}
+
+/** Resolve a lookup query against flags and ruled-out rows. */
+export function resolveLookup(query, flags, ruled) {
+  const q = String(query ?? "").trim();
+  if (!q) return { kind: "not_found", flags: [], ruled: [] };
+  const hitFlags = (flags || []).filter((f) =>
+    (f.ids || []).some((id) => idMatchesQuery(id, q))
+    || (f.evidence || []).some((ev) => evidenceMatchesQuery(ev, q))
+    || idMatchesQuery(f.stable_key, q));
+  if (hitFlags.length) return { kind: "flagged", flags: hitFlags, ruled: [] };
+  const hitRuled = (ruled || []).filter((r) => (r.ids || []).some((id) => idMatchesQuery(id, q)));
+  if (hitRuled.length) return { kind: "ruled_out", flags: [], ruled: hitRuled };
+  return { kind: "not_found", flags: [], ruled: [] };
 }
 
 // ---------- patterns (rule-computed, >= 3 flags sharing one cause) ----------
