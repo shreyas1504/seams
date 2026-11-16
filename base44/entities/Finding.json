@@ -50,6 +50,10 @@
     },
     "amount": {
       "type": "number"
+    },
+    "date": {
+      "type": "string",
+      "description": "Event date (delivery, invoice ship date, bill date or email date), YYYY-MM-DD"
     }
   },
   "required": [

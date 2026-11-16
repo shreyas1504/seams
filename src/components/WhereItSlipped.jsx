@@ -19,6 +19,17 @@ export default function WhereItSlipped({ flags, ruledCount, stages, onPicked }) 
 
   const rows = useMemo(() => seamFlowRows(flags), [flags]);
   const maxCents = useMemo(() => Math.max(1, ...rows.map((r) => r.cents)), [rows]);
+  // Journey labels from the data: the problem with the most dollars on each seam (kit findings), else the built-in label.
+  const journeyLabels = useMemo(() => {
+    const by = new Map();
+    for (const f of flags) {
+      if (!f.kit || (f.signed_cents || 0) <= 0) continue;
+      const m = by.get(f.seam) || new Map();
+      m.set(f.rule, (m.get(f.rule) || 0) + f.signed_cents);
+      by.set(f.seam, m);
+    }
+    return Object.fromEntries([...by.entries()].map(([seam, m]) => [seam, [...m.entries()].sort((a, b) => b[1] - a[1])[0][0]]));
+  }, [flags]);
 
   // Default selection: the seam with the most recoverable cents (also when the selected seam has closed).
   useEffect(() => {
@@ -74,6 +85,7 @@ export default function WhereItSlipped({ flags, ruledCount, stages, onPicked }) 
                 rows={rows}
                 maxCents={maxCents}
                 stages={stages}
+                labels={journeyLabels}
                 activeSeam={activeSeam}
                 onHover={setHovered}
                 onSelect={pick}

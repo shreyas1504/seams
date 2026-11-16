@@ -101,6 +101,61 @@ function KitCauseSpark({ flag, rows }) {
   );
 }
 
+/** When the cause's lines happened: one dot per line on a day axis, the open line dark, first day marked. */
+function KitTimeline({ flag, rows }) {
+  const dated = rows.filter((r) => /^\d{4}-\d{2}-\d{2}/.test(r.date || ""));
+  if (!dated.length) return null;
+  const day = (iso) => Date.parse(`${iso.slice(0, 10)}T00:00:00Z`) / 86400000;
+  const days = dated.map((r) => day(r.date));
+  const lo = Math.min(...days) - 1, hi = Math.max(...days) + 1, span = Math.max(hi - lo, 7);
+  const W = 520, x = (d) => 16 + ((d - lo) / span) * (W - 32);
+  const first = dated.reduce((a, r) => (r.date < a.date ? r : a), dated[0]);
+  const fmtDay = (iso) => new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  const stack = new Map();
+  return (
+    <figure className="finding-chart" aria-label={`${dated.length} lines between ${fmtDay(first.date)} and ${fmtDay(dated.reduce((a, r) => (r.date > a ? r.date : a), first.date))}`}>
+      <figcaption className="finding-chart__title">When it happened · first seen {fmtDay(first.date)}</figcaption>
+      <svg viewBox={`0 0 ${W} 86`} width="100%" role="img" style={{ fontFamily: "Figtree, system-ui, sans-serif" }}>
+        <line x1="10" x2={W - 10} y1="62" y2="62" stroke={KC.line} strokeWidth="2" />
+        <line x1={x(day(first.date))} x2={x(day(first.date))} y1="14" y2="66" stroke={KC.owed} strokeDasharray="3 3" />
+        {dated.map((r) => {
+          const k = Math.round(x(day(r.date)));
+          const n = stack.get(k) || 0; stack.set(k, n + 1);
+          const on = r.stable_key === flag.stable_key;
+          return <circle key={r.stable_key} cx={k} cy={54 - Math.min(n, 5) * 9} r={on ? 5.5 : 4} fill={on ? KC.ink : r.signed_cents < 0 ? "#7FBFB3" : "#E9A985"} />;
+        })}
+        <text x="10" y="80" fontSize="11" fill={KC.muted}>{fmtDay(new Date(lo * 86400000 + 86400000).toISOString())}</text>
+        <text x={W - 10} y="80" fontSize="11" textAnchor="end" fill={KC.muted}>{fmtDay(new Date(hi * 86400000 - 86400000).toISOString())}</text>
+        <text x={Math.min(W - 60, x(day(first.date)) + 6)} y="12" fontSize="11" fill={KC.owed}>started</text>
+      </svg>
+      <p className="finding-chart__caption">{dated.length} {dated.length === 1 ? "line" : "lines"}; the open one is dark. Everything after the dashed line repeats the same cause.</p>
+    </figure>
+  );
+}
+
+/** Who the cause hits: top customers or suppliers by dollars. */
+function KitWho({ rows }) {
+  const by = new Map();
+  for (const r of rows) by.set(r.party || "Unknown", (by.get(r.party || "Unknown") || 0) + r.signed_cents);
+  const top = [...by.entries()].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 5);
+  if (top.length < 2) return null;
+  const max = Math.max(...top.map(([, c]) => Math.abs(c)), 1);
+  return (
+    <figure className="finding-chart" aria-label={`Top ${top.length} affected`}>
+      <figcaption className="finding-chart__title">Who it hits · {by.size} {by.size === 1 ? "account" : "accounts"}</figcaption>
+      <ul className="mt-1 grid gap-1.5">
+        {top.map(([name, c]) => (
+          <li key={name} className="grid items-center gap-2 text-[12.5px]" style={{ gridTemplateColumns: "minmax(0,150px) 1fr auto" }}>
+            <span className="truncate text-[#44403C]">{name}</span>
+            <span className="h-[7px] rounded-full bg-[#F1ECE4]"><span className="block h-full rounded-full" style={{ width: `${Math.max(4, (Math.abs(c) / max) * 100)}%`, background: kitTone(c), opacity: 0.8 }} /></span>
+            <span className="money font-semibold" style={{ color: kitTone(c) }}>{c === 0 ? "$0" : fmt(c)}</span>
+          </li>
+        ))}
+      </ul>
+    </figure>
+  );
+}
+
 function KitProofStep({ dot, label, last, children }) {
   return (
     <li className="relative pl-6">
@@ -122,7 +177,7 @@ function KitProof({ flag, causeRows, onDraft }) {
   }
   const stamp = flag.status === "sent" ? "APPROVED" : flag.status === "dismissed" ? "DISMISSED" : "OPEN";
   return (
-    <section className="card rise p-5 lg:col-span-6" aria-label="Proof trace">
+    <section className="card rise self-start p-5 lg:sticky lg:top-20 lg:col-span-6" aria-label="Proof trace">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[#6B635A]">Proof · Trace</p>
         <span className={`fix-stamp ${flag.status === "sent" ? "fix-stamp-sent" : ""}`}>{stamp}</span>
@@ -158,9 +213,13 @@ function KitProof({ flag, causeRows, onDraft }) {
             ))}
           </div>
         </KitProofStep>
-        <KitProofStep dot="#A8A29E" label="Picture" last>
+        <KitProofStep dot="#A8A29E" label="Picture">
           <KitBars flag={flag} />
           <KitCauseSpark flag={flag} rows={causeRows} />
+        </KitProofStep>
+        <KitProofStep dot="#C2410C" label="Pattern" last>
+          <KitTimeline flag={flag} rows={causeRows} />
+          <KitWho rows={causeRows} />
         </KitProofStep>
       </ol>
       {flag.decision ? (
@@ -357,7 +416,7 @@ export default function KitToday({ role, onGoData }) {
         </article>
       </section>
 
-      <WhereItSlipped flags={open} ruledCount={dismissed.length} stages={{}} onPicked={scrollToFixes} />
+      <WhereItSlipped flags={open} ruledCount={dismissed.length} stages={{ contracted: true, shipped: true, invoiced: true, collected: false }} onPicked={scrollToFixes} />
 
       <section className="rise lg:col-span-6 scroll-mt-24" aria-label="Today's fixes">
         <div className="flex flex-wrap items-end justify-between gap-2">

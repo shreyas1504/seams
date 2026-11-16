@@ -506,6 +506,14 @@ for r in ib[(ib.direction == "outbound")].itertuples():
 
 os.makedirs(OUT, exist_ok=True)
 FCOLS = ["problem", "delivery_id", "invoice_no", "sku", "po_no", "bill_id", "supplier", "message_id", "amount", "month", "cause", "finding_id", "party", "category", "explanation", "action_type"]
+# event date per finding (for the app's timeline; not scored): delivery, invoice ship date, bill date or email date
+_d_date = dict(zip(dl.delivery_id, dl.delivery_date))
+_i_date = {r.invoice_no: (r.ship_date or r.date) for r in inv.itertuples()}
+_b_date = dict(zip(bills.bill_id, bills.bill_date))
+_m_date = dict(zip(ib.message_id, ib.sent_at.str.slice(0, 10))) if "ib" in globals() else {}
+for r in findings:
+    r["date"] = _d_date.get(r["delivery_id"]) or _i_date.get(r["invoice_no"]) or _b_date.get(r["bill_id"]) or _m_date.get(r["message_id"]) or ""
+if "date" not in FCOLS: FCOLS.append("date")
 with open(os.path.join(OUT, "findings.csv"), "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=FCOLS); w.writeheader(); w.writerows(findings)
 with open(os.path.join(OUT, "evidence.csv"), "w", newline="") as f:

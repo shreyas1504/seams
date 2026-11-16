@@ -39,7 +39,7 @@ export function journeyAriaLabel(rows) {
     .join("; ")}.`;
 }
 
-export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHover, onSelect }) {
+export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHover, onSelect, labels = {} }) {
   const shown = rows.filter((r) => JourneyTributaries[r.seam]);
   const vendorRow = shown.find((r) => r.seam === "AP→Vendors");
   const gates = JourneyGates.filter((g) => stages[g.key]);
@@ -96,7 +96,7 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
       ) : null}
 
       {shown.map((r) => {
-        const t = JourneyTributaries[r.seam];
+        const t = { ...JourneyTributaries[r.seam], label: labels[r.seam] || JourneyTributaries[r.seam].label };
         const d = journeyPath(t);
         const colors = r.seam === SEAM_FLOW_OVERDUE_SEAM ? SEAM_FLOW_COLORS.overdue : SEAM_FLOW_COLORS.owed;
         const amount = `${fmt(r.cents)} · ${r.n}`;

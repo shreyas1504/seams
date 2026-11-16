@@ -6,7 +6,7 @@ import { parseCsv } from "@/lib/csv.js";
 import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { useEntity } from "@/lib/useEntity";
 
-const KIT_FINDING_COLS = ["finding_id", "problem", "delivery_id", "invoice_no", "sku", "po_no", "bill_id", "supplier", "message_id", "amount", "month", "cause", "party", "category", "explanation", "action_type"];
+const KIT_FINDING_COLS = ["finding_id", "problem", "delivery_id", "invoice_no", "sku", "po_no", "bill_id", "supplier", "message_id", "amount", "month", "cause", "party", "category", "explanation", "action_type", "date"];
 
 async function kitReplace(entity, rows, say) {
   const old = await base44.entities[entity].list(undefined, 20000);

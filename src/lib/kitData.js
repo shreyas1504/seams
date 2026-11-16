@@ -39,6 +39,7 @@ export function kitToFlag(f, evidence, decision) {
     why: f.explanation || f.cause || "",
     cause: f.cause || f.problem,
     month: f.month || "",
+    date: f.date || "",
     seam: f.category || "Other",
     bucket: amount > 0 ? "recoverable" : amount < 0 ? "credit_owed" : "attention",
     lane: vendor ? "vendor" : "customer",
