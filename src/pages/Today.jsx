@@ -65,7 +65,7 @@ function SeamPill({ seam, children, label }) {
   );
 }
 
-export default function Today({ role = "admin" }) {
+export default function Today({ role = "admin", notice = null, onDismissNotice, twistNewKeys = [] }) {
   // One flag list feeds both the brief and the map, so they always update together.
   const [flags, reloadFlags] = useEntity("Flag");
   const [ruled, reloadRuled] = useEntity("RuledOut");
@@ -210,7 +210,7 @@ export default function Today({ role = "admin" }) {
       if (f.lane === "vendor" || labels.has(f.party)) continue;
       const total = buildLetterDraft({ party: f.party, flags, contracts, rule_enabled: { ...DEFAULT_SETTINGS.rule_enabled, ...(fixSettings[0]?.rule_enabled || {}) } }).total_cents;
       const approval = Math.abs(total) >= (fixSettings[0]?.four_eyes_threshold_cents ?? 500000);
-      labels.set(f.party, approval ? `Request approval · ${fmt(Math.abs(total))}` : `Settle ${f.party} · ${fmt(Math.abs(total))}`);
+      labels.set(f.party, approval ? `Request approval · ${fmt(total)}` : `Settle ${f.party} · ${fmt(total)}`);
     }
     return labels;
   }, [flags, contracts, fixSettings]);
@@ -218,10 +218,10 @@ export default function Today({ role = "admin" }) {
   // Default selected flag: the largest open flag in the seam.
   useEffect(() => {
     if (!fixCards.length) return;
-    if (!fixCards.some((f) => f.stable_key === selectedFlagKey)) setSelectedFlagKey(fixCards[0].stable_key);
-  }, [fixCards, selectedFlagKey, setSelectedFlagKey]);
+    if (!flags.some((f) => f.stable_key === selectedFlagKey && f.seam === selectedSeam)) setSelectedFlagKey(fixCards[0].stable_key);
+  }, [fixCards, flags, selectedSeam, selectedFlagKey, setSelectedFlagKey]);
 
-  const selectedFlag = fixCards.find((f) => f.stable_key === selectedFlagKey) || null;
+  const selectedFlag = flags.find((f) => f.stable_key === selectedFlagKey && f.seam === selectedSeam) || null;
   const seamRootCause = useMemo(() => {
     const p = fixPatternFor(seamOpen, patterns);
     return p ? p.title : seamOpen[0]?.rule || null;
@@ -230,11 +230,11 @@ export default function Today({ role = "admin" }) {
 
   const newKeys = useMemo(() => {
     const last = Date.parse(visit?.last_seen_at || "");
-    if (!Number.isFinite(last)) return new Set();
+    if (!Number.isFinite(last)) return new Set(twistNewKeys);
     return new Set(
-      flags.filter((f) => Date.parse(f.created_date || f.created_at || "") > last).map((f) => f.stable_key),
+      [...twistNewKeys, ...flags.filter((f) => Date.parse(f.created_date || f.created_at || "") > last).map((f) => f.stable_key)],
     );
-  }, [flags, visit]);
+  }, [flags, visit, twistNewKeys]);
 
   // Pending four-eyes sends, by party: flags in that send show NEEDS APPROVAL.
   const pendingByParty = useMemo(() => {
@@ -314,6 +314,7 @@ export default function Today({ role = "admin" }) {
   if (!flags.length) return <SeamsSkeleton />;
   return (
     <div className="grid gap-5 lg:grid-cols-12">
+      {notice ? <div className="twist-banner lg:col-span-12" role="status"><p>New data in. {notice.new||0} new, {notice.cleared||0} cleared. Nothing rebuilt.</p><button aria-label="Dismiss new data banner" onClick={onDismissNotice}>×</button></div> : null}
       <section className="rise lg:col-span-4" aria-label="Morning brief">
         <p className="brief-label">Morning brief · computed from 4 systems</p>
         <h1 className="mt-3 font-display text-[36px] font-medium leading-[1.12] tracking-[-0.01em] text-ink">

@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
-import SideBySide from "@/components/SideBySide.jsx";
 import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 
 export default function RefundDrawer({ party, role = "admin", pendingAction = null, onClose, onSent, onPending }) {
@@ -93,9 +92,12 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
   if (!draft) {
     return (
       <div className="fixed inset-0 z-40 flex justify-end bg-ink/30">
-        <div className="h-full w-full max-w-lg bg-white p-6 text-sm text-muted" role="dialog" aria-label="Refund letter">
-          <button onClick={onClose}>Close</button>
-          {err ? <p role="alert">{err}</p> : <><p>Building refund…</p><div className="seams-skeleton mt-4 h-32" /></>}
+        <div className="seams-settle-sheet seams-settle-sheet__loading h-full w-full max-w-lg" role="dialog" aria-label="Refund letter">
+          <header className="seams-settle-sheet__header">
+            <div><div className="seams-settle-sheet__eyebrow">Settle · vendor</div><h2 className="seams-settle-sheet__title">{party}</h2></div>
+            <button type="button" onClick={onClose} className="seams-settle-sheet__close" aria-label="Close">×</button>
+          </header>
+          {err ? <p className="seams-settle-sheet__error" role="alert">{err}</p> : <><p className="text-xs text-muted">Building refund preview…</p><div className="seams-skeleton mt-4 h-32" /></>}
         </div>
       </div>
     );
@@ -104,71 +106,87 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
   return (
     <div className="fixed inset-0 z-40 flex justify-end bg-ink/30" role="dialog" aria-label="Refund letter">
       <button type="button" className="flex-1" aria-label="Close" onClick={onClose} />
-      <div className="flex h-full w-full max-w-lg flex-col overflow-y-auto bg-paper">
-        <div className="flex items-start justify-between gap-3 border-b border-line bg-white p-4">
-          <div>
-            <h2 className="font-display text-[20px] font-semibold text-ink">{party}</h2>
-            <p className="text-xs text-muted">Vendor refund</p>
+      <div className="seams-settle-sheet flex h-full w-full max-w-lg flex-col">
+        <header className="seams-settle-sheet__header">
+          <div><div className="seams-settle-sheet__eyebrow">Settle · vendor refund</div><h2 className="seams-settle-sheet__title">{party}</h2></div>
+          <button type="button" onClick={onClose} className="seams-settle-sheet__close" aria-label="Close">×</button>
+        </header>
+        <main className="seams-settle-sheet__body">
+          <div className="seams-settle-sheet__controls">
+            <span className="seams-settle-sheet__control-label">To</span>
+            <div className="seams-settle-sheet__control-value">
+              <input aria-label="Recipient" value={draft.to || ""} readOnly className="seams-settle-sheet__input" />
+              <span className="seams-settle-sheet__locked">from contract · locked</span>
+            </div>
+            <label className="seams-settle-sheet__control-label" htmlFor="refund-subject">Subject</label>
+            <input id="refund-subject" value={subject} onChange={(e) => setSubject(e.target.value)} className="seams-settle-sheet__input" />
           </div>
-          <button type="button" onClick={onClose} className="min-h-[44px] min-w-[44px] rounded-2xl bg-chip">✕</button>
-        </div>
-        <div className="space-y-4 p-4">
-          <label className="block text-xs text-muted">
-            To
-            <input value={draft.to || ""} readOnly className="mt-1 min-h-[44px] w-full rounded-2xl border border-line bg-chip px-3 font-mono text-sm" />
-          </label>
-          <label className="block text-xs text-muted">
-            Subject
-            <input value={subject} onChange={(e) => setSubject(e.target.value)} className="mt-1 min-h-[44px] w-full rounded-2xl border border-line bg-white px-3 text-sm" />
-          </label>
-          <p className="text-sm">{draft.greeting}</p>
-          {draft.sections.map((sec) => (
-            <section key={sec.title}>
-              <h3 className="mb-2 text-sm font-semibold">{sec.title}</h3>
-              <ul className="space-y-3">
-                {sec.lines.map((line) => (
-                  <li key={line.key} className="rounded-2xl border border-line bg-white p-3">
-                    <div className="flex items-start gap-2">
-                      <input type="checkbox" checked={!exclude.includes(line.key)} onChange={() => toggleKey(line.key)} className="mt-1" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs">{line.text}</p>
-                        <p className="mt-1 font-mono text-sm text-owed">{fmt(line.amount_cents)}</p>
-                        {line.flag ? <SideBySide flag={line.flag} /> : null}
-                      </div>
+          <article className="seams-settle-sheet__preview">
+            <p className="seams-settle-sheet__greeting">{draft.greeting}</p>
+            {draft.sections.map((sec) => (
+              <section className="seams-settle-sheet__section" key={sec.title}>
+                <h3 className="seams-settle-sheet__section-title">{sec.title}</h3>
+                <div className="seams-settle-sheet__lines">
+                  {sec.lines.map((line) => (
+                    <div className="seams-settle-sheet__line" key={line.key}>
+                      <input type="checkbox" checked={!exclude.includes(line.key)} onChange={() => toggleKey(line.key)} aria-label={`Include ${line.text}`} />
+                      <span className="seams-settle-sheet__line-copy">{line.text}</span>
+                      <span className="seams-settle-sheet__line-amount">{fmt(line.signed_cents ?? line.amount_cents)}</span>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-          <p className="text-sm">{draft.closing}</p>
-          <p className="text-xs text-muted">{draft.footer}</p>
+                  ))}
+                </div>
+              </section>
+            ))}
+            <p className="seams-settle-sheet__closing">{draft.closing}</p>
+            <p className="seams-settle-sheet__fineprint">{draft.footer}</p>
+          </article>
+          <section className="seams-settle-sheet__receipt-section">
+            <h3 className="seams-settle-sheet__receipt-title">Receipt · records behind each line</h3>
+            <div className="seams-settle-sheet__receipt-wrap">
+              <table className="seams-settle-sheet__receipt">
+                <thead><tr><th>System</th><th>Record</th><th>Fields</th></tr></thead>
+                <tbody>
+                  {draft.receipt.map((r, i) => (
+                    <tr key={i}>
+                      <td>{r.system}</td>
+                      <td>{r.id}</td>
+                      <td>{Object.entries(r.fields || {}).map(([k, v]) => `${k}=${v}`).join(" · ")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+        <footer className="seams-settle-sheet__footer">
+          <div className="seams-settle-sheet__total-row">
+            <span className="seams-settle-sheet__control-label">Total</span>
+            <strong className="seams-settle-sheet__total">{fmt(draft.total_cents)}</strong>
+          </div>
           {pendingSecond ? (
-            <div className="rounded-2xl bg-[#EEF0FD] px-3 py-2.5 text-xs text-[#4338CA]">
+            <div className="seams-settle-sheet__approval">
               <p>Waiting for a second Controller to approve this send.</p>
-              <button
-                type="button"
-                disabled={busy || role !== "admin"}
-                onClick={approve}
-                className="mt-2 min-h-[36px] rounded-full border border-[#4338CA] px-3 font-medium disabled:opacity-40"
-              >
+              <button type="button" disabled={busy || role !== "admin"} onClick={approve}>
                 {busy ? <><span className="seams-spinner" /> Sending…</> : "Approve as second Controller"}
               </button>
             </div>
           ) : null}
-          {err ? <p className="text-xs text-owed">{err}</p> : null}
-          <button
-            type="button"
-            disabled={busy || role !== "admin" || !!pendingSecond || !draft.flag_keys?.length || !draft.to}
-            onClick={send}
-            className="min-h-[44px] w-full rounded-2xl bg-ink text-sm font-medium text-white disabled:opacity-40"
-          >
-            {busy ? <><span className="seams-spinner" /> Sending…</> : role !== "admin" ? "Controller only" : `Request ${fmt(draft.total_cents)} refund`}
-          </button>
-          <p className="text-xs text-muted" role="status">
+          {err ? <p className="seams-settle-sheet__error" role="alert">{err}</p> : null}
+          <div className="seams-settle-sheet__actions">
+            <button
+              type="button"
+              disabled={busy || role !== "admin" || !!pendingSecond || !draft.flag_keys?.length || !draft.to}
+              onClick={send}
+              className="seams-settle-sheet__send"
+            >
+              {busy ? <><span className="seams-spinner" /> Sending…</> : role !== "admin" ? "Controller only" : `Request ${fmt(draft.total_cents)} refund`}
+            </button>
+            <button type="button" disabled={busy} onClick={onClose} className="seams-settle-sheet__cancel">Cancel</button>
+          </div>
+          <p className="seams-settle-sheet__status" role="status">
             {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : Math.abs(draft.total_cents) >= 500000 ? "Needs a second Controller over $5,000" : ""}
           </p>
-        </div>
+        </footer>
       </div>
     </div>
   );

@@ -25,3 +25,9 @@ Keep sent money letters irreversible. Undo must show “Send a correction instea
 
 **Why:** the user confirmed that a sent money letter should not be reversible and that this is an honest answer for judges.
 **How to apply:** preserve this behavior in later interaction changes; do not implement a reversal of a sent letter.
+
+## Screenshot annotations
+The dark and blue caption strips at the bottom of the Settle and Upload screenshots are design notes, not UI. Do not render them.
+
+**Why:** the user explicitly repeated this instruction.
+**How to apply:** use those screenshots as references for the sheets, excluding the bottom caption strips.

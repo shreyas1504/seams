@@ -3,6 +3,8 @@ import React, { useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { useEntity } from "@/lib/useEntity";
+import { seamsActorName, seamsAuditSentence } from "@/components/auditPresentation.js";
+import { seamsNotifyFeedback } from "@/components/InteractionFeedback.jsx";
 
 export default function Ledger({ role = "admin" }) {
   const [events, reload] = useEntity("AuditEvent");
@@ -32,6 +34,7 @@ export default function Ledger({ role = "admin" }) {
       reload();
     } catch (e) {
       setErr(e?.response?.data?.error || e.message);
+      seamsNotifyFeedback({ error: true, message: e?.response?.data?.error || e.message });
     } finally {
       setBusy(null);
     }
@@ -40,13 +43,15 @@ export default function Ledger({ role = "admin" }) {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-[28px] font-bold tracking-tight text-[#111]">Ledger</h1>
-        <p className="text-sm text-[#6B6B76]">Every change, newest first</p>
+        <p className="brief-label">A record of every decision</p>
+        <h1 className="font-display text-[32px] font-medium mt-2">Activity</h1>
+        <p className="text-sm text-muted">Every change, newest first</p>
       </header>
 
       <div className="flex flex-wrap gap-2">
         <select
           value={actionFilter}
+          aria-label="Filter by action"
           onChange={(e) => setActionFilter(e.target.value)}
           className="min-h-[44px] rounded-full border border-[#E4E4E8] bg-white px-3 text-sm font-semibold"
         >
@@ -55,6 +60,7 @@ export default function Ledger({ role = "admin" }) {
         </select>
         <select
           value={entityFilter}
+          aria-label="Filter by entity"
           onChange={(e) => setEntityFilter(e.target.value)}
           className="min-h-[44px] rounded-full border border-[#E4E4E8] bg-white px-3 text-sm font-semibold"
         >
@@ -65,24 +71,22 @@ export default function Ledger({ role = "admin" }) {
 
       {err ? <p className="text-sm font-semibold text-[#C22A25]">{err}</p> : null}
 
-      <ul className="space-y-2">
+      <ul className="activity-timeline">
         {filtered.map((ev) => (
-          <li key={ev.id} className="crm-card p-4">
+          <li key={ev.id} className="activity-event card p-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-bold text-[#111]">
-                  {ev.action}
+                  {seamsAuditSentence(ev)}
                   {ev.undone ? (
                     <span className="crm-tag crm-tag-warn ml-2">undone</span>
                   ) : null}
                 </p>
                 <p className="mt-1 text-xs text-[#6B6B76]">
-                  {ev.actor_email} · {ev.actor_role}
+                  {seamsActorName(ev.actor_email)} · {ev.actor_role === "admin" ? "Controller" : ev.actor_role === "user" ? "Analyst" : ev.actor_role}
                   {ev.entity_type ? ` · ${ev.entity_type}` : ""}
-                  {ev.entity_id ? <span className="font-mono"> · {ev.entity_id}</span> : null}
                 </p>
                 {ev.reason ? <p className="mt-1 text-xs text-[#111]">{ev.reason}</p> : null}
-                {ev.after?.sha256 ? <p className="mt-1 font-mono text-[11px] text-[#6B6B76]">sha256 {ev.after.sha256}</p> : null}
               </div>
               <div className="text-right">
                 <p className="font-mono text-[11px] text-[#6B6B76]">{(ev.created_at || ev.created_date || "").slice(0, 19)}</p>
@@ -94,14 +98,16 @@ export default function Ledger({ role = "admin" }) {
                     className="crm-btn-black mt-2 !text-xs disabled:opacity-40"
                     title={role !== "admin" ? "Controller only" : "Undo"}
                   >
-                    {role !== "admin" ? "Controller only" : busy === ev.id ? "…" : "Undo"}
+                    {role !== "admin" ? "Controller only" : busy === ev.id ? "Undoing…" : "Undo"}
                   </button>
                 ) : null}
+                {ev.reversible && !ev.undone && role !== "admin" ? <p className="text-xs text-muted mt-1">Controller approval needed</p> : null}
               </div>
             </div>
           </li>
         ))}
       </ul>
+      {!filtered.length ? <p className="card p-8 text-muted text-center">No activity matches these filters.</p> : null}
     </div>
   );
 }

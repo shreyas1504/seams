@@ -10,7 +10,7 @@ export function seamsNotifyFeedback(detail) {
 export async function seamsNotifySent(data) {
   const letter = await base44.entities.Letter.get(data.letter_id);
   const events = await base44.entities.AuditEvent.filter({ entity_type: "Letter", entity_id: data.letter_id });
-  seamsNotifyFeedback({ message: `Sent to ${letter.party} · ${fmt(Math.abs(letter.frozen_total_cents))}.`, auditId: events.find((e) => e.action === "send_letter")?.id });
+  seamsNotifyFeedback({ message: `Sent to ${letter.party} · ${fmt(letter.frozen_total_cents)}.`, auditId: events.find((e) => e.action === "send_letter")?.id });
 }
 
 export function useSeamsDrawerLifecycle(onClose) {

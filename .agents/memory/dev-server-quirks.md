@@ -11,3 +11,8 @@ When replacing the old background Vite server with a managed workflow, verify th
 
 **Why:** workflow configuration retained the old port-80 mapping while adding a different port for the healthy server; local screenshots worked but the public preview returned 502.
 **How to apply:** check which listener external port 80 actually forwards to. Remove stale mappings through the validated configuration flow rather than repeatedly restarting a healthy server.
+
+Keep the Vite default port consistent with the managed workflow, not just the workflow's command-line override.
+
+**Why:** a later restart brought back the obsolete default-port forwarding rule even after a validated forwarding fix. Aligning the default and workflow kept the public URL reachable after restart.
+**How to apply:** when changing a server port, align its config, workflow and public forwarding; verify the public URL after the restart.

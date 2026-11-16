@@ -1,3 +1,6 @@
+@import "./components/settleSheets.css";
+@import "./workspaceViews.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

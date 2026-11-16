@@ -4,15 +4,17 @@ import { base44 } from "@/api/base44Client";
 import { useEntity } from "@/lib/useEntity";
 import { DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
 import Today from "./pages/Today.jsx";
-import Home from "./pages/Home.jsx";
+import Accounts from "./pages/Accounts.jsx";
 import Data from "./pages/Data.jsx";
 import Ledger from "./pages/Ledger.jsx";
 import Settings from "./pages/Settings.jsx";
-import { SelectedSeamProvider } from "./context/SelectedSeam.jsx";
+import { SelectedSeamProvider, useSelectedSeam } from "./context/SelectedSeam.jsx";
 import { loadDemoData } from "./actions/loadDemoData.js";
 import { shortDate } from "./components/systems.js";
 import { setLocalUser } from "./lib/local/localBase44.js";
 import InteractionFeedback, { SeamsSkeleton } from "./components/InteractionFeedback.jsx";
+import CommandPalette from "./components/CommandPalette.jsx";
+import SeamsSheet from "./components/SeamsSheet.jsx";
 
 // Accounts and Activity show the previous Overview and Ledger pages until they are rebuilt.
 const NAV = [
@@ -149,12 +151,15 @@ function EmptyState({ role }) {
   );
 }
 
-export default function App() {
+function SeamsAppShell() {
   const [tab, setTab] = useState("Today");
   const [identity, setIdentity] = useState("admin");
   const role = USERS[identity].role;
-  const [lookupQ, setLookupQ] = useState("");
-  const [lookupSignal, setLookupSignal] = useState(0);
+  const [palette, setPalette] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [twistNotice, setTwistNotice] = useState(null);
+  const [twistNewKeys, setTwistNewKeys] = useState([]);
+  const { setSelectedSeam, setSelectedFlagKey } = useSelectedSeam();
   const [settings] = useEntity("Setting");
   const flagState = useFlagCount();
   const searchRef = useRef(null);
@@ -165,18 +170,19 @@ export default function App() {
   };
   useEffect(() => { switchRole("admin"); }, []);
 
-  const runHeaderSearch = (e) => {
-    e.preventDefault();
-    if (!lookupQ.trim()) return;
-    setTab("Accounts");
-    setLookupSignal((n) => n + 1);
+  const openFlag = (flag) => {
+    setSelectedSeam(flag.seam); setSelectedFlagKey(flag.stable_key); setTab("Today");
+  };
+  const onTwistApproved = (data) => {
+    setTwistNotice(data.checks?.counts || {new:0,cleared:0});
+    setTwistNewKeys([...(data.dry?.new_recoverable||[]),...(data.dry?.new_credit||[])].map(f=>f.stable_key));
+    setUploadOpen(false);setTab("Today");
   };
 
   const onKey = useCallback((e) => {
-    if (e.target.closest?.("input,textarea,select,[contenteditable=true]")) return;
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
-      searchRef.current?.focus();
+      setPalette(true);
     }
   }, []);
   useEffect(() => {
@@ -188,26 +194,18 @@ export default function App() {
 
   let page;
   if (tab === "Today") {
-    page = !flagState.loaded ? <SeamsSkeleton /> : flagState.n ? <Today role={role} /> : <EmptyState role={role} />;
+    page = !flagState.loaded ? <SeamsSkeleton /> : flagState.n ? <Today role={role} notice={twistNotice} onDismissNotice={()=>setTwistNotice(null)} twistNewKeys={twistNewKeys} /> : <EmptyState role={role} />;
   } else if (tab === "Accounts") {
-    page = (
-      <Home
-        role={role}
-        headerLookup={lookupQ}
-        headerLookupSignal={lookupSignal}
-        onGoData={() => setTab("Data")}
-      />
-    );
+    page = <Accounts role={role} onOpenFlag={openFlag} />;
   } else if (tab === "Activity") {
     page = <Ledger role={role} />;
   } else if (tab === "Settings") {
     page = <Settings role={role} />;
   } else {
-    page = <Data role={role} />;
+    page = <Data role={role} onApproved={onTwistApproved} />;
   }
 
   return (
-    <SelectedSeamProvider>
       <div className="min-h-screen bg-paper text-ink">
         <a href="#main" className="skip-link">
           Skip to main content
@@ -245,26 +243,26 @@ export default function App() {
             </nav>
 
             <div className="ml-auto flex items-center gap-2.5">
-              <form onSubmit={runHeaderSearch} className="relative hidden sm:block" role="search">
+              <div className="relative hidden sm:block" role="search">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">
                   <SearchIcon />
                 </span>
                 <label htmlFor="global-search" className="sr-only">
                   Ask Seams or find a record
                 </label>
-                <input
+                <button
+                  type="button"
                   id="global-search"
                   ref={searchRef}
-                  value={lookupQ}
-                  onChange={(e) => setLookupQ(e.target.value)}
-                  placeholder="Ask Seams or find a record"
-                  className="search-input"
-                />
+                  onClick={()=>setPalette(true)}
+                  className="search-input text-left"
+                  aria-label="Ask Seams or find a record"
+                >Ask Seams or find a record</button>
                 <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-muted">
                   ⌘K
                 </kbd>
-              </form>
-              <button type="button" className="btn-forest" onClick={() => setTab("Data")}>
+              </div>
+              <button type="button" className="btn-forest" onClick={() => setUploadOpen(true)}>
                 Upload new data
               </button>
               <AvatarMenu role={identity} onSwitchRole={switchRole} />
@@ -276,7 +274,12 @@ export default function App() {
           {page}
         </main>
         <InteractionFeedback />
+        {uploadOpen ? <SeamsSheet title="Upload new data" eyebrow="Data stays in your systems" wide onClose={()=>setUploadOpen(false)}><Data role={role} onApproved={onTwistApproved}/></SeamsSheet> : null}
+        {palette ? <CommandPalette role={role} onClose={()=>setPalette(false)} onNavigate={setTab} onUpload={()=>setUploadOpen(true)} /> : null}
       </div>
-    </SelectedSeamProvider>
   );
+}
+
+export default function App() {
+  return <SelectedSeamProvider><SeamsAppShell /></SelectedSeamProvider>;
 }

@@ -1,8 +1,9 @@
 // H / 6.7 — Twist card after a Return import: dry run, approve, revoke, load reviewed spec.
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { TWIST_SPEC } from "@/lib/twistSpec.js";
 import { fmt } from "@/lib/engine/engine.js";
+import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 
 export default function TwistCard({
   fileName = TWIST_SPEC.file_hint,
@@ -10,12 +11,15 @@ export default function TwistCard({
   rowsImported,
   role = "admin",
   onDone,
+  approved = false,
 }) {
   const [spec, setSpec] = useState(TWIST_SPEC);
   const [dry, setDry] = useState(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const adminOnly = role !== "admin";
+  const twistLock = useRef(false);
+  useEffect(() => { if (!adminOnly) runDry(); }, [rowsImported, fileName, approved, role]);
 
   async function runDry() {
     setBusy(true);
@@ -31,23 +35,26 @@ export default function TwistCard({
   }
 
   async function act(mode) {
-    if (adminOnly) return;
+    if (adminOnly || twistLock.current) return;
+    twistLock.current = true;
     setBusy(true);
     setMsg("");
     try {
       const { data } = await base44.functions.invoke("applyRuleSpec", { mode });
       setMsg(mode === "approve" ? "Rules approved and checks re-run." : "Rules revoked and checks re-run.");
-      onDone?.(data);
+      announceSeamsDataChanged();
+      onDone?.({ ...data, dry }, mode);
     } catch (e) {
       setMsg(e?.response?.data?.error || e.message);
     } finally {
+      twistLock.current = false;
       setBusy(false);
     }
   }
 
   return (
-    <div className="rounded-[28px] border border-[#3B5BDB]/30 bg-[#E8EEFF] p-5 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-      <h2 className="text-base font-semibold text-[#14171F]">{spec.title}</h2>
+    <div className="twist-preview">
+      <h2 className="font-display text-[20px] font-semibold">New checks Seams proposes</h2>
       <p className="mt-1 text-xs text-[#5B5F68]">
         {fileName}
         {rowsParsed != null ? ` · rows parsed ${rowsParsed}` : ""}
@@ -63,14 +70,12 @@ export default function TwistCard({
       </ul>
 
       {dry ? (
-        <div className="mt-3 rounded-2xl bg-white p-3 font-mono text-xs text-[#14171F]">
-          <div>
-            {dry.cleared?.length || 0} cleared
-            {dry.cleared?.[0] ? ` (${fmt(dry.cleared[0].amount_cents)})` : ""} · +
-            {fmt((dry.new_recoverable || []).reduce((a, f) => a + f.amount_cents, 0))} owed to us · +
-            {fmt((dry.new_credit || []).reduce((a, f) => a + f.amount_cents, 0))} we owe ·{" "}
-            {dry.trap_hits?.length || 0} look-alikes hit
-          </div>
+        <div className="twist-numbers" aria-label="Dry run preview">
+          <p className="text-xs text-muted col-span-full">Dry run · nothing changes until you approve</p>
+          <div><strong className="money">{dry.cleared?.length || 0}</strong><small>cleared ({fmt((dry.cleared || []).reduce((a,f)=>a+f.amount_cents,0))})</small></div>
+          <div><strong className="money text-owed">+{fmt((dry.new_recoverable || []).reduce((a,f)=>a+f.amount_cents,0))}</strong><small>owed to us</small></div>
+          <div><strong className="money text-credit">+{fmt((dry.new_credit || []).reduce((a,f)=>a+f.amount_cents,0))}</strong><small>we owe</small></div>
+          <div><strong className="money">{dry.trap_hits?.length || 0}</strong><small>look-alikes hit</small></div>
         </div>
       ) : null}
 
@@ -85,12 +90,12 @@ export default function TwistCard({
         </button>
         <button
           type="button"
-          disabled={busy || adminOnly}
+          disabled={busy || adminOnly || !dry}
           title={adminOnly ? "Controller only" : undefined}
           onClick={() => act("approve")}
           className="min-h-[44px] rounded-2xl bg-[#3B5BDB] px-4 text-sm font-medium text-white disabled:opacity-40"
         >
-          Approve rule
+          {busy ? "Working…" : "Approve new checks"}
         </button>
         <button
           type="button"
@@ -111,7 +116,7 @@ export default function TwistCard({
         >
           Load reviewed spec
         </button>
-        <button
+        {approved ? <button
           type="button"
           disabled={busy || adminOnly}
           title={adminOnly ? "Controller only" : undefined}
@@ -119,7 +124,7 @@ export default function TwistCard({
           className="min-h-[44px] rounded-2xl border border-[#C22A25] px-4 text-sm text-[#C22A25] disabled:opacity-40"
         >
           Revoke
-        </button>
+        </button> : null}
       </div>
       {adminOnly ? <p className="mt-2 text-xs text-[#8A5A00]">Controller only</p> : null}
       {msg ? <p className="mt-2 text-xs text-[#5B5F68]">{msg}</p> : null}
