@@ -15,6 +15,8 @@ import LookupBox from "@/components/LookupBox.jsx";
 import FlagDetail from "@/components/FlagDetail.jsx";
 import SettlementBar from "@/components/SettlementBar.jsx";
 import NeedsReview from "@/components/NeedsReview.jsx";
+import LetterDrawer from "@/components/LetterDrawer.jsx";
+import RefundDrawer from "@/components/RefundDrawer.jsx";
 
 const LIVE_STATUSES = new Set(["open", "sent", "disputed"]);
 
@@ -43,6 +45,8 @@ export default function Home({ role = "admin" }) {
   const [audits, reloadAudits] = useEntity("AuditEvent");
   const [filterKey, setFilterKey] = useState(null);
   const [detailFlag, setDetailFlag] = useState(null);
+  const [letterParty, setLetterParty] = useState(null);
+  const [refundParty, setRefundParty] = useState(null);
   const [since, setSince] = useState(null);
 
   useEffect(() => {
@@ -126,7 +130,12 @@ export default function Home({ role = "admin" }) {
               <h2 className="mb-3 text-base font-semibold text-[#14171F]">Customers to square up</h2>
               <div className="space-y-3">
                 {filteredCustomers.map((p) => (
-                  <CustomerCard key={p.party} party={p} onOpenFlag={setDetailFlag} />
+                  <CustomerCard
+                    key={p.party}
+                    party={p}
+                    onOpenFlag={setDetailFlag}
+                    onSquareUp={() => setLetterParty(p)}
+                  />
                 ))}
               </div>
             </div>
@@ -134,7 +143,12 @@ export default function Home({ role = "admin" }) {
               <h2 className="mb-3 text-base font-semibold text-[#14171F]">Vendors to recover</h2>
               <div className="space-y-3">
                 {filteredVendors.map((p) => (
-                  <VendorCard key={p.party} party={p} onOpenFlag={setDetailFlag} />
+                  <VendorCard
+                    key={p.party}
+                    party={p}
+                    onOpenFlag={setDetailFlag}
+                    onRequestRefund={() => setRefundParty(p)}
+                  />
                 ))}
               </div>
             </div>
@@ -151,6 +165,24 @@ export default function Home({ role = "admin" }) {
           role={role}
           onClose={() => setDetailFlag(null)}
           onTransition={onTransition}
+        />
+      ) : null}
+      {letterParty ? (
+        <LetterDrawer
+          party={letterParty.party}
+          kind="customer"
+          role={role}
+          cardNet={letterParty.net}
+          onClose={() => setLetterParty(null)}
+          onSent={() => { reloadFlags(); reloadAudits(); setLetterParty(null); }}
+        />
+      ) : null}
+      {refundParty ? (
+        <RefundDrawer
+          party={refundParty.party}
+          role={role}
+          onClose={() => setRefundParty(null)}
+          onSent={() => { reloadFlags(); reloadAudits(); setRefundParty(null); }}
         />
       ) : null}
     </div>

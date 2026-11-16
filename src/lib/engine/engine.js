@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS = {
   po_abs_cents: 2500,
   po_pct: 0.01,
   match_window_days: 10,
+  four_eyes_threshold_cents: 500000,
   rule_enabled: {
     unbilled: true, short_billed: true, below_contract: true, freight: true,
     dup_payment: true, over_po: true, overdue: true, above_contract: true,
@@ -444,4 +445,213 @@ export function visitDeltasSince(events, lastSeenAt) {
     }
   }
   return since;
+}
+
+// ---------- letters (shared: sections, totals, receipt, templates, AI validator) ----------
+export const LETTER_BEC_FOOTER = "Northline will never ask you to change bank details by email.";
+export const LETTER_CHECKED_CREDITS = "We checked: no credits owed.";
+
+/** Reject AI greeting/closing that contains digits, URLs, @, or bank words. */
+export function validateLetterAiText(text) {
+  const t = String(text ?? "");
+  if (!t.trim()) return false;
+  if (/\d/.test(t)) return false;
+  if (/https?:\/\//i.test(t) || /\bwww\./i.test(t)) return false;
+  if (/@/.test(t)) return false;
+  if (/\b(bank|account|routing|wire|IBAN|SWIFT)\b/i.test(t)) return false;
+  return true;
+}
+
+export function letterToneGreeting(party, tone) {
+  if (tone === "firm") return `${party},`;
+  if (tone === "nudge") return `Hi ${party},`;
+  return `Hello ${party} team,`;
+}
+
+export function letterToneClosing(tone) {
+  if (tone === "firm") return "Please settle these items promptly.";
+  if (tone === "nudge") return "Happy to walk through any line with you.";
+  return "Thank you for partnering with Northline.";
+}
+
+export function vendorRefundEmail(vendor) {
+  const slug = String(vendor ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  return `ap@${slug}.example`;
+}
+
+export function pickBillingEmail(contracts, party) {
+  const row = (contracts || []).find((c) => c.customer_name === party && c.billing_email);
+  return row?.billing_email || null;
+}
+
+export async function sha256Hex(text) {
+  const data = new TextEncoder().encode(String(text));
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function letterLineFromFlag(f) {
+  return {
+    key: f.stable_key,
+    text: f.why || f.title || f.rule,
+    amount_cents: f.amount_cents,
+    evidence: f.evidence || [],
+    flag: f,
+  };
+}
+
+function letterReceiptFromSections(sections) {
+  const rows = [];
+  for (const sec of sections) {
+    for (const line of sec.lines) {
+      if (!line.evidence?.length) continue;
+      for (const ev of line.evidence) {
+        rows.push({
+          line_key: line.key,
+          system: ev.system,
+          id: ev.id,
+          fields: Object.fromEntries(
+            Object.entries(ev.fields || {}).filter(([k]) => k !== "import_batch" && k !== "source_row"),
+          ),
+        });
+      }
+    }
+  }
+  return rows;
+}
+
+function letterBodyText(draft) {
+  const parts = [draft.greeting, ""];
+  for (const sec of draft.sections) {
+    parts.push(sec.title);
+    for (const line of sec.lines) {
+      const amt = line.amount_cents ? ` ${fmt(line.signed_cents ?? line.amount_cents)}` : "";
+      parts.push(`- ${line.text}${amt}`);
+    }
+    parts.push("");
+  }
+  parts.push(draft.closing, "", draft.footer);
+  return parts.join("\n");
+}
+
+/**
+ * Build a letter draft in code (numbers + sections). Greeting/closing are templates unless overridden.
+ * @returns {{to,subject,greeting,closing,sections,receipt,total_cents,footer,warnings,flag_keys,body,kind,party,tone}}
+ */
+export function buildLetterDraft({
+  party,
+  kind = "customer",
+  tone = "warm",
+  flags = [],
+  contracts = [],
+  exclude_keys = [],
+  rule_enabled = {},
+  greeting,
+  closing,
+  subject,
+}) {
+  const excl = new Set(exclude_keys || []);
+  const warnings = [];
+  const partyFlags = (flags || []).filter((f) => f.party === party);
+  let selected = [];
+  if (kind === "vendor") {
+    selected = partyFlags.filter((f) => f.status === "open" && f.lane === "vendor" && !excl.has(f.stable_key));
+  } else if (kind === "correction") {
+    selected = partyFlags.filter((f) => f.status === "needs_review" && !excl.has(f.stable_key));
+  } else {
+    selected = partyFlags.filter((f) => f.status === "open" && f.lane === "customer" && !excl.has(f.stable_key));
+  }
+
+  const sections = [];
+  if (kind === "vendor") {
+    sections.push({
+      title: "Amounts to recover",
+      lines: selected.sort((a, b) => b.amount_cents - a.amount_cents).map((f) => {
+        const line = letterLineFromFlag(f);
+        line.signed_cents = f.amount_cents;
+        return line;
+      }),
+    });
+  } else if (kind === "correction") {
+    sections.push({
+      title: "Correction owed",
+      lines: selected.sort((a, b) => b.amount_cents - a.amount_cents).map((f) => {
+        const line = letterLineFromFlag(f);
+        line.signed_cents = f.bucket === "credit_owed" ? -f.amount_cents : f.amount_cents;
+        line.text = `${f.review_reason || "Correction owed"}: ${f.why || f.rule}`;
+        return line;
+      }),
+    });
+  } else {
+    const credits = selected.filter((f) => f.bucket === "credit_owed");
+    const recoverable = selected.filter((f) => f.bucket === "recoverable");
+    const overdue = selected.filter((f) => f.bucket === "overdue");
+    const rule8On = rule_enabled.above_contract !== false;
+    const creditLines = credits.sort((a, b) => b.amount_cents - a.amount_cents).map((f) => {
+      const line = letterLineFromFlag(f);
+      line.signed_cents = -f.amount_cents;
+      return line;
+    });
+    if (!creditLines.length && rule8On) {
+      creditLines.push({
+        key: "_checked_credits",
+        text: LETTER_CHECKED_CREDITS,
+        amount_cents: 0,
+        signed_cents: 0,
+        evidence: [],
+      });
+    }
+    sections.push({ title: "Credits we owe you", lines: creditLines });
+    sections.push({
+      title: "Billing we missed",
+      lines: recoverable.sort((a, b) => b.amount_cents - a.amount_cents).map((f) => {
+        const line = letterLineFromFlag(f);
+        line.signed_cents = f.amount_cents;
+        return line;
+      }),
+    });
+    sections.push({
+      title: "Overdue balance",
+      lines: overdue.sort((a, b) => b.amount_cents - a.amount_cents).map((f) => {
+        const line = letterLineFromFlag(f);
+        line.signed_cents = f.amount_cents;
+        return line;
+      }),
+    });
+  }
+
+  const total_cents = sections.reduce(
+    (a, sec) => a + sec.lines.reduce((b, line) => b + (line.signed_cents || 0), 0),
+    0,
+  );
+  const flag_keys = selected.map((f) => f.stable_key);
+  const to = kind === "vendor" ? vendorRefundEmail(party) : pickBillingEmail(contracts, party);
+  if (!to) warnings.push("No recipient on file");
+  const greet = greeting && validateLetterAiText(greeting) ? greeting : letterToneGreeting(party, tone);
+  const close = closing && validateLetterAiText(closing) ? closing : letterToneClosing(tone);
+  const defaultSubject =
+    kind === "vendor"
+      ? `Refund request · ${party}`
+      : kind === "correction"
+        ? `Correction · ${party}`
+        : total_cents < 0
+          ? `Credit letter · ${party}`
+          : `Settlement · ${party}`;
+  const draft = {
+    party,
+    kind,
+    tone,
+    to,
+    subject: subject || defaultSubject,
+    greeting: greet,
+    closing: close,
+    sections,
+    receipt: letterReceiptFromSections(sections),
+    total_cents,
+    footer: LETTER_BEC_FOOTER,
+    warnings,
+    flag_keys,
+  };
+  draft.body = letterBodyText(draft);
+  return draft;
 }
