@@ -1,0 +1,21 @@
+{
+  "title": "Returns file — proposed rules",
+  "file_hint": "twist_returns_log.csv",
+  "rules": [
+    {
+      "id": "return_offset",
+      "title": "Return explains a short-bill",
+      "plain": "If units came back on a return before we finished billing the shipment, don't treat the gap as short-billed — the return explains it."
+    },
+    {
+      "id": "dup_credit_memo",
+      "title": "Duplicate credit memo",
+      "plain": "If the same credit memo number appears twice (ignoring case and punctuation), the second one is an over-credit we can recover."
+    },
+    {
+      "id": "missing_credit",
+      "title": "Credit never issued",
+      "plain": "If goods were returned on a paid invoice and no credit memo exists, Northline owes the customer a credit."
+    }
+  ]
+}
