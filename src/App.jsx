@@ -1,196 +1,275 @@
-// CRMEdge-style shell: left sidebar + top search header + main canvas.
-import React, { useCallback, useState } from "react";
+// Seams shell: one header (brand, nav, search, upload, avatar menu) + page canvas. No sidebar.
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useEntity } from "@/lib/useEntity";
+import { DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
+import Today from "./pages/Today.jsx";
 import Home from "./pages/Home.jsx";
 import Data from "./pages/Data.jsx";
 import Ledger from "./pages/Ledger.jsx";
 import Settings from "./pages/Settings.jsx";
-import SplashScreen from "./components/SplashScreen.jsx";
+import { SelectedSeamProvider } from "./context/SelectedSeam.jsx";
+import { loadDemoData } from "./actions/loadDemoData.js";
+import { shortDate } from "./components/systems.js";
 import { setLocalUser } from "./lib/local/localBase44.js";
 
+// Accounts and Activity show the previous Overview and Ledger pages until they are rebuilt.
 const NAV = [
-  { id: "Home", label: "Overview", icon: "▣" },
-  { id: "Data", label: "Data", icon: "▦" },
-  { id: "Ledger", label: "Ledger", icon: "☰" },
-  { id: "Settings", label: "Settings", icon: "⚙" },
+  { id: "Today", label: "Today" },
+  { id: "Accounts", label: "Accounts" },
+  { id: "Activity", label: "Activity" },
+  { id: "Data", label: "Data" },
+  { id: "Settings", label: "Settings" },
 ];
 
-export default function App() {
-  const [splash, setSplash] = useState(() => {
+const USERS = {
+  admin: { name: "Dana Controller", email: "dana@northline.example", roleLabel: "Controller" },
+  user: { name: "Analyst", email: "analyst@northline.example", roleLabel: "Analyst" },
+};
+
+function SearchIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="7" cy="7" r="4.75" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M10.5 10.5 14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Flag count with a "loaded" bit, so the empty state never flashes before the first list returns. */
+function useFlagCount() {
+  const [state, setState] = useState({ loaded: false, n: 0 });
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      base44.entities.Flag.list(undefined, 5000).then((rows) => alive && setState({ loaded: true, n: rows.length }));
+    load();
+    const un = base44.entities.Flag.subscribe?.(() => load());
+    return () => {
+      alive = false;
+      un && un();
+    };
+  }, []);
+  return state;
+}
+
+function AvatarMenu({ role, onSwitchRole }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const u = USERS[role] || USERS.admin;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => ref.current && !ref.current.contains(e.target) && setOpen(false);
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        className="avatar"
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-label={`Account: ${u.name}, ${u.roleLabel}`}
+        onClick={() => setOpen((o) => !o)}
+      >
+        {u.name.slice(0, 1)}
+      </button>
+      {open ? (
+        <div className="card rise absolute right-0 top-[calc(100%+8px)] z-30 w-[240px] p-3 shadow-lift" role="menu">
+          <p className="text-[13px] font-semibold text-ink">{u.name}</p>
+          <p className="text-[11px] text-muted">{u.email}</p>
+          <label className="mt-3 block text-[11px] font-medium text-muted">
+            Role
+            <select
+              value={role}
+              onChange={(e) => onSwitchRole(e.target.value)}
+              className="mt-1 min-h-[36px] w-full rounded-[10px] border border-line bg-paper px-2 text-[13px] font-medium text-ink"
+            >
+              <option value="admin">Controller</option>
+              <option value="user">Analyst</option>
+            </select>
+          </label>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function EmptyState({ role }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const controllerOnly = role !== "admin";
+
+  const load = async () => {
+    if (controllerOnly) return;
+    setBusy(true);
+    setErr("");
     try {
-      return sessionStorage.getItem("seams_splash_done") !== "1";
-    } catch {
-      return true;
+      await loadDemoData();
+    } catch (e) {
+      setErr(e?.response?.data?.error || e.message);
+    } finally {
+      setBusy(false);
     }
-  });
-  const [tab, setTab] = useState("Home");
+  };
+
+  return (
+    <div className="rise flex min-h-[55vh] flex-col items-center justify-center text-center">
+      <p className="font-display text-[30px] font-medium text-ink">Nothing loaded yet</p>
+      <p className="mt-2 max-w-sm text-[13px] text-muted">
+        Load the four Northline systems (CRM, Warehouse, Billing, AP) to see where money slipped.
+      </p>
+      <button
+        type="button"
+        className="btn-forest mt-5"
+        onClick={load}
+        disabled={busy || controllerOnly}
+        title={controllerOnly ? "Controller only" : undefined}
+      >
+        {busy ? "Loading…" : "Load demo data"}
+      </button>
+      {controllerOnly ? <p className="mt-2 text-[11px] font-medium text-overdue">Controller only</p> : null}
+      {err ? (
+        <p className="mt-2 text-[12px] font-medium text-overdue" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+export default function App() {
+  const [tab, setTab] = useState("Today");
   const [role, setRole] = useState("admin");
   const [lookupQ, setLookupQ] = useState("");
   const [lookupSignal, setLookupSignal] = useState(0);
-
-  const finishSplash = useCallback(() => {
-    try {
-      sessionStorage.setItem("seams_splash_done", "1");
-    } catch {
-      /* ignore */
-    }
-    setSplash(false);
-  }, []);
+  const [settings] = useEntity("Setting");
+  const flagState = useFlagCount();
+  const searchRef = useRef(null);
 
   const switchRole = (r) => {
     setRole(r);
-    setLocalUser({
-      email: r === "admin" ? "dana@northline.example" : "analyst@northline.example",
-      role: r,
-    });
+    setLocalUser({ email: USERS[r].email, role: r });
   };
 
   const runHeaderSearch = (e) => {
     e.preventDefault();
-    setTab("Home");
+    if (!lookupQ.trim()) return;
+    setTab("Accounts");
     setLookupSignal((n) => n + 1);
   };
 
-  if (splash) return <SplashScreen onDone={finishSplash} />;
+  const onKey = useCallback((e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      searchRef.current?.focus();
+    }
+  }, []);
+  useEffect(() => {
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onKey]);
 
-  const userLabel = role === "admin" ? "Dana Controller" : "Analyst";
-  const userEmail = role === "admin" ? "dana@northline.example" : "analyst@northline.example";
+  const asOf = settings[0]?.as_of_date || DEFAULT_SETTINGS.as_of_date;
+
+  let page;
+  if (tab === "Today") {
+    page = !flagState.loaded ? null : flagState.n ? <Today /> : <EmptyState role={role} />;
+  } else if (tab === "Accounts") {
+    page = (
+      <Home
+        role={role}
+        headerLookup={lookupQ}
+        headerLookupSignal={lookupSignal}
+        onGoData={() => setTab("Data")}
+      />
+    );
+  } else if (tab === "Activity") {
+    page = <Ledger role={role} />;
+  } else if (tab === "Settings") {
+    page = <Settings role={role} />;
+  } else {
+    page = <Data role={role} />;
+  }
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#111111]">
-      <a href="#main" className="skip-link">
-        Skip to main content
-      </a>
+    <SelectedSeamProvider>
+      <div className="min-h-screen bg-paper text-ink">
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
 
-      <div className="mx-auto flex min-h-screen max-w-[1440px]">
-        {/* Sidebar */}
-        <aside
-          className="sticky top-0 hidden h-screen w-[240px] shrink-0 flex-col border-r border-[#ECECEF] bg-[#F7F7F8] px-4 py-5 md:flex"
-          aria-label="Primary"
-        >
-          <div className="mb-8 flex items-center gap-2.5 px-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#C6F135] text-sm font-black text-[#111]">
-              S
-            </span>
-            <div>
-              <p className="text-base font-bold leading-none">Seams</p>
-              <p className="text-[11px] font-medium text-[#6B6B76]">Mind the gap</p>
-            </div>
-          </div>
-
-          <nav className="flex flex-1 flex-col gap-1">
-            {NAV.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="crm-nav-item"
-                aria-current={tab === item.id ? "page" : undefined}
-                onClick={() => setTab(item.id)}
-              >
-                <span aria-hidden className="w-4 text-center">
-                  {item.icon}
-                </span>
-                {item.label}
-              </button>
-            ))}
-          </nav>
-
-          <div className="mt-4 rounded-2xl border border-[#ECECEF] bg-white p-3">
-            <div className="flex items-center gap-2.5">
-              <div
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111] text-xs font-bold text-white"
-                aria-hidden
-              >
-                {userLabel.slice(0, 1)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{userLabel}</p>
-                <p className="truncate text-[11px] text-[#6B6B76]">{userEmail}</p>
-              </div>
-            </div>
-            <label className="mt-2 block text-[11px] font-semibold text-[#6B6B76]">
-              Role
-              <select
-                value={role}
-                onChange={(e) => switchRole(e.target.value)}
-                className="mt-1 min-h-[40px] w-full rounded-xl border border-[#E4E4E8] bg-[#F7F7F8] px-2 text-sm font-semibold text-[#111]"
-              >
-                <option value="admin">Controller</option>
-                <option value="user">Analyst</option>
-              </select>
-            </label>
-          </div>
-        </aside>
-
-        {/* Main column */}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex flex-wrap items-center gap-3 border-b border-[#ECECEF] bg-[#F7F7F8]/95 px-4 py-3 backdrop-blur md:px-6">
-            <form onSubmit={runHeaderSearch} className="relative min-w-[200px] flex-1" role="search">
-              <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B6B76]" aria-hidden>
-                ⌕
+        <header className="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur">
+          <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 md:px-8">
+            <button
+              type="button"
+              className="flex items-center gap-2.5 text-left"
+              onClick={() => setTab("Today")}
+              aria-label="Seams, go to Today"
+            >
+              <span className="brand-mark" aria-hidden>
+                S
               </span>
-              <label htmlFor="global-search" className="sr-only">
-                Search records
-              </label>
-              <input
-                id="global-search"
-                value={lookupQ}
-                onChange={(e) => setLookupQ(e.target.value)}
-                placeholder="Search invoice, shipment, bill…"
-                className="crm-input"
-              />
-            </form>
-            <button
-              type="button"
-              className="crm-btn-black"
-              onClick={() => setTab("Data")}
-            >
-              <span aria-hidden>+</span> Reset / import data
+              <span className="font-display text-[19px] font-semibold leading-none text-ink">Seams</span>
             </button>
-            <button
-              type="button"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#E4E4E8] bg-white text-[#111]"
-              aria-label="Notifications"
-              title="Notifications"
-            >
-              ⌂
-            </button>
-          </header>
+            <p className="hidden text-[12px] text-muted xl:block">
+              Mind the gap · Northline Supply · as of {shortDate(asOf)}
+            </p>
 
-          {/* Mobile nav */}
-          <nav className="flex gap-1 overflow-x-auto border-b border-[#ECECEF] px-3 py-2 md:hidden" aria-label="Mobile">
-            {NAV.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setTab(item.id)}
-                aria-current={tab === item.id ? "page" : undefined}
-                className={`min-h-[40px] shrink-0 rounded-full px-3 text-xs font-semibold ${
-                  tab === item.id ? "bg-[#111] text-white" : "bg-white text-[#6B6B76] border border-[#E4E4E8]"
-                }`}
-              >
-                {item.label}
+            <nav className="order-last flex w-full gap-1 overflow-x-auto md:order-none md:w-auto" aria-label="Primary">
+              {NAV.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="nav-link"
+                  aria-current={tab === item.id ? "page" : undefined}
+                  onClick={() => setTab(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+
+            <div className="ml-auto flex items-center gap-2.5">
+              <form onSubmit={runHeaderSearch} className="relative hidden sm:block" role="search">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">
+                  <SearchIcon />
+                </span>
+                <label htmlFor="global-search" className="sr-only">
+                  Ask Seams or find a record
+                </label>
+                <input
+                  id="global-search"
+                  ref={searchRef}
+                  value={lookupQ}
+                  onChange={(e) => setLookupQ(e.target.value)}
+                  placeholder="Ask Seams or find a record"
+                  className="search-input"
+                />
+                <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-muted">
+                  ⌘K
+                </kbd>
+              </form>
+              <button type="button" className="btn-forest" onClick={() => setTab("Data")}>
+                Upload new data
               </button>
-            ))}
-          </nav>
+              <AvatarMenu role={role} onSwitchRole={switchRole} />
+            </div>
+          </div>
+        </header>
 
-          <main id="main" className="flex-1 px-4 py-5 md:px-6 md:py-6">
-            {tab === "Home" ? (
-              <Home
-                role={role}
-                headerLookup={lookupQ}
-                headerLookupSignal={lookupSignal}
-                onGoData={() => setTab("Data")}
-              />
-            ) : tab === "Ledger" ? (
-              <Ledger role={role} />
-            ) : tab === "Settings" ? (
-              <Settings role={role} />
-            ) : (
-              <Data role={role} />
-            )}
-          </main>
-        </div>
+        <main id="main" className="mx-auto max-w-[1280px] px-5 py-6 md:px-8 md:py-7">
+          {page}
+        </main>
       </div>
-    </div>
+    </SelectedSeamProvider>
   );
 }

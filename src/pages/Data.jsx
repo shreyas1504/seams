@@ -11,13 +11,8 @@ import {
   anyAmbiguousDates,
   isDateField,
 } from "@/lib/mapping.js";
+import { loadDemoData } from "@/actions/loadDemoData.js";
 
-const SEED = {
-  Contract: "crm_contracts",
-  Shipment: "warehouse_shipments",
-  Invoice: "billing_invoices",
-  VendorBill: "ap_bills",
-};
 const ENTITY_OPTIONS = Object.keys(ENTITY_CANONICAL_FIELDS);
 const errMsg = (e) => e?.response?.data?.error || e.message;
 
@@ -59,22 +54,8 @@ export default function Data({ role = "admin" }) {
     setJoinHealth([]);
     setParsed(null);
     try {
-      await base44.functions.invoke("resetDemo");
-      for (const [ent, f] of Object.entries(SEED)) {
-        const { header, rows } = parseCsv(await (await fetch(`/seed/${f}.csv`)).text());
-        const r = await base44.functions.invoke("importRows", {
-          entity: ent,
-          rows,
-          header_hash: headerHash(header),
-          file_name: f,
-        });
-        say(`${ent}: ${r.data.imported} rows`);
-      }
-      const c = await base44.functions.invoke("runChecks");
-      say(
-        `Checks: ${c.data.counts.new} new flags · recoverable ${c.data.totals.recoverable.n} · ruled out ${c.data.totals.ruled_out}`,
-      );
-      setJoinHealth(c.data.needs_review || []);
+      const checks = await loadDemoData(say);
+      setJoinHealth(checks.needs_review || []);
     } catch (e) {
       say(`Error: ${errMsg(e)}`);
     }
