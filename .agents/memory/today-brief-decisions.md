@@ -11,3 +11,11 @@ description: Template rules for the Today morning brief that the user explicitly
 - Accounts/Activity temporarily open old Overview/Ledger; user's Runs 5 and 6 replace them.
 - Python module in .replit is harmless; ignore.
 **How to apply:** don't revisit these unless the user changes them.
+
+## Today's fixes (user review after Run 4, 2026-11-16)
+- Keep "Approve as second Controller" in both drawers; a second Controller identity is coming in Run 5.
+- Keep: dismissed ("Not an issue") findings count as look-alikes checked.
+- Overdue math falling back to the rule name is acceptable; Run 5 rewords it.
+- Fix in Run 5: credit_owed findings must not inflate a seam's card count vs its pill; put them in their own small labelled group.
+- Fix in Run 5: customer card buttons must show the letter total, not the single flag amount.
+**Why:** "one number everywhere" — any button or count must equal what actually gets sent or shown elsewhere.
