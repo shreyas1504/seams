@@ -892,6 +892,8 @@ OVERPO-B-60163-NL-11351,purchase_orders.csv,"PO-26257, line 5",unit_cost $37.91;
 FREIGHT-B-60176,supplier_bills.csv,"bill B-60176, line 4",freight $146.00,$0.00
 FREIGHT-B-60176,suppliers.csv,Summit Liner Co.,terms ALWAYS_PREPAID (free over $0),
 FREIGHT-B-60176,purchase_orders.csv,PO-26306,PO total $950.19,
+OVERPO-B-60181-NL-11106,supplier_bills.csv,"bill B-60181, line 2",unit_cost $35.53 x 20 cases,$32.30 a case
+OVERPO-B-60181-NL-11106,purchase_orders.csv,"PO-26005, line 2",unit_cost $32.30; 20 cases accepted,
 OVERPO-B-60222-NL-12142,supplier_bills.csv,"bill B-60222, line 3",unit_cost $25.25 x 20 cases,$24.05 a case
 OVERPO-B-60222-NL-12142,purchase_orders.csv,"PO-26472, line 3",unit_cost $24.05; 20 cases accepted,
 OVERPO-B-60233-NL-10175,supplier_bills.csv,"bill B-60233, line 5",unit_cost $44.73 x 50 cases,$40.66 a case
@@ -970,32 +972,18 @@ DUPBILL-B-60326,supplier_bills.csv,bill B-60213,invoice AC-47727 $3244.05 2026-0
 DUPBILL-B-60326,supplier_bills.csv,bill B-60326,invoice AC47727 $3244.05 2026-09-29,Enter each supplier invoice once
 NOREPLY-M-001156,inbox.csv,message M-001156,Cohen and Jensen Labs: Delivery window (2026-09-02 11:20),A reply by the end of Sep 03
 NOREPLY-M-001156,inbox.csv,thread T-00550,no reply in the thread,
-NOREPLY-M-000979,inbox.csv,message M-000979,Noodle Union - DUMBO: Invoice #1048106 quantity (2026-09-02 12:40),A reply by the end of Sep 03
-NOREPLY-M-000979,inbox.csv,thread T-00458,first reply Sep 04,
 NOREPLY-M-001152,inbox.csv,message M-001152,Brooks & Patel Capital: Copy of invoice (2026-09-03 11:57),A reply by the end of Sep 04
 NOREPLY-M-001152,inbox.csv,thread T-00546,no reply in the thread,
 NOREPLY-M-001154,inbox.csv,message M-001154,Young & Lam Partners LLP: Statement request (2026-09-04 09:51),A reply by the end of Sep 08
 NOREPLY-M-001154,inbox.csv,thread T-00548,no reply in the thread,
-NOREPLY-M-000985,inbox.csv,message M-000985,Biryani Roasters: Invoice #1048324 quantity (2026-09-10 08:39),A reply by the end of Sep 11
-NOREPLY-M-000985,inbox.csv,thread T-00461,first reply Sep 15,
-NOREPLY-M-000981,inbox.csv,message M-000981,Marrow Bistro: Invoice #1048321 quantity (2026-09-10 11:28),A reply by the end of Sep 11
-NOREPLY-M-000981,inbox.csv,thread T-00459,first reply Sep 14,
-NOREPLY-M-000971,inbox.csv,message M-000971,Brick Lane Cafés - UES: Invoice #1048371 quantity (2026-09-11 09:04),A reply by the end of Sep 14
-NOREPLY-M-000971,inbox.csv,thread T-00454,first reply Sep 16,
 NOREPLY-M-001155,inbox.csv,message M-001155,Walsh and Abbott Media: Statement request (2026-09-15 16:41),A reply by the end of Sep 16
 NOREPLY-M-001155,inbox.csv,thread T-00549,no reply in the thread,
 NOREPLY-M-001151,inbox.csv,message M-001151,Kettle & Crumb Bakeries - Williamsburg: Price check (2026-09-16 12:15),A reply by the end of Sep 17
 NOREPLY-M-001151,inbox.csv,thread T-00545,no reply in the thread,
-NOREPLY-M-000983,inbox.csv,message M-000983,Biryani Diner: Invoice #1048631 quantity (2026-09-18 08:14),A reply by the end of Sep 21
-NOREPLY-M-000983,inbox.csv,thread T-00460,first reply Sep 23,
 PHISH-M-001820,inbox.csv,message M-001820,From accounts@baylinepack-payments.com: URGENT: updated banking details - Bayline Packaging,Verify by calling the number on file
 PHISH-M-001820,suppliers.csv,Bayline Packaging,"emails @baylinepack.com, phone (908) 555-6148",
 NOREPLY-M-001153,inbox.csv,message M-001153,Greco & Lam Capital: Price check (2026-09-22 11:46),A reply by the end of Sep 23
 NOREPLY-M-001153,inbox.csv,thread T-00547,no reply in the thread,
-NOREPLY-M-000973,inbox.csv,message M-000973,Copper Citrus Eatery: Invoice #1048784 quantity (2026-09-23 15:39),A reply by the end of Sep 24
-NOREPLY-M-000973,inbox.csv,thread T-00455,first reply Sep 28,
-NOREPLY-M-000967,inbox.csv,message M-000967,Tide House: Invoice #1048797 quantity (2026-09-24 16:32),A reply by the end of Sep 25
-NOREPLY-M-000967,inbox.csv,thread T-00452,first reply Sep 29,
 NOREPLY-M-001150,inbox.csv,message M-001150,Copper Citrus Eatery: Certificate of insurance (2026-09-25 10:17),A reply by the end of Sep 28
 NOREPLY-M-001150,inbox.csv,thread T-00544,no reply in the thread,
 NOREPLY-M-001149,inbox.csv,message M-001149,Meridian Workplace Services - FiDi: Statement request (2026-09-28 15:22),A reply by the end of Sep 29

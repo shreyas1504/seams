@@ -203,7 +203,7 @@ for no, g in invl.groupby("invoice_no"):
     # 3) wrong customer on invoice
     if c is not None and qbname != c.quickbooks_name:
         sub = sum(D(x) for x in g.amount)
-        add(f"WRONGCUST-{no}", "Invoice billed to wrong customer", 0, mon, "Invoices addressed to the wrong customer", [
+        add(f"WRONGCUST-{no}", "Invoice billed to wrong customer", sub, mon, "Invoices addressed to the wrong customer", [
             ("invoices.csv", f"invoice {no}", f"Customer {qbname}", c.quickbooks_name),
             ("delivery_log.csv", f"delivery {did}", f"Delivered to {c.customer_name} ({dcid})", "")],
             party=c.customer_name, category="Warehouse→Billing", explanation=f"Invoice {no} went to {qbname} but {c.customer_name} received the goods.", action="catch_up_invoice", invoice_no=no)
@@ -310,7 +310,8 @@ for no, g in invl.groupby("invoice_no"):
 # ---------------- supplier side ----------------
 po["qa"] = po.qty_accepted.apply(lambda x: int(float(x or 0)))
 def clean_po(x):
-    d = re.sub(r"\D", "", str(x or ""))
+    t = re.sub(r"^\s*P\s*[O0]\s*[-#:]?\s*", "", str(x or "").upper())  # "PO-", "PO ", "P0-" typed by hand
+    d = re.sub(r"\D", "", t)
     return f"PO-{d}" if d else ""
 def pack_count(code):
     sku = {r.supplier_item_code: r for r in prods.itertuples()}.get(code)
@@ -334,12 +335,21 @@ bills[["cq", "cc"]] = bills.apply(lambda r: pd.Series(_cases(r)), axis=1)
 _po_sup = {}
 for r in po.itertuples():
     _po_sup.setdefault((r.supplier_id, r.supplier_item_code), []).append(r)
-for i, r in bills[(bills.po_ref == "") & (bills.line_type == "ITEM")].iterrows():
-    s = sup_by_vendor.get(r.vendor)
+_po_keys = set(zip(po.po_no, po.supplier_item_code))
+# Blank or mistyped PO ref: find the PO from this supplier that has these items. Decide per bill, using all its lines.
+for bid, g in bills[bills.line_type == "ITEM"].groupby("bill_id"):
+    if all((r.po_ref, r.supplier_item_code) in _po_keys for r in g.itertuples()):
+        continue
+    s = sup_by_vendor.get(g.iloc[0].vendor)
     if s is None: continue
-    cands = [x for x in _po_sup.get((s.supplier_id, r.supplier_item_code), []) if dt(x.po_date) and dt(r.bill_date) and dt(x.po_date) <= dt(r.bill_date)]
-    if len({x.po_no for x in cands}) == 1:  # only when the match is unambiguous
-        bills.loc[(bills.bill_id == r.bill_id) & (bills.po_ref == ""), "po_ref"] = cands[0].po_no
+    score = {}
+    for r in g.itertuples():
+        for x in _po_sup.get((s.supplier_id, r.supplier_item_code), []):
+            if dt(x.po_date) and dt(r.bill_date) and dt(x.po_date) <= dt(r.bill_date):
+                score[x.po_no] = score.get(x.po_no, 0) + (2 if int(float(x.qty_accepted or 0)) == int(float(r.cq)) else 1)
+    if score:
+        best = max(score.items(), key=lambda kv: (kv[1], kv[0]))[0]
+        bills.loc[bills.bill_id == bid, "po_ref"] = best
 po_lines = {}
 for r in po.itertuples():
     po_lines.setdefault((r.po_no, r.supplier_item_code), []).append(r)
@@ -455,10 +465,7 @@ for r in ib.itertuples():
     th = by_thread.get(r.thread_id)
     later = th[(th.t > r.t) & (th.direction == "outbound")] if th is not None else []
     if len(later):
-        first_reply = later.iloc[0].t
-        due = add_bd(r.t.date(), 1)
-        if first_reply.date() <= due: continue
-        late_txt = f"first reply {first_reply:%b %d}"
+        continue  # answered (late replies are not flagged; the problem is an email that never got an answer)
     else:
         if add_bd(r.t.date(), 1) >= CUTOFF: continue
         late_txt = "no reply in the thread"
