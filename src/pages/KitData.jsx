@@ -77,17 +77,17 @@ export default function KitData({ role }) {
         <p className="brief-label">Load findings</p>
         <h1 className="mt-1 font-display text-[26px] text-[#1C1917]">findings.csv + evidence.csv</h1>
         <p className="mt-1 text-[13px] text-[#6B635A]">Our code reads the raw Northline files, applies billing_rules.md and writes these two files. Loading replaces Findings and Evidence and keeps every Decision, so October needs no rebuild.</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <label className="settings-check">
-            <input ref={fIn} type="file" accept=".csv" onChange={(e) => setFiles((s) => ({ ...s, findings: e.target.files[0] }))} />
-            <span className="text-[12px]">findings.csv</span>
-          </label>
-          <label className="settings-check">
-            <input ref={eIn} type="file" accept=".csv" onChange={(e) => setFiles((s) => ({ ...s, evidence: e.target.files[0] }))} />
-            <span className="text-[12px]">evidence.csv</span>
-          </label>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {[["findings", fIn, "Findings table · Dana's queue"], ["evidence", eIn, "Evidence table · the proof"]].map(([k, ref, sub]) => (
+            <label key={k} className={`kit-drop${files[k] ? " is-set" : ""}`}>
+              <input ref={ref} type="file" accept=".csv" aria-label={`Choose ${k}.csv`} onChange={(e) => setFiles((s) => ({ ...s, [k]: e.target.files[0] }))} />
+              <span className="kit-drop__name">{k}.csv</span>
+              <span className="kit-drop__file">{files[k] ? `✓ ${files[k].name}` : sub}</span>
+              <span className="kit-drop__file">{files[k] ? "" : "Click to choose a file"}</span>
+            </label>
+          ))}
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
           <button type="button" className="btn-forest" disabled={busy || role !== "admin"} onClick={fromFiles}>{busy ? "Loading…" : "Replace findings (keep decisions)"}</button>
           <button type="button" className="fix-quiet" disabled={busy || role !== "admin"} onClick={fromDemo}>Load the September run</button>
         </div>

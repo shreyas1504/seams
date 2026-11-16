@@ -17,6 +17,7 @@ const SeamMapNodes = {
   Cash: { x: 600, y: 120, label: "Cash in", sub: "customers pay", tint: SEAM_MAP_NEUTRAL },
   AP: { x: 320, y: 260, label: "AP", sub: "vendor bills", tint: SYSTEM_TINT.AP },
   Vendors: { x: 600, y: 260, label: "Vendors", sub: "we pay", tint: SEAM_MAP_NEUTRAL },
+  Inbox: { x: 40, y: 300, label: "Inbox", sub: "customer email", tint: SYSTEM_TINT.Inbox || SEAM_MAP_NEUTRAL },
 };
 const SeamMapSpareSlots = [
   { x: 40, y: 300 },
@@ -34,11 +35,14 @@ const SeamMapPaths = {
   "Warehouse→Billing": { d: "M178 225 C 250 225, 248 157, 308 157", mid: [243, 191], lift: 0 },
   "Billing→Cash": { d: "M458 145 L588 145", mid: [523, 145], lift: 26 },
   "AP→Vendors": { d: "M458 285 L588 285", mid: [523, 285], lift: 26 },
+  "Inbox→Billing": { d: "M178 325 C 262 325, 262 167, 308 167", mid: [222, 300], lift: 0 },
 };
 
 /** Build node positions: registry nodes plus spare slots for unknown systems found in the seams. */
 function seamMapLayout(rows) {
-  const nodes = { ...SeamMapNodes };
+  // Only the systems a seam actually touches: no floating cards with nothing flowing in or out.
+  const used = new Set(rows.flatMap((r) => [r.from, r.to]));
+  const nodes = Object.fromEntries(Object.entries(SeamMapNodes).filter(([k]) => used.has(k)));
   let spare = 0;
   for (const r of rows) {
     for (const name of [r.from, r.to]) {
