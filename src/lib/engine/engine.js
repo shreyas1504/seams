@@ -655,3 +655,73 @@ export function buildLetterDraft({
   draft.body = letterBodyText(draft);
   return draft;
 }
+
+// ---------- Ask Seams intent routing (keyword fallback; LLM schema in askSeams.js) ----------
+export function fuzzyPartyChoices(query, parties) {
+  const q = normName(query);
+  if (!q) return [];
+  const scored = [...new Set(parties)].map((p) => {
+    const n = normName(p);
+    let score = 0;
+    if (n === q) score = 1;
+    else if (n.includes(q) || q.includes(n)) score = 0.9;
+    else {
+      const qt = new Set(q.split(" "));
+      const pt = n.split(" ");
+      const hit = pt.filter((t) => qt.has(t)).length;
+      score = pt.length ? hit / pt.length : 0;
+    }
+    return { party: p, score };
+  }).filter((x) => x.score >= 0.45).sort((a, b) => b.score - a.score);
+  return scored;
+}
+
+/** Deterministic keyword router used when InvokeLLM is offline. */
+export function routeAskQuestion(question) {
+  const q = String(question || "").toLowerCase();
+  if (!q.trim()) return { type: "unsupported" };
+  if (/forecast|next quarter|predict|outside/.test(q)) return { type: "unsupported" };
+  if (/\b(owe|credit)\b/.test(q) && /customer/.test(q)) return { type: "query", query: "by_bucket", bucket: "credit_owed" };
+  if (/\b(owe|credit)\b/.test(q)) return { type: "query", query: "by_bucket", bucket: "credit_owed" };
+  if (/(why|not flagged)/.test(q)) {
+    const m = q.match(/why wasn'?t the (.+?) (?:rent |bill )?flagged/) || q.match(/why .+? (.+?) (?:not|wasn't)/);
+    return { type: "query", query: "ruled_out", target: m ? m[1].replace(/\s+rent$/, "").trim() : q };
+  }
+  if (/(changed|after).*(return|twist)/.test(q) || /what changed after/.test(q)) {
+    return { type: "query", query: "changes" };
+  }
+  if (/\b(biggest|top)\b/.test(q)) return { type: "query", query: "top_n", n: 3 };
+  if (/\b(fix|send|correct)\b/.test(q)) {
+    let target = "";
+    const m = q.match(/(?:fix|send|correct)\s+(?:the\s+)?(.+)/i);
+    if (m) target = m[1].replace(/\s+towels?$/, "").replace(/\s+letter$/, "").trim();
+    let action = "send_letter";
+    if (/correct/.test(q) || /towel/.test(q)) action = "send_correction";
+    if (/refund/.test(q)) action = "request_refund";
+    if (/dismiss/.test(q)) action = "dismiss";
+    return { type: "suggest_action", action, target };
+  }
+  return { type: "unsupported" };
+}
+
+export function formatAskBucketAnswer(flags, bucket) {
+  const list = flags.filter((f) => f.bucket === bucket && ["open", "sent", "disputed"].includes(f.status || "open"));
+  const byParty = new Map();
+  for (const f of list) {
+    if (!byParty.has(f.party)) byParty.set(f.party, []);
+    byParty.get(f.party).push(f);
+  }
+  const lines = [...byParty.entries()].map(([party, fs]) => {
+    const cents = fs.reduce((a, f) => a + f.amount_cents, 0);
+    const ids = fs.flatMap((f) => f.ids || []).filter((id) => String(id).startsWith("INV-"));
+    return `${party} ${fmt(cents)}${ids.length ? ` (${ids.join(", ")})` : ""}`;
+  });
+  const total = list.reduce((a, f) => a + f.amount_cents, 0);
+  return {
+    answer: lines.length
+      ? `${lines.join("; ")}; total ${fmt(total)}`
+      : `No open ${bucket} flags.`,
+    ids: list.flatMap((f) => f.ids || []),
+    amount_cents: total,
+  };
+}

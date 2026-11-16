@@ -17,6 +17,8 @@ import SettlementBar from "@/components/SettlementBar.jsx";
 import NeedsReview from "@/components/NeedsReview.jsx";
 import LetterDrawer from "@/components/LetterDrawer.jsx";
 import RefundDrawer from "@/components/RefundDrawer.jsx";
+import TwistCard from "@/components/TwistCard.jsx";
+import AskSeams from "@/components/AskSeams.jsx";
 
 const LIVE_STATUSES = new Set(["open", "sent", "disputed"]);
 
@@ -40,14 +42,16 @@ function partyMatchesFilter(party, filterKey) {
 export default function Home({ role = "admin" }) {
   const [flags, reloadFlags] = useEntity("Flag");
   const [ruled] = useEntity("RuledOut");
-  const [patterns] = useEntity("Pattern");
+  const [patterns, reloadPatterns] = useEntity("Pattern");
   const [settings] = useEntity("Setting");
   const [audits, reloadAudits] = useEntity("AuditEvent");
+  const [returns] = useEntity("Return");
   const [filterKey, setFilterKey] = useState(null);
   const [detailFlag, setDetailFlag] = useState(null);
   const [letterParty, setLetterParty] = useState(null);
   const [refundParty, setRefundParty] = useState(null);
   const [since, setSince] = useState(null);
+  const [twistBanner, setTwistBanner] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -116,11 +120,29 @@ export default function Home({ role = "admin" }) {
           ruledOut={ruled.length}
           overturned={overturned}
           since={since}
+          twistBanner={twistBanner}
         />
         <LineStatusBoard rows={boardRows} activeKey={filterKey} onSelect={setFilterKey} />
       </section>
 
       <section className="space-y-4 md:col-span-7">
+        {returns.length ? (
+          <TwistCard
+            role={role}
+            rowsImported={returns.length}
+            onDone={(data) => {
+              reloadFlags();
+              reloadAudits();
+              reloadPatterns();
+              const c = data?.checks?.counts;
+              if (c) {
+                setTwistBanner(
+                  `Twist applied: +${c.new || 0} new · ${c.cleared || 0} cleared · ${c.needs_review || 0} need review`,
+                );
+              }
+            }}
+          />
+        ) : null}
         <NeedsReview flags={flags} onOpenFlag={setDetailFlag} />
         {showReward ? (
           <RewardState claimedCents={sumBucket("recoverable")} returnedCents={sumBucket("credit_owed")} />
@@ -154,7 +176,23 @@ export default function Home({ role = "admin" }) {
             </div>
           </>
         )}
-        <PatternList patterns={patterns} />
+        <AskSeams
+          role={role}
+          onOpenId={(id) => setDetailFlag(flags.find((f) => (f.ids || []).includes(id)) || null)}
+        />
+        <PatternList
+          patterns={patterns}
+          onSuggestFix={async (p) => {
+            await base44.entities.SuggestedAction.create({
+              source: "pattern",
+              action_type: "pattern_fix",
+              params: { pattern_key: p.key, fix: p.fix },
+              label: `Log fix for ${p.title}?`,
+              amount_cents: p.amount_cents,
+              status: "proposed",
+            });
+          }}
+        />
         <RuledOutList ruled={ruled} onOpenId={(id) => setDetailFlag(flags.find((f) => (f.ids || []).includes(id)) || null)} />
       </section>
 
