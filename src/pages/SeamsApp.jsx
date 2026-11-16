@@ -17,14 +17,16 @@ import InteractionFeedback, { SeamsSkeleton } from "@/components/InteractionFeed
 import CommandPalette from "@/components/CommandPalette.jsx";
 import SeamsSheet from "@/components/SeamsSheet.jsx";
 import SeamsTheme from "@/components/SeamsTheme.jsx";
+import KitToday from "@/pages/KitToday.jsx";
+import KitData from "@/pages/KitData.jsx";
+import KitDecisions from "@/pages/KitDecisions.jsx";
 
 // Accounts and Activity show the previous Overview and Ledger pages until they are rebuilt.
+// Kit mode: the app loads findings.csv + evidence.csv (from kit/detect.py) and keeps Decisions.
 const NAV = [
   { id: "Today", label: "Today" },
-  { id: "Accounts", label: "Accounts" },
-  { id: "Activity", label: "Activity" },
-  { id: "Data", label: "Data" },
-  { id: "Settings", label: "Settings" },
+  { id: "Decisions", label: "Decisions" },
+  { id: "Data", label: "Load findings" },
 ];
 
 const USERS = {
@@ -261,7 +263,11 @@ function SeamsAppShell() {
 
   let page;
   if (tab === "Today") {
-    page = !flagState.loaded ? <SeamsSkeleton /> : flagState.n ? <Today role={role} notice={twistNotice} onDismissNotice={()=>setTwistNotice(null)} twistNewKeys={twistNewKeys} /> : <EmptyState role={role} />;
+    page = <KitToday role={role} onGoData={() => setTab("Data")} />;
+  } else if (tab === "Decisions") {
+    page = <KitDecisions />;
+  } else if (tab === "Data") {
+    page = <KitData role={role} />;
   } else if (tab === "Accounts") {
     page = <Accounts role={role} onOpenFlag={openFlag} />;
   } else if (tab === "Activity") {
@@ -343,7 +349,7 @@ function SeamsAppShell() {
                 <SearchIcon />
               </button>
               <button type="button" className="btn-forest" onClick={() => setUploadOpen(true)}>
-                Upload new data
+                Load findings
               </button>
               <AvatarMenu role={identity} onSwitchRole={switchRole} realUser={realUser} />
             </div>
@@ -354,7 +360,7 @@ function SeamsAppShell() {
           {page}
         </main>
         <InteractionFeedback />
-        {uploadOpen ? <SeamsSheet title="Upload new data" eyebrow="Data stays in your systems" wide onClose={()=>setUploadOpen(false)}><Data role={role} onApproved={onTwistApproved}/></SeamsSheet> : null}
+        {uploadOpen ? <SeamsSheet title="Load findings" eyebrow="findings.csv + evidence.csv · decisions kept" wide onClose={()=>setUploadOpen(false)}><KitData role={role} /></SeamsSheet> : null}
         {palette ? <CommandPalette key={paletteQuery + (paletteAsk ? ":ask" : "")} initialQuery={paletteQuery} autoAsk={paletteAsk} role={role} onClose={()=>{setPalette(false);setPaletteQuery("");setPaletteAsk(false);}} onNavigate={setTab} onUpload={()=>setUploadOpen(true)} /> : null}
       </div>
   );

@@ -1,0 +1,43 @@
+{
+  "name": "Evidence",
+  "type": "object",
+  "description": "One row of evidence.csv: a record that proves a finding",
+  "properties": {
+    "finding_id": {
+      "type": "string"
+    },
+    "file": {
+      "type": "string"
+    },
+    "record": {
+      "type": "string"
+    },
+    "shows": {
+      "type": "string"
+    },
+    "expected": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "finding_id"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

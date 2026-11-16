@@ -1159,6 +1159,28 @@ button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
 .finding-chart { margin-top: 12px; border: 1px solid var(--s-line); border-radius: 12px; background: #fff; padding: 10px 12px 8px; }
 .finding-chart__title { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--s-muted); margin-bottom: 4px; }
 .finding-chart__caption { margin-top: 4px; font-size: 12px; color: #44403c; }
+.cause-group { padding: 14px 16px; }
+.cause-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.cause-title { font-size: 14px; font-weight: 600; color: var(--s-ink); }
+.cause-meta { font-size: 12px; color: var(--s-muted); margin-top: 2px; }
+.cause-rows { margin-top: 8px; border-top: 1px solid var(--s-line); }
+.cause-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 10px; width: 100%; text-align: left; padding: 7px 4px; border-bottom: 1px solid #f3eee6; font-size: 12.5px; background: none; border-left: 0; border-right: 0; border-top: 0; cursor: pointer; }
+.cause-row:hover { background: #fbf8f3; }
+.cause-row[aria-pressed="true"] { background: #f6efe6; box-shadow: inset 3px 0 0 var(--s-owed); }
+.cause-row-ids { font-family: var(--s-font-mono); font-size: 11.5px; color: #44403c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cause-row-party { color: var(--s-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cause-row-amt { font-weight: 600; }
+.record-chip { border: 1px solid var(--s-line); background: #fff; border-radius: 8px; padding: 2px 8px; font-family: var(--s-font-mono); font-size: 11px; color: #44403c; cursor: pointer; }
+.record-chip:hover { border-color: var(--s-ink); }
+.evidence-list { display: grid; gap: 8px; list-style: none; padding: 0; }
+.evidence-row { border: 1px solid var(--s-line); border-radius: 10px; padding: 8px 10px; background: #fff; }
+.evidence-src { font-size: 11px; color: var(--s-muted); }
+.evidence-file { font-family: var(--s-font-mono); color: #44403c; }
+.evidence-shows { font-size: 13px; color: var(--s-ink); margin-top: 2px; }
+.evidence-expected { font-size: 12px; color: var(--s-owed); margin-top: 2px; font-weight: 500; }
+.fix-draft { width: 100%; border: 1px solid var(--s-line); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 12.5px; line-height: 1.5; color: var(--s-ink); background: #fff; }
+.ask-chip[aria-pressed="true"] { background: var(--s-ink); color: #fff; border-color: var(--s-ink); }
+.ask-chip { border-radius: 999px; border: 1px solid var(--s-line); background: #fff; padding: 3px 10px; font-size: 11.5px; color: #44403c; cursor: pointer; }
 `;
 
 export default function SeamsTheme() {

@@ -1,0 +1,78 @@
+{
+  "name": "Finding",
+  "type": "object",
+  "description": "One row of findings.csv (written by kit/detect.py)",
+  "properties": {
+    "finding_id": {
+      "type": "string"
+    },
+    "problem": {
+      "type": "string"
+    },
+    "delivery_id": {
+      "type": "string"
+    },
+    "invoice_no": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "po_no": {
+      "type": "string"
+    },
+    "bill_id": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "message_id": {
+      "type": "string"
+    },
+    "month": {
+      "type": "string"
+    },
+    "cause": {
+      "type": "string"
+    },
+    "party": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "explanation": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "finding_id",
+    "problem",
+    "amount"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

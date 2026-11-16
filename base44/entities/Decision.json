@@ -1,0 +1,55 @@
+{
+  "name": "Decision",
+  "type": "object",
+  "description": "Dana's decision on a finding; kept across reloads",
+  "properties": {
+    "finding_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "draft": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string"
+    },
+    "decided_by": {
+      "type": "string"
+    },
+    "decided_at": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "approved",
+        "dismissed"
+      ]
+    }
+  },
+  "required": [
+    "finding_id",
+    "status"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

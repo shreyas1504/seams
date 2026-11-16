@@ -1,0 +1,1012 @@
+finding_id,file,record,shows,expected
+NOTINV-D-260902-0107,delivery_log.csv,delivery D-260902-0107 (6 lines),"Delivered Sep 02: 53 cases, $2968.52 at correct prices",An invoice by Sep 08
+NOTINV-D-260902-0107,invoices.csv,all invoices,No invoice memo mentions D-260902-0107,One invoice for this delivery
+NOTINV-D-260903-0116,delivery_log.csv,delivery D-260903-0116 (6 lines),"Delivered Sep 03: 31 cases, $1388.75 at correct prices",An invoice by Sep 09
+NOTINV-D-260903-0116,invoices.csv,all invoices,No invoice memo mentions D-260903-0116,One invoice for this delivery
+NOTINV-D-260903-0123,delivery_log.csv,delivery D-260903-0123 (3 lines),"Delivered Sep 03: 7 cases, $359.39 at correct prices",An invoice by Sep 09
+NOTINV-D-260903-0123,invoices.csv,all invoices,No invoice memo mentions D-260903-0123,One invoice for this delivery
+NOTINV-D-260903-0158,delivery_log.csv,delivery D-260903-0158 (2 lines),"Delivered Sep 03: 3 cases, $125.51 at correct prices + $35.00 fee",An invoice by Sep 09
+NOTINV-D-260903-0158,invoices.csv,all invoices,No invoice memo mentions D-260903-0158,One invoice for this delivery
+NOTINV-D-260904-0184,delivery_log.csv,delivery D-260904-0184 (5 lines),"Delivered Sep 04: 50 cases, $2682.12 at correct prices",An invoice by Sep 10
+NOTINV-D-260904-0184,invoices.csv,all invoices,No invoice memo mentions D-260904-0184,One invoice for this delivery
+NOTINV-D-260908-0248,delivery_log.csv,delivery D-260908-0248 (8 lines),"Delivered Sep 08: 89 cases, $3854.95 at correct prices",An invoice by Sep 11
+NOTINV-D-260908-0248,invoices.csv,all invoices,No invoice memo mentions D-260908-0248,One invoice for this delivery
+NOTINV-D-260909-0265,delivery_log.csv,delivery D-260909-0265 (6 lines),"Delivered Sep 09: 25 cases, $1140.12 at correct prices",An invoice by Sep 14
+NOTINV-D-260909-0265,invoices.csv,all invoices,No invoice memo mentions D-260909-0265,One invoice for this delivery
+NOTINV-D-260909-0274,delivery_log.csv,delivery D-260909-0274 (7 lines),"Delivered Sep 09: 41 cases, $1828.50 at correct prices",An invoice by Sep 14
+NOTINV-D-260909-0274,invoices.csv,all invoices,No invoice memo mentions D-260909-0274,One invoice for this delivery
+NOTINV-D-260909-0284,delivery_log.csv,delivery D-260909-0284 (3 lines),"Delivered Sep 09: 23 cases, $1019.49 at correct prices",An invoice by Sep 14
+NOTINV-D-260909-0284,invoices.csv,all invoices,No invoice memo mentions D-260909-0284,One invoice for this delivery
+NOTINV-D-260909-0293,delivery_log.csv,delivery D-260909-0293 (4 lines),"Delivered Sep 09: 9 cases, $398.38 at correct prices",An invoice by Sep 14
+NOTINV-D-260909-0293,invoices.csv,all invoices,No invoice memo mentions D-260909-0293,One invoice for this delivery
+NOTINV-D-260910-0344,delivery_log.csv,delivery D-260910-0344 (4 lines),"Delivered Sep 10: 18 cases, $663.04 at correct prices",An invoice by Sep 15
+NOTINV-D-260910-0344,invoices.csv,all invoices,No invoice memo mentions D-260910-0344,One invoice for this delivery
+NOTINV-D-260910-0359,delivery_log.csv,delivery D-260910-0359 (7 lines),"Delivered Sep 10: 37 cases, $1551.33 at correct prices",An invoice by Sep 15
+NOTINV-D-260910-0359,invoices.csv,all invoices,No invoice memo mentions D-260910-0359,One invoice for this delivery
+NOTINV-D-260910-0362,delivery_log.csv,delivery D-260910-0362 (4 lines),"Delivered Sep 10: 5 cases, $335.10 at correct prices",An invoice by Sep 15
+NOTINV-D-260910-0362,invoices.csv,all invoices,No invoice memo mentions D-260910-0362,One invoice for this delivery
+NOTINV-D-260910-0364,delivery_log.csv,delivery D-260910-0364 (7 lines),"Delivered Sep 10: 28 cases, $1283.84 at correct prices",An invoice by Sep 15
+NOTINV-D-260910-0364,invoices.csv,all invoices,No invoice memo mentions D-260910-0364,One invoice for this delivery
+NOTINV-D-260911-0381,delivery_log.csv,delivery D-260911-0381 (2 lines),"Delivered Sep 11: 15 cases, $643.43 at correct prices",An invoice by Sep 16
+NOTINV-D-260911-0381,invoices.csv,all invoices,No invoice memo mentions D-260911-0381,One invoice for this delivery
+NOTINV-D-260915-0489,delivery_log.csv,delivery D-260915-0489 (6 lines),"Delivered Sep 15: 34 cases, $1384.13 at correct prices",An invoice by Sep 18
+NOTINV-D-260915-0489,invoices.csv,all invoices,No invoice memo mentions D-260915-0489,One invoice for this delivery
+NOTINV-D-260915-0502,delivery_log.csv,delivery D-260915-0502 (6 lines),"Delivered Sep 15: 50 cases, $2727.62 at correct prices",An invoice by Sep 18
+NOTINV-D-260915-0502,invoices.csv,all invoices,No invoice memo mentions D-260915-0502,One invoice for this delivery
+NOTINV-D-260916-0539,delivery_log.csv,delivery D-260916-0539 (2 lines),"Delivered Sep 16: 5 cases, $268.34 at correct prices + $35.00 fee",An invoice by Sep 21
+NOTINV-D-260916-0539,invoices.csv,all invoices,No invoice memo mentions D-260916-0539,One invoice for this delivery
+NOTINV-D-260916-0546,delivery_log.csv,delivery D-260916-0546 (5 lines),"Delivered Sep 16: 39 cases, $1631.88 at correct prices",An invoice by Sep 21
+NOTINV-D-260916-0546,invoices.csv,all invoices,No invoice memo mentions D-260916-0546,One invoice for this delivery
+NOTINV-D-260917-0562,delivery_log.csv,delivery D-260917-0562 (6 lines),"Delivered Sep 17: 28 cases, $1054.45 at correct prices",An invoice by Sep 22
+NOTINV-D-260917-0562,invoices.csv,all invoices,No invoice memo mentions D-260917-0562,One invoice for this delivery
+NOTINV-D-260917-0579,delivery_log.csv,delivery D-260917-0579 (3 lines),"Delivered Sep 17: 3 cases, $123.73 at correct prices + $35.00 fee",An invoice by Sep 22
+NOTINV-D-260917-0579,invoices.csv,all invoices,No invoice memo mentions D-260917-0579,One invoice for this delivery
+NOTINV-D-260918-0620,delivery_log.csv,delivery D-260918-0620 (3 lines),"Delivered Sep 18: 8 cases, $264.35 at correct prices + $35.00 fee",An invoice by Sep 23
+NOTINV-D-260918-0620,invoices.csv,all invoices,No invoice memo mentions D-260918-0620,One invoice for this delivery
+NOTINV-D-260918-0626,delivery_log.csv,delivery D-260918-0626 (9 lines),"Delivered Sep 18: 72 cases, $3817.97 at correct prices",An invoice by Sep 23
+NOTINV-D-260918-0626,invoices.csv,all invoices,No invoice memo mentions D-260918-0626,One invoice for this delivery
+NOTINV-D-260918-0634,delivery_log.csv,delivery D-260918-0634 (2 lines),"Delivered Sep 18: 8 cases, $300.27 at correct prices",An invoice by Sep 23
+NOTINV-D-260918-0634,invoices.csv,all invoices,No invoice memo mentions D-260918-0634,One invoice for this delivery
+NOTINV-D-260918-0654,delivery_log.csv,delivery D-260918-0654 (5 lines),"Delivered Sep 18: 14 cases, $949.94 at correct prices",An invoice by Sep 23
+NOTINV-D-260918-0654,invoices.csv,all invoices,No invoice memo mentions D-260918-0654,One invoice for this delivery
+NOTINV-D-260923-0754,delivery_log.csv,delivery D-260923-0754 (2 lines),"Delivered Sep 23: 10 cases, $658.60 at correct prices",An invoice by Sep 28
+NOTINV-D-260923-0754,invoices.csv,all invoices,No invoice memo mentions D-260923-0754,One invoice for this delivery
+NOTINV-D-260923-0767,delivery_log.csv,delivery D-260923-0767 (8 lines),"Delivered Sep 23: 44 cases, $2289.33 at correct prices",An invoice by Sep 28
+NOTINV-D-260923-0767,invoices.csv,all invoices,No invoice memo mentions D-260923-0767,One invoice for this delivery
+NOTINV-D-260923-0780,delivery_log.csv,delivery D-260923-0780 (2 lines),"Delivered Sep 23: 7 cases, $364.43 at correct prices",An invoice by Sep 28
+NOTINV-D-260923-0780,invoices.csv,all invoices,No invoice memo mentions D-260923-0780,One invoice for this delivery
+NOTINV-D-260923-0793,delivery_log.csv,delivery D-260923-0793 (4 lines),"Delivered Sep 23: 12 cases, $592.19 at correct prices",An invoice by Sep 28
+NOTINV-D-260923-0793,invoices.csv,all invoices,No invoice memo mentions D-260923-0793,One invoice for this delivery
+NOTINV-D-260924-0803,delivery_log.csv,delivery D-260924-0803 (10 lines),"Delivered Sep 24: 51 cases, $2881.85 at correct prices",An invoice by Sep 29
+NOTINV-D-260924-0803,invoices.csv,all invoices,No invoice memo mentions D-260924-0803,One invoice for this delivery
+NOTINV-D-260924-0844,delivery_log.csv,delivery D-260924-0844 (9 lines),"Delivered Sep 24: 54 cases, $2593.43 at correct prices",An invoice by Sep 29
+NOTINV-D-260924-0844,invoices.csv,all invoices,No invoice memo mentions D-260924-0844,One invoice for this delivery
+DUPINV-1048305,invoices.csv,invoice 1048125,First invoice for D-260901-0007,
+DUPINV-1048305,invoices.csv,invoice 1048305,Second invoice for D-260901-0007: $570.29,Only one invoice per delivery
+DUPINV-1048306,invoices.csv,invoice 1048185,First invoice for D-260902-0077,
+DUPINV-1048306,invoices.csv,invoice 1048306,Second invoice for D-260902-0077: $1881.77,Only one invoice per delivery
+DUPINV-1048417,invoices.csv,invoice 1048209,First invoice for D-260903-0149,
+DUPINV-1048417,invoices.csv,invoice 1048417,Second invoice for D-260903-0149: $1648.98,Only one invoice per delivery
+DUPINV-1048792,invoices.csv,invoice 1048711,First invoice for D-260918-0615,
+DUPINV-1048792,invoices.csv,invoice 1048792,Second invoice for D-260918-0615: $779.30,Only one invoice per delivery
+QTY-1048104-NL-10553,invoices.csv,"invoice 1048104, line 4",3 cases at $70.33,1 cases
+QTY-1048104-NL-10553,delivery_log.csv,"delivery D-260901-0010, NL-10553","ordered 3, shipped 1, delivered 1 (Out of stock)",
+TAX-1048113-NL-19419,invoices.csv,"invoice 1048113, line 2",line tax $0.00 on $41.47,$3.68
+TAX-1048113-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048113-NL-19419,customers.csv,Kettle & Crumb Bakeries - Midtown,tax exempt N until ,
+QTY-1048114-NL-11701,invoices.csv,"invoice 1048114, line 1",2 cases at $52.62,3 cases
+QTY-1048114-NL-11701,delivery_log.csv,"delivery D-260901-0040, NL-11701","ordered 3, shipped 3, delivered 3",
+TAX-1048115-NL-19419,invoices.csv,"invoice 1048115, line 4",line tax $0.00 on $80.38,$7.13
+TAX-1048115-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048115-NL-19419,customers.csv,Lotus Taqueria,tax exempt N until ,
+TAX-1048128-NL-19419,invoices.csv,"invoice 1048128, line 1",line tax $0.00 on $384.75,$34.15
+TAX-1048128-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048128-NL-19419,customers.csv,Rossi and Alvarez Media,tax exempt N until ,
+FEE-MISSING-1048132,invoices.csv,invoice 1048132,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048132,delivery_log.csv,delivery D-260901-0039,merchandise $174.84 at correct prices,under $300.00
+PRICE-1048133-NL-11659,invoices.csv,"invoice 1048133, line 1",rate $31.94 x 5 cases,$34.43 a case
+PRICE-1048133-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048133-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048133-NL-11659,delivery_log.csv,"delivery D-260901-0041, NL-11659",5 cases delivered Sep 01,
+PRICE-1048133-NL-10679,invoices.csv,"invoice 1048133, line 2",rate $93.83 x 11 cases,$101.12 a case
+PRICE-1048133-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048133-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048133-NL-10679,delivery_log.csv,"delivery D-260901-0041, NL-10679",11 cases delivered Sep 01,
+PRICE-1048133-NL-11771,invoices.csv,"invoice 1048133, line 3",rate $43.16 x 7 cases,$46.51 a case
+PRICE-1048133-NL-11771,products.csv,NL-11771,list 47.95 (previous) less tier C 3%,
+PRICE-1048133-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048133-NL-11771,delivery_log.csv,"delivery D-260901-0041, NL-11771",7 cases delivered Sep 01,
+PRICE-1048133-NL-11078,invoices.csv,"invoice 1048133, line 4",rate $37.80 x 9 cases,$40.74 a case
+PRICE-1048133-NL-11078,products.csv,NL-11078,list 42.00 (current) less tier C 3%,
+PRICE-1048133-NL-11078,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048133-NL-11078,delivery_log.csv,"delivery D-260901-0041, NL-11078",9 cases delivered Sep 01,
+QTY-1048137-NL-11099,invoices.csv,"invoice 1048137, line 10",7 cases at $49.15,0 cases
+QTY-1048137-NL-11099,delivery_log.csv,"delivery D-260901-0047, NL-11099","ordered 7, shipped 0, delivered 0 (Out of stock)",
+TAX-1048148-NL-19419,invoices.csv,"invoice 1048148, line 5",line tax $0.00 on $342.00,$30.35
+TAX-1048148-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048148-NL-19419,customers.csv,Pepper Plum Noodle Bar,tax exempt N until ,
+QTY-1048150-NL-10770,invoices.csv,"invoice 1048150, line 1",5 cases at $27.95,6 cases
+QTY-1048150-NL-10770,delivery_log.csv,"delivery D-260902-0083, NL-10770","ordered 6, shipped 6, delivered 6",
+QTY-1048160-NL-10931,invoices.csv,"invoice 1048160, line 2",6 cases at $46.80,5 cases
+QTY-1048160-NL-10931,delivery_log.csv,"delivery D-260901-0013, NL-10931","ordered 6, shipped 6, delivered 5 (Refused at door - damaged)",
+QTY-1048167-NL-10686,invoices.csv,"invoice 1048167, line 7",4 cases at $94.28,3 cases
+QTY-1048167-NL-10686,delivery_log.csv,"delivery D-260901-0030, NL-10686","ordered 4, shipped 4, delivered 3 (Refused at door - damaged)",
+TAX-1048181-NL-19419,invoices.csv,"invoice 1048181, line 1",line tax $0.00 on $42.75,$3.79
+TAX-1048181-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048181-NL-19419,customers.csv,Plum Grill,tax exempt N until ,
+TAX-1048187-NL-19419,invoices.csv,"invoice 1048187, line 3",line tax $0.00 on $76.96,$6.83
+TAX-1048187-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048187-NL-19419,customers.csv,Quince Olive Trattoria,tax exempt N until ,
+PRICE-1048188-NL-11715,invoices.csv,"invoice 1048188, line 1",rate $29.66 x 6 cases,$31.96 a case
+PRICE-1048188-NL-11715,products.csv,NL-11715,list 32.95 (previous) less tier C 3%,
+PRICE-1048188-NL-11715,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-11715,delivery_log.csv,"delivery D-260902-0093, NL-11715",6 cases delivered Sep 02,
+PRICE-1048188-NL-11078,invoices.csv,"invoice 1048188, line 2",rate $37.80 x 5 cases,$40.74 a case
+PRICE-1048188-NL-11078,products.csv,NL-11078,list 42.00 (current) less tier C 3%,
+PRICE-1048188-NL-11078,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-11078,delivery_log.csv,"delivery D-260902-0093, NL-11078",5 cases delivered Sep 02,
+PRICE-1048188-NL-10210,invoices.csv,"invoice 1048188, line 3",rate $58.95 x 15 cases,$63.54 a case
+PRICE-1048188-NL-10210,products.csv,NL-10210,list 65.50 (current) less tier C 3%,
+PRICE-1048188-NL-10210,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-10210,delivery_log.csv,"delivery D-260902-0093, NL-10210",15 cases delivered Sep 02,
+PRICE-1048188-NL-10679,invoices.csv,"invoice 1048188, line 4",rate $93.83 x 5 cases,$101.12 a case
+PRICE-1048188-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048188-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-10679,delivery_log.csv,"delivery D-260902-0093, NL-10679",5 cases delivered Sep 02,
+PRICE-1048188-NL-10917,invoices.csv,"invoice 1048188, line 5",rate $36.86 x 12 cases,$39.72 a case
+PRICE-1048188-NL-10917,products.csv,NL-10917,list 40.95 (current) less tier C 3%,
+PRICE-1048188-NL-10917,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-10917,delivery_log.csv,"delivery D-260902-0093, NL-10917",12 cases delivered Sep 02,
+PRICE-1048188-NL-11659,invoices.csv,"invoice 1048188, line 6",rate $31.94 x 8 cases,$34.43 a case
+PRICE-1048188-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048188-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-11659,delivery_log.csv,"delivery D-260902-0093, NL-11659",8 cases delivered Sep 02,
+PRICE-1048188-NL-11848,invoices.csv,"invoice 1048188, line 7",rate $39.15 x 1 cases,$42.20 a case
+PRICE-1048188-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1048188-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-11848,delivery_log.csv,"delivery D-260902-0093, NL-11848",1 cases delivered Sep 02,
+PRICE-1048188-NL-12114,invoices.csv,"invoice 1048188, line 8",rate $40.50 x 10 cases,$43.65 a case
+PRICE-1048188-NL-12114,products.csv,NL-12114,list 45.00 (current) less tier C 3%,
+PRICE-1048188-NL-12114,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048188-NL-12114,delivery_log.csv,"delivery D-260902-0093, NL-12114",10 cases delivered Sep 02,
+TAX-1048199-NL-19419,invoices.csv,"invoice 1048199, line 1",line tax $0.00 on $42.75,$3.79
+TAX-1048199-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048199-NL-19419,customers.csv,Laurel Kebab Trattoria,tax exempt N until ,
+TAX-1048219-NL-19419,invoices.csv,"invoice 1048219, line 3",line tax $0.00 on $115.44,$10.25
+TAX-1048219-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048219-NL-19419,customers.csv,Taco Catering,tax exempt N until ,
+TAX-1048221-NL-19419,invoices.csv,"invoice 1048221, line 2",line tax $0.00 on $241.14,$21.40
+TAX-1048221-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048221-NL-19419,customers.csv,Ortiz & Young Labs,tax exempt N until ,
+FEE-EXTRA-1048223,invoices.csv,invoice 1048223,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048223,delivery_log.csv,delivery D-260902-0097,order $551.52 is $300 or more,No fee
+TAX-1048224-NL-12051,invoices.csv,"invoice 1048224, line 1",line tax $13.93 on $156.98,$0
+TAX-1048224-NL-12051,products.csv,NL-12051,taxable Y,
+TAX-1048224-NL-12051,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048224-NL-11386,invoices.csv,"invoice 1048224, line 2",line tax $17.02 on $191.76,$0
+TAX-1048224-NL-11386,products.csv,NL-11386,taxable Y,
+TAX-1048224-NL-11386,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048224-NL-12807,invoices.csv,"invoice 1048224, line 3",line tax $7.32 on $82.52,$0
+TAX-1048224-NL-12807,products.csv,NL-12807,taxable Y,
+TAX-1048224-NL-12807,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048233-NL-19419,invoices.csv,"invoice 1048233, line 1",line tax $0.00 on $80.38,$7.13
+TAX-1048233-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048233-NL-19419,customers.csv,Dumpling Quince Trattoria,tax exempt N until ,
+FEE-MISSING-1048244,invoices.csv,invoice 1048244,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048244,delivery_log.csv,delivery D-260903-0147,merchandise $35.66 at correct prices,under $300.00
+TAX-1048250-NL-19419,invoices.csv,"invoice 1048250, line 3",line tax $0.00 on $248.82,$22.08
+TAX-1048250-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048250-NL-19419,customers.csv,Sparrow Coffee,tax exempt N until ,
+FEE-EXTRA-1048251,invoices.csv,invoice 1048251,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048251,delivery_log.csv,delivery D-260904-0170,order $3105.13 is $300 or more,No fee
+QTY-1048263-NL-11911,invoices.csv,"invoice 1048263, line 4",5 cases at $45.68,4 cases
+QTY-1048263-NL-11911,delivery_log.csv,"delivery D-260903-0126, NL-11911","ordered 5, shipped 4, delivered 4 (Out of stock)",
+FEE-DUP-1048273,invoices.csv,invoice 1048273,"2 DEL-FEE lines, $70.00",At most one $35.00 fee
+TAX-1048277-NL-19419,invoices.csv,"invoice 1048277, line 2",line tax $0.00 on $207.35,$18.40
+TAX-1048277-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048277-NL-19419,customers.csv,Maple Hotel,tax exempt N until ,
+FEE-MISSING-1048283,invoices.csv,invoice 1048283,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048283,delivery_log.csv,delivery D-260904-0190,merchandise $182.09 at correct prices,under $300.00
+TAX-1048284-NL-19419,invoices.csv,"invoice 1048284, line 6",line tax $0.00 on $384.75,$34.15
+TAX-1048284-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048284-NL-19419,customers.csv,Gyro Copper Espresso Bar,tax exempt N until ,
+QTY-1048286-NL-10203,invoices.csv,"invoice 1048286, line 5",2 cases at $65.79,3 cases
+QTY-1048286-NL-10203,delivery_log.csv,"delivery D-260904-0194, NL-10203","ordered 3, shipped 3, delivered 3",
+TAX-1048296-NL-19419,invoices.csv,"invoice 1048296, line 3",line tax $0.00 on $213.75,$18.97
+TAX-1048296-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048296-NL-19419,customers.csv,Laurel Kebab Trattoria,tax exempt N until ,
+TAX-1048299-NL-19419,invoices.csv,"invoice 1048299, line 4",line tax $0.00 on $213.75,$18.97
+TAX-1048299-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048299-NL-19419,customers.csv,Rossi and Alvarez Media,tax exempt N until ,
+TAX-1048303-NL-19419,invoices.csv,"invoice 1048303, line 4",line tax $0.00 on $207.35,$18.40
+TAX-1048303-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048303-NL-19419,customers.csv,Saffron Provisions,tax exempt N until ,
+QTY-1048319-NL-12723,invoices.csv,"invoice 1048319, line 3",2 cases at $31.53,3 cases
+QTY-1048319-NL-12723,delivery_log.csv,"delivery D-260908-0204, NL-12723","ordered 3, shipped 3, delivered 3",
+TAX-1048326-NL-19419,invoices.csv,"invoice 1048326, line 4",line tax $0.00 on $160.76,$14.27
+TAX-1048326-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048326-NL-19419,customers.csv,Dumpling Quince Trattoria,tax exempt N until ,
+PRICE-1048329-NL-12576,invoices.csv,"invoice 1048329, line 6",rate $71.77 x 2 cases,$64.37 a case
+PRICE-1048329-NL-12576,contract_prices.csv,NL-12576,contract CT-3169 64.37,
+PRICE-1048329-NL-12576,customers.csv,Biryani Hotel,tier C,
+PRICE-1048329-NL-12576,delivery_log.csv,"delivery D-260908-0223, NL-12576",2 cases delivered Sep 08,
+FEE-MISSING-1048338,invoices.csv,invoice 1048338,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048338,delivery_log.csv,delivery D-260908-0236,merchandise $242.92 at correct prices,under $300.00
+TAX-1048340-NL-19419,invoices.csv,"invoice 1048340, line 2",line tax $0.00 on $160.76,$14.27
+TAX-1048340-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048340-NL-19419,customers.csv,Cedar Lantern Coffee,tax exempt N until ,
+PRICE-1048342-NL-10931,invoices.csv,"invoice 1048342, line 1",rate $43.43 x 4 cases,$46.80 a case
+PRICE-1048342-NL-10931,products.csv,NL-10931,list 48.25 (current) less tier C 3%,
+PRICE-1048342-NL-10931,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048342-NL-10931,delivery_log.csv,"delivery D-260908-0241, NL-10931",4 cases delivered Sep 08,
+PRICE-1048342-NL-12114,invoices.csv,"invoice 1048342, line 2",rate $40.50 x 7 cases,$43.65 a case
+PRICE-1048342-NL-12114,products.csv,NL-12114,list 45.00 (current) less tier C 3%,
+PRICE-1048342-NL-12114,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048342-NL-12114,delivery_log.csv,"delivery D-260908-0241, NL-12114",7 cases delivered Sep 08,
+PRICE-1048342-NL-11659,invoices.csv,"invoice 1048342, line 3",rate $31.94 x 2 cases,$34.43 a case
+PRICE-1048342-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048342-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048342-NL-11659,delivery_log.csv,"delivery D-260908-0241, NL-11659",2 cases delivered Sep 08,
+PRICE-1048342-NL-12373,invoices.csv,"invoice 1048342, line 4",rate $69.75 x 6 cases,$75.18 a case
+PRICE-1048342-NL-12373,products.csv,NL-12373,list 77.50 (current) less tier C 3%,
+PRICE-1048342-NL-12373,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048342-NL-12373,delivery_log.csv,"delivery D-260908-0241, NL-12373",6 cases delivered Sep 08,
+PRICE-1048342-NL-10210,invoices.csv,"invoice 1048342, line 5",rate $58.95 x 12 cases,$63.54 a case
+PRICE-1048342-NL-10210,products.csv,NL-10210,list 65.50 (current) less tier C 3%,
+PRICE-1048342-NL-10210,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048342-NL-10210,delivery_log.csv,"delivery D-260908-0241, NL-10210",12 cases delivered Sep 08,
+PRICE-1048342-NL-10679,invoices.csv,"invoice 1048342, line 6",rate $93.83 x 1 cases,$101.12 a case
+PRICE-1048342-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048342-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048342-NL-10679,delivery_log.csv,"delivery D-260908-0241, NL-10679",1 cases delivered Sep 08,
+TAX-1048346-NL-19419,invoices.csv,"invoice 1048346, line 3",line tax $0.00 on $128.25,$11.38
+TAX-1048346-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048346-NL-19419,customers.csv,Gyro Copper Espresso Bar,tax exempt N until ,
+FEE-EXTRA-1048349,invoices.csv,invoice 1048349,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048349,customers.csv,Lupa Hospitality - LIC,free-delivery period,No fee
+QTY-1048360-NL-10084,invoices.csv,"invoice 1048360, line 6",1 cases at $43.46,0 cases
+QTY-1048360-NL-10084,delivery_log.csv,"delivery D-260909-0296, NL-10084","ordered 1, shipped 0, delivered 0 (Out of stock)",
+TAX-1048361-NL-19419,invoices.csv,"invoice 1048361, line 1",line tax $0.00 on $120.57,$10.70
+TAX-1048361-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048361-NL-19419,customers.csv,Plum Bistro,tax exempt N until ,
+TAX-1048366-NL-19419,invoices.csv,"invoice 1048366, line 4",line tax $0.00 on $683.23,$60.64
+TAX-1048366-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048366-NL-19419,customers.csv,Citrus Bistro,tax exempt N until ,
+TAX-1048384-NL-19419,invoices.csv,"invoice 1048384, line 4",line tax $0.00 on $38.48,$3.42
+TAX-1048384-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048384-NL-19419,customers.csv,Taco Catering,tax exempt N until ,
+TAX-1048387-NL-19419,invoices.csv,"invoice 1048387, line 1",line tax $0.00 on $153.92,$13.66
+TAX-1048387-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048387-NL-19419,customers.csv,Quince Olive Trattoria,tax exempt N until ,
+FEE-MISSING-1048389,invoices.csv,invoice 1048389,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048389,delivery_log.csv,delivery D-260909-0292,merchandise $200.78 at correct prices,under $300.00
+TAX-1048391-NL-19419,invoices.csv,"invoice 1048391, line 4",line tax $0.00 on $38.48,$3.42
+TAX-1048391-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048391-NL-19419,customers.csv,Diaz and Castillo Capital,tax exempt N until ,
+PRICE-1048392-NL-10917,invoices.csv,"invoice 1048392, line 1",rate $36.86 x 4 cases,$39.72 a case
+PRICE-1048392-NL-10917,products.csv,NL-10917,list 40.95 (current) less tier C 3%,
+PRICE-1048392-NL-10917,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-10917,delivery_log.csv,"delivery D-260909-0295, NL-10917",4 cases delivered Sep 09,
+PRICE-1048392-NL-10210,invoices.csv,"invoice 1048392, line 2",rate $58.95 x 4 cases,$63.54 a case
+PRICE-1048392-NL-10210,products.csv,NL-10210,list 65.50 (current) less tier C 3%,
+PRICE-1048392-NL-10210,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-10210,delivery_log.csv,"delivery D-260909-0295, NL-10210",4 cases delivered Sep 09,
+PRICE-1048392-NL-11715,invoices.csv,"invoice 1048392, line 3",rate $29.66 x 4 cases,$31.96 a case
+PRICE-1048392-NL-11715,products.csv,NL-11715,list 32.95 (previous) less tier C 3%,
+PRICE-1048392-NL-11715,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-11715,delivery_log.csv,"delivery D-260909-0295, NL-11715",4 cases delivered Sep 09,
+PRICE-1048392-NL-12163,invoices.csv,"invoice 1048392, line 4",rate $18.90 x 1 cases,$20.37 a case
+PRICE-1048392-NL-12163,products.csv,NL-12163,list 21.00 (current) less tier C 3%,
+PRICE-1048392-NL-12163,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-12163,delivery_log.csv,"delivery D-260909-0295, NL-12163",1 cases delivered Sep 09,
+PRICE-1048392-NL-11078,invoices.csv,"invoice 1048392, line 5",rate $37.80 x 4 cases,$40.74 a case
+PRICE-1048392-NL-11078,products.csv,NL-11078,list 42.00 (current) less tier C 3%,
+PRICE-1048392-NL-11078,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-11078,delivery_log.csv,"delivery D-260909-0295, NL-11078",4 cases delivered Sep 09,
+PRICE-1048392-NL-10931,invoices.csv,"invoice 1048392, line 6",rate $43.43 x 10 cases,$46.80 a case
+PRICE-1048392-NL-10931,products.csv,NL-10931,list 48.25 (current) less tier C 3%,
+PRICE-1048392-NL-10931,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-10931,delivery_log.csv,"delivery D-260909-0295, NL-10931",10 cases delivered Sep 09,
+PRICE-1048392-NL-10679,invoices.csv,"invoice 1048392, line 7",rate $93.83 x 12 cases,$101.12 a case
+PRICE-1048392-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048392-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-10679,delivery_log.csv,"delivery D-260909-0295, NL-10679",12 cases delivered Sep 09,
+PRICE-1048392-NL-11771,invoices.csv,"invoice 1048392, line 8",rate $43.16 x 4 cases,$46.51 a case
+PRICE-1048392-NL-11771,products.csv,NL-11771,list 47.95 (previous) less tier C 3%,
+PRICE-1048392-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-11771,delivery_log.csv,"delivery D-260909-0295, NL-11771",4 cases delivered Sep 09,
+PRICE-1048392-NL-12114,invoices.csv,"invoice 1048392, line 9",rate $40.50 x 8 cases,$43.65 a case
+PRICE-1048392-NL-12114,products.csv,NL-12114,list 45.00 (current) less tier C 3%,
+PRICE-1048392-NL-12114,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-12114,delivery_log.csv,"delivery D-260909-0295, NL-12114",8 cases delivered Sep 09,
+PRICE-1048392-NL-11848,invoices.csv,"invoice 1048392, line 10",rate $39.15 x 13 cases,$42.20 a case
+PRICE-1048392-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1048392-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-11848,delivery_log.csv,"delivery D-260909-0295, NL-11848",13 cases delivered Sep 09,
+PRICE-1048392-NL-10189,invoices.csv,"invoice 1048392, line 11",rate $57.14 x 4 cases,$61.59 a case
+PRICE-1048392-NL-10189,products.csv,NL-10189,list 63.49 (current) less tier C 3%,
+PRICE-1048392-NL-10189,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-10189,delivery_log.csv,"delivery D-260909-0295, NL-10189",4 cases delivered Sep 09,
+PRICE-1048392-NL-11659,invoices.csv,"invoice 1048392, line 12",rate $31.94 x 1 cases,$34.43 a case
+PRICE-1048392-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048392-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048392-NL-11659,delivery_log.csv,"delivery D-260909-0295, NL-11659",1 cases delivered Sep 09,
+FEE-MISSING-1048405,invoices.csv,invoice 1048405,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048405,delivery_log.csv,delivery D-260910-0342,merchandise $218.35 at correct prices,under $300.00
+TAX-1048409-NL-19419,invoices.csv,"invoice 1048409, line 3",line tax $0.00 on $580.58,$51.53
+TAX-1048409-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048409-NL-19419,customers.csv,Saffron Provisions,tax exempt N until ,
+FEE-MISSING-1048419,invoices.csv,invoice 1048419,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048419,delivery_log.csv,delivery D-260908-0237,merchandise $113.74 at correct prices,under $300.00
+TAX-1048427-NL-11848,invoices.csv,"invoice 1048427, line 1",line tax $7.26 on $81.78,$0
+TAX-1048427-NL-11848,products.csv,NL-11848,taxable Y,
+TAX-1048427-NL-11848,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048427-NL-11540,invoices.csv,"invoice 1048427, line 2",line tax $34.20 on $385.40,$0
+TAX-1048427-NL-11540,products.csv,NL-11540,taxable Y,
+TAX-1048427-NL-11540,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048427-NL-19419,invoices.csv,"invoice 1048427, line 3",line tax $28.53 on $321.52,$0
+TAX-1048427-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048427-NL-19419,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048427-NL-12807,invoices.csv,"invoice 1048427, line 4",line tax $9.15 on $103.15,$0
+TAX-1048427-NL-12807,products.csv,NL-12807,taxable Y,
+TAX-1048427-NL-12807,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048427-NL-12436,invoices.csv,"invoice 1048427, line 5",line tax $26.56 on $299.32,$0
+TAX-1048427-NL-12436,products.csv,NL-12436,taxable Y,
+TAX-1048427-NL-12436,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048427-NL-11596,invoices.csv,"invoice 1048427, line 6",line tax $27.11 on $305.45,$0
+TAX-1048427-NL-11596,products.csv,NL-11596,taxable Y,
+TAX-1048427-NL-11596,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+QTY-1048444-NL-10770,invoices.csv,"invoice 1048444, line 3",4 cases at $26.27,3 cases
+QTY-1048444-NL-10770,delivery_log.csv,"delivery D-260910-0339, NL-10770","ordered 4, shipped 4, delivered 3 (Refused at door - damaged)",
+FEE-EXTRA-1048452,invoices.csv,invoice 1048452,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048452,customers.csv,Lupa Hospitality - UES,free-delivery period,No fee
+WRONGCUST-1048458,invoices.csv,invoice 1048458,Customer Noodle - DUMBO,Noodle - Fordham
+WRONGCUST-1048458,delivery_log.csv,delivery D-260911-0394,Delivered to Noodle Union - Fordham (C-1021),
+QTY-1048468-NL-12464,invoices.csv,"invoice 1048468, line 1",4 cases at $46.79,2 cases
+QTY-1048468-NL-12464,delivery_log.csv,"delivery D-260910-0325, NL-12464","ordered 4, shipped 2, delivered 2 (Short picked)",
+TAX-1048475-NL-19419,invoices.csv,"invoice 1048475, line 2",line tax $0.00 on $200.95,$17.83
+TAX-1048475-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048475-NL-19419,customers.csv,Pizza Sage House,tax exempt N until ,
+QTY-1048478-NL-12611,invoices.csv,"invoice 1048478, line 4",9 cases at $58.44,6 cases
+QTY-1048478-NL-12611,delivery_log.csv,"delivery D-260911-0373, NL-12611","ordered 9, shipped 6, delivered 6 (Short picked)",
+FEE-EXTRA-1048480,invoices.csv,invoice 1048480,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048480,delivery_log.csv,delivery D-260911-0375,order $2533.67 is $300 or more,No fee
+QTY-1048483-NL-11239,invoices.csv,"invoice 1048483, line 2",5 cases at $42.67,2 cases
+QTY-1048483-NL-11239,delivery_log.csv,"delivery D-260911-0378, NL-11239","ordered 5, shipped 2, delivered 2 (Out of stock)",
+QTY-1048484-NL-11631,invoices.csv,"invoice 1048484, line 2",5 cases at $56.17,7 cases
+QTY-1048484-NL-11631,delivery_log.csv,"delivery D-260911-0379, NL-11631","ordered 7, shipped 7, delivered 7",
+FEE-MISSING-1048495,invoices.csv,invoice 1048495,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048495,delivery_log.csv,delivery D-260911-0395,merchandise $106.18 at correct prices,under $300.00
+TAX-1048501-NL-19419,invoices.csv,"invoice 1048501, line 2",line tax $0.00 on $213.75,$18.97
+TAX-1048501-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048501-NL-19419,customers.csv,Copper Honey Bistro,tax exempt N until ,
+TAX-1048502-NL-19419,invoices.csv,"invoice 1048502, line 2",line tax $0.00 on $124.41,$11.04
+TAX-1048502-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048502-NL-19419,customers.csv,Orchard Coffee,tax exempt N until ,
+TAX-1048506-NL-19419,invoices.csv,"invoice 1048506, line 3",line tax $0.00 on $281.33,$24.97
+TAX-1048506-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048506-NL-19419,customers.csv,Taco Maple Canteen,tax exempt N until ,
+TAX-1048508-NL-19419,invoices.csv,"invoice 1048508, line 5",line tax $0.00 on $40.19,$3.57
+TAX-1048508-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048508-NL-19419,customers.csv,Harbor & Vine Group - Downtown JC,tax exempt N until ,
+PRICE-1048515-NL-10868,invoices.csv,"invoice 1048515, line 4",rate $63.04 x 6 cases,$66.82 a case
+PRICE-1048515-NL-10868,products.csv,NL-10868,list 68.89 (current) less tier C 3%,
+PRICE-1048515-NL-10868,customers.csv,Citrus Taqueria,tier C,
+PRICE-1048515-NL-10868,delivery_log.csv,"delivery D-260914-0445, NL-10868",6 cases delivered Sep 14,
+QTY-1048518-NL-12632,invoices.csv,"invoice 1048518, line 4",5 cases at $20.03,7 cases
+QTY-1048518-NL-12632,delivery_log.csv,"delivery D-260911-0366, NL-12632","ordered 7, shipped 7, delivered 7",
+TAX-1048521-NL-19419,invoices.csv,"invoice 1048521, line 4",line tax $0.00 on $414.70,$36.80
+TAX-1048521-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048521-NL-19419,customers.csv,Sparrow Coffee,tax exempt N until ,
+TAX-1048522-NL-19419,invoices.csv,"invoice 1048522, line 2",line tax $0.00 on $171.00,$15.18
+TAX-1048522-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048522-NL-19419,customers.csv,Pizza Kitchen,tax exempt N until ,
+TAX-1048524-NL-19419,invoices.csv,"invoice 1048524, line 4",line tax $0.00 on $470.25,$41.73
+TAX-1048524-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048524-NL-19419,customers.csv,Pepper Plum Noodle Bar,tax exempt N until ,
+PRICE-1048529-NL-11715,invoices.csv,"invoice 1048529, line 1",rate $31.14 x 10 cases,$33.56 a case
+PRICE-1048529-NL-11715,products.csv,NL-11715,list 34.60 (current) less tier C 3%,
+PRICE-1048529-NL-11715,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048529-NL-11715,delivery_log.csv,"delivery D-260914-0435, NL-11715",10 cases delivered Sep 14,
+PRICE-1048529-NL-10210,invoices.csv,"invoice 1048529, line 2",rate $58.95 x 5 cases,$63.54 a case
+PRICE-1048529-NL-10210,products.csv,NL-10210,list 65.50 (current) less tier C 3%,
+PRICE-1048529-NL-10210,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048529-NL-10210,delivery_log.csv,"delivery D-260914-0435, NL-10210",5 cases delivered Sep 14,
+PRICE-1048529-NL-11848,invoices.csv,"invoice 1048529, line 3",rate $39.15 x 4 cases,$42.20 a case
+PRICE-1048529-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1048529-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048529-NL-11848,delivery_log.csv,"delivery D-260914-0435, NL-11848",4 cases delivered Sep 14,
+PRICE-1048529-NL-10917,invoices.csv,"invoice 1048529, line 4",rate $36.86 x 1 cases,$39.72 a case
+PRICE-1048529-NL-10917,products.csv,NL-10917,list 40.95 (current) less tier C 3%,
+PRICE-1048529-NL-10917,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048529-NL-10917,delivery_log.csv,"delivery D-260914-0435, NL-10917",1 cases delivered Sep 14,
+QTY-1048538-NL-12100,invoices.csv,"invoice 1048538, line 2",7 cases at $33.46,9 cases
+QTY-1048538-NL-12100,delivery_log.csv,"delivery D-260915-0464, NL-12100","ordered 9, shipped 9, delivered 9",
+FEE-MISSING-1048539,invoices.csv,invoice 1048539,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048539,delivery_log.csv,delivery D-260915-0465,merchandise $133.09 at correct prices,under $300.00
+QTY-1048541-NL-12037,invoices.csv,"invoice 1048541, line 1",5 cases at $73.99,6 cases
+QTY-1048541-NL-12037,delivery_log.csv,"delivery D-260915-0467, NL-12037","ordered 6, shipped 6, delivered 6",
+TAX-1048542-NL-19419,invoices.csv,"invoice 1048542, line 3",line tax $0.00 on $331.76,$29.44
+TAX-1048542-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048542-NL-19419,customers.csv,Maple Hotel,tax exempt N until ,
+PRICE-1048550-NL-10756,invoices.csv,"invoice 1048550, line 3",rate $31.01 x 8 cases,$32.87 a case
+PRICE-1048550-NL-10756,products.csv,NL-10756,list 34.97 (current) less tier B 6%,
+PRICE-1048550-NL-10756,customers.csv,Ramen Roasters,tier B,
+PRICE-1048550-NL-10756,delivery_log.csv,"delivery D-260915-0492, NL-10756",8 cases delivered Sep 15,
+TAX-1048560-NL-19419,invoices.csv,"invoice 1048560, line 1",line tax $0.00 on $85.50,$7.59
+TAX-1048560-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048560-NL-19419,customers.csv,Cedar Bakehouse,tax exempt N until ,
+QTY-1048565-NL-10266,invoices.csv,"invoice 1048565, line 4",5 cases at $73.80,0 cases
+QTY-1048565-NL-10266,delivery_log.csv,"delivery D-260915-0448, NL-10266","ordered 5, shipped 0, delivered 0 (Out of stock)",
+PRICE-1048567-NL-10756,invoices.csv,"invoice 1048567, line 3",rate $32.99 x 3 cases,$34.97 a case
+PRICE-1048567-NL-10756,products.csv,NL-10756,list 34.97 (current) less tier D 0%,
+PRICE-1048567-NL-10756,customers.csv,Saffron Grill,tier D,
+PRICE-1048567-NL-10756,delivery_log.csv,"delivery D-260915-0450, NL-10756",3 cases delivered Sep 15,
+PRICE-1048567-NL-11666,invoices.csv,"invoice 1048567, line 10",rate $47.25 x 9 cases,$51.03 a case
+PRICE-1048567-NL-11666,products.csv,NL-11666,list 51.03 (current) less tier D 0%,
+PRICE-1048567-NL-11666,customers.csv,Saffron Grill,tier D,
+PRICE-1048567-NL-11666,delivery_log.csv,"delivery D-260915-0450, NL-11666",9 cases delivered Sep 15,
+TAX-1048569-NL-19419,invoices.csv,"invoice 1048569, line 1",line tax $0.00 on $124.41,$11.04
+TAX-1048569-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048569-NL-19419,customers.csv,Orchard Coffee,tax exempt N until ,
+TAX-1048571-NL-19419,invoices.csv,"invoice 1048571, line 4",line tax $0.00 on $38.48,$3.42
+TAX-1048571-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048571-NL-19419,customers.csv,Pho Bistro,tax exempt N until ,
+PRICE-1048573-NL-10658,invoices.csv,"invoice 1048573, line 5",rate $77.00 x 2 cases,$82.39 a case
+PRICE-1048573-NL-10658,products.csv,NL-10658,list 82.39 (current) less tier D 0%,
+PRICE-1048573-NL-10658,customers.csv,Laurel Kebab Trattoria,tier D,
+PRICE-1048573-NL-10658,delivery_log.csv,"delivery D-260915-0462, NL-10658",2 cases delivered Sep 15,
+PRICE-1048576-NL-11120,invoices.csv,"invoice 1048576, line 1",rate $43.71 x 3 cases,$45.90 a case
+PRICE-1048576-NL-11120,products.csv,NL-11120,list 48.83 (current) less tier B 6%,
+PRICE-1048576-NL-11120,customers.csv,Citrus Bistro,tier B,
+PRICE-1048576-NL-11120,delivery_log.csv,"delivery D-260915-0474, NL-11120",3 cases delivered Sep 15,
+TAX-1048582-NL-19419,invoices.csv,"invoice 1048582, line 2",line tax $0.00 on $40.19,$3.57
+TAX-1048582-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048582-NL-19419,customers.csv,Cedar Lantern Coffee,tax exempt N until ,
+PRICE-1048584-NL-11477,invoices.csv,"invoice 1048584, line 1",rate $57.11 x 6 cases,$61.55 a case
+PRICE-1048584-NL-11477,products.csv,NL-11477,list 63.45 (current) less tier C 3%,
+PRICE-1048584-NL-11477,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048584-NL-11477,delivery_log.csv,"delivery D-260915-0487, NL-11477",6 cases delivered Sep 15,
+PRICE-1048584-NL-10210,invoices.csv,"invoice 1048584, line 2",rate $58.95 x 6 cases,$63.54 a case
+PRICE-1048584-NL-10210,products.csv,NL-10210,list 65.50 (current) less tier C 3%,
+PRICE-1048584-NL-10210,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048584-NL-10210,delivery_log.csv,"delivery D-260915-0487, NL-10210",6 cases delivered Sep 15,
+PRICE-1048584-NL-11848,invoices.csv,"invoice 1048584, line 3",rate $39.15 x 4 cases,$42.20 a case
+PRICE-1048584-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1048584-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048584-NL-11848,delivery_log.csv,"delivery D-260915-0487, NL-11848",4 cases delivered Sep 15,
+PRICE-1048584-NL-10679,invoices.csv,"invoice 1048584, line 4",rate $93.83 x 4 cases,$101.12 a case
+PRICE-1048584-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048584-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048584-NL-10679,delivery_log.csv,"delivery D-260915-0487, NL-10679",4 cases delivered Sep 15,
+PRICE-1048584-NL-11715,invoices.csv,"invoice 1048584, line 5",rate $31.14 x 2 cases,$33.56 a case
+PRICE-1048584-NL-11715,products.csv,NL-11715,list 34.60 (current) less tier C 3%,
+PRICE-1048584-NL-11715,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048584-NL-11715,delivery_log.csv,"delivery D-260915-0487, NL-11715",2 cases delivered Sep 15,
+PRICE-1048584-NL-10168,invoices.csv,"invoice 1048584, line 6",rate $58.50 x 10 cases,$63.05 a case
+PRICE-1048584-NL-10168,products.csv,NL-10168,list 65.00 (current) less tier C 3%,
+PRICE-1048584-NL-10168,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048584-NL-10168,delivery_log.csv,"delivery D-260915-0487, NL-10168",10 cases delivered Sep 15,
+PRICE-1048584-NL-11771,invoices.csv,"invoice 1048584, line 7",rate $45.75 x 7 cases,$49.31 a case
+PRICE-1048584-NL-11771,products.csv,NL-11771,list 50.83 (current) less tier C 3%,
+PRICE-1048584-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048584-NL-11771,delivery_log.csv,"delivery D-260915-0487, NL-11771",7 cases delivered Sep 15,
+TAX-1048594-NL-19419,invoices.csv,"invoice 1048594, line 1",line tax $0.00 on $128.25,$11.38
+TAX-1048594-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048594-NL-19419,customers.csv,Cedar Bakehouse,tax exempt N until ,
+TAX-1048596-NL-19419,invoices.csv,"invoice 1048596, line 7",line tax $0.00 on $321.52,$28.53
+TAX-1048596-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048596-NL-19419,customers.csv,Rye Café,tax exempt N until ,
+PRICE-1048600-NL-12058,invoices.csv,"invoice 1048600, line 1",rate $71.54 x 3 cases,$64.16 a case
+PRICE-1048600-NL-12058,contract_prices.csv,NL-12058,contract CT-3168 64.16,
+PRICE-1048600-NL-12058,customers.csv,Biryani Hotel,tier C,
+PRICE-1048600-NL-12058,delivery_log.csv,"delivery D-260916-0527, NL-12058",3 cases delivered Sep 16,
+PRICE-1048610-NL-11120,invoices.csv,"invoice 1048610, line 1",rate $46.50 x 1 cases,$48.83 a case
+PRICE-1048610-NL-11120,products.csv,NL-11120,list 48.83 (current) less tier D 0%,
+PRICE-1048610-NL-11120,customers.csv,Pizza Kitchen,tier D,
+PRICE-1048610-NL-11120,delivery_log.csv,"delivery D-260915-0455, NL-11120",1 cases delivered Sep 15,
+PRICE-1048613-NL-11120,invoices.csv,"invoice 1048613, line 7",rate $45.11 x 5 cases,$47.37 a case
+PRICE-1048613-NL-11120,products.csv,NL-11120,list 48.83 (current) less tier C 3%,
+PRICE-1048613-NL-11120,customers.csv,Noodle Union - DUMBO,tier C,
+PRICE-1048613-NL-11120,delivery_log.csv,"delivery D-260915-0463, NL-11120",5 cases delivered Sep 15,
+PRICE-1048614-NL-12576,invoices.csv,"invoice 1048614, line 1",rate $71.77 x 1 cases,$64.37 a case
+PRICE-1048614-NL-12576,contract_prices.csv,NL-12576,contract CT-3169 64.37,
+PRICE-1048614-NL-12576,customers.csv,Biryani Hotel,tier C,
+PRICE-1048614-NL-12576,delivery_log.csv,"delivery D-260915-0470, NL-12576",1 cases delivered Sep 15,
+PRICE-1048614-NL-12688,invoices.csv,"invoice 1048614, line 3",rate $31.53 x 6 cases,$27.30 a case
+PRICE-1048614-NL-12688,contract_prices.csv,NL-12688,contract CT-3167 27.30,
+PRICE-1048614-NL-12688,customers.csv,Biryani Hotel,tier C,
+PRICE-1048614-NL-12688,delivery_log.csv,"delivery D-260915-0470, NL-12688",6 cases delivered Sep 15,
+WRONGCUST-1048615,invoices.csv,invoice 1048615,Customer Noodle - DUMBO,Noodle - Fordham
+WRONGCUST-1048615,delivery_log.csv,delivery D-260915-0483,Delivered to Noodle Union - Fordham (C-1021),
+QTY-1048626-NL-11379,invoices.csv,"invoice 1048626, line 1",4 cases at $69.84,5 cases
+QTY-1048626-NL-11379,delivery_log.csv,"delivery D-260916-0524, NL-11379","ordered 5, shipped 5, delivered 5",
+TAX-1048627-NL-19419,invoices.csv,"invoice 1048627, line 1",line tax $0.00 on $128.25,$11.38
+TAX-1048627-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048627-NL-19419,customers.csv,Thyme Roasters,tax exempt N until ,
+TAX-1048630-NL-19419,invoices.csv,"invoice 1048630, line 1",line tax $0.00 on $726.75,$64.50
+TAX-1048630-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048630-NL-19419,customers.csv,Pepper Plum Noodle Bar,tax exempt N until ,
+TAX-1048638-NL-12254,invoices.csv,"invoice 1048638, line 1",line tax $10.70 on $120.57,$0
+TAX-1048638-NL-12254,products.csv,NL-12254,taxable Y,
+TAX-1048638-NL-12254,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048638-NL-11540,invoices.csv,"invoice 1048638, line 3",line tax $17.10 on $192.70,$0
+TAX-1048638-NL-11540,products.csv,NL-11540,taxable Y,
+TAX-1048638-NL-11540,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+QTY-1048642-NL-10567,invoices.csv,"invoice 1048642, line 3",9 cases at $100.94,5 cases
+QTY-1048642-NL-10567,delivery_log.csv,"delivery D-260917-0559, NL-10567","ordered 9, shipped 5, delivered 5 (Out of stock)",
+TAX-1048643-NL-19419,invoices.csv,"invoice 1048643, line 2",line tax $0.00 on $321.52,$28.53
+TAX-1048643-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048643-NL-19419,customers.csv,Citrus Bistro,tax exempt N until ,
+TAX-1048645-NL-19419,invoices.csv,"invoice 1048645, line 1",line tax $0.00 on $120.57,$10.70
+TAX-1048645-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048645-NL-19419,customers.csv,Taco Maple Canteen,tax exempt N until ,
+WRONGCUST-1048646,invoices.csv,invoice 1048646,Customer Harbor - Bushwick,Harbor - Downtown JC
+WRONGCUST-1048646,delivery_log.csv,delivery D-260917-0576,Delivered to Harbor & Vine Group - Downtown JC (C-1012),
+TAX-1048649-NL-19419,invoices.csv,"invoice 1048649, line 6",line tax $0.00 on $342.00,$30.35
+TAX-1048649-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048649-NL-19419,customers.csv,Gyro Copper Espresso Bar,tax exempt N until ,
+PRICE-1048653-NL-10756,invoices.csv,"invoice 1048653, line 2",rate $32.99 x 2 cases,$34.97 a case
+PRICE-1048653-NL-10756,products.csv,NL-10756,list 34.97 (current) less tier D 0%,
+PRICE-1048653-NL-10756,customers.csv,Copper Honey Bistro,tier D,
+PRICE-1048653-NL-10756,delivery_log.csv,"delivery D-260917-0602, NL-10756",2 cases delivered Sep 17,
+PRICE-1048657-NL-10819,invoices.csv,"invoice 1048657, line 4",rate $42.95 x 2 cases,$46.39 a case
+PRICE-1048657-NL-10819,products.csv,NL-10819,list 46.39 (current) less tier D 0%,
+PRICE-1048657-NL-10819,customers.csv,Laurel Trattoria,tier D,
+PRICE-1048657-NL-10819,delivery_log.csv,"delivery D-260916-0535, NL-10819",2 cases delivered Sep 16,
+PRICE-1048658-NL-12373,invoices.csv,"invoice 1048658, line 1",rate $69.75 x 2 cases,$75.18 a case
+PRICE-1048658-NL-12373,products.csv,NL-12373,list 77.50 (current) less tier C 3%,
+PRICE-1048658-NL-12373,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048658-NL-12373,delivery_log.csv,"delivery D-260916-0541, NL-12373",2 cases delivered Sep 16,
+PRICE-1048658-NL-11659,invoices.csv,"invoice 1048658, line 2",rate $31.94 x 5 cases,$34.43 a case
+PRICE-1048658-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048658-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048658-NL-11659,delivery_log.csv,"delivery D-260916-0541, NL-11659",5 cases delivered Sep 16,
+PRICE-1048658-NL-12163,invoices.csv,"invoice 1048658, line 3",rate $18.90 x 1 cases,$20.37 a case
+PRICE-1048658-NL-12163,products.csv,NL-12163,list 21.00 (current) less tier C 3%,
+PRICE-1048658-NL-12163,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048658-NL-12163,delivery_log.csv,"delivery D-260916-0541, NL-12163",1 cases delivered Sep 16,
+PRICE-1048658-NL-11771,invoices.csv,"invoice 1048658, line 4",rate $45.75 x 1 cases,$49.31 a case
+PRICE-1048658-NL-11771,products.csv,NL-11771,list 50.83 (current) less tier C 3%,
+PRICE-1048658-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048658-NL-11771,delivery_log.csv,"delivery D-260916-0541, NL-11771",1 cases delivered Sep 16,
+PRICE-1048658-NL-11078,invoices.csv,"invoice 1048658, line 5",rate $37.80 x 11 cases,$40.74 a case
+PRICE-1048658-NL-11078,products.csv,NL-11078,list 42.00 (current) less tier C 3%,
+PRICE-1048658-NL-11078,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048658-NL-11078,delivery_log.csv,"delivery D-260916-0541, NL-11078",11 cases delivered Sep 16,
+PRICE-1048658-NL-10679,invoices.csv,"invoice 1048658, line 6",rate $93.83 x 7 cases,$101.12 a case
+PRICE-1048658-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048658-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048658-NL-10679,delivery_log.csv,"delivery D-260916-0541, NL-10679",7 cases delivered Sep 16,
+PRICE-1048658-NL-10917,invoices.csv,"invoice 1048658, line 7",rate $36.86 x 8 cases,$39.72 a case
+PRICE-1048658-NL-10917,products.csv,NL-10917,list 40.95 (current) less tier C 3%,
+PRICE-1048658-NL-10917,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048658-NL-10917,delivery_log.csv,"delivery D-260916-0541, NL-10917",8 cases delivered Sep 16,
+PRICE-1048666-NL-10840,invoices.csv,"invoice 1048666, line 2",rate $55.46 x 12 cases,$59.34 a case
+PRICE-1048666-NL-10840,products.csv,NL-10840,list 63.13 (current) less tier B 6%,
+PRICE-1048666-NL-10840,customers.csv,Fennel Provisions,tier B,
+PRICE-1048666-NL-10840,delivery_log.csv,"delivery D-260917-0567, NL-10840",12 cases delivered Sep 17,
+TAX-1048672-NL-19419,invoices.csv,"invoice 1048672, line 5",line tax $0.00 on $153.92,$13.66
+TAX-1048672-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048672-NL-19419,customers.csv,Quince Olive Trattoria,tax exempt N until ,
+PRICE-1048672-NL-10868,invoices.csv,"invoice 1048672, line 7",rate $58.49 x 5 cases,$62.00 a case
+PRICE-1048672-NL-10868,products.csv,NL-10868,list 68.89 (current) less tier A 10%,
+PRICE-1048672-NL-10868,customers.csv,Quince Olive Trattoria,tier A,
+PRICE-1048672-NL-10868,delivery_log.csv,"delivery D-260917-0577, NL-10868",5 cases delivered Sep 17,
+PRICE-1048673-NL-11120,invoices.csv,"invoice 1048673, line 4",rate $45.11 x 1 cases,$47.37 a case
+PRICE-1048673-NL-11120,products.csv,NL-11120,list 48.83 (current) less tier C 3%,
+PRICE-1048673-NL-11120,customers.csv,Fennel Noodle Bar,tier C,
+PRICE-1048673-NL-11120,delivery_log.csv,"delivery D-260917-0580, NL-11120",1 cases delivered Sep 17,
+TAX-1048677-NL-19419,invoices.csv,"invoice 1048677, line 2",line tax $0.00 on $85.50,$7.59
+TAX-1048677-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048677-NL-19419,customers.csv,Gyro Eatery,tax exempt N until ,
+PRICE-1048678-NL-10819,invoices.csv,"invoice 1048678, line 1",rate $41.66 x 1 cases,$45.00 a case
+PRICE-1048678-NL-10819,products.csv,NL-10819,list 46.39 (current) less tier C 3%,
+PRICE-1048678-NL-10819,customers.csv,Basil Citrus Kitchen,tier C,
+PRICE-1048678-NL-10819,delivery_log.csv,"delivery D-260917-0587, NL-10819",1 cases delivered Sep 17,
+PRICE-1048678-NL-10756,invoices.csv,"invoice 1048678, line 3",rate $32.00 x 12 cases,$33.92 a case
+PRICE-1048678-NL-10756,products.csv,NL-10756,list 34.97 (current) less tier C 3%,
+PRICE-1048678-NL-10756,customers.csv,Basil Citrus Kitchen,tier C,
+PRICE-1048678-NL-10756,delivery_log.csv,"delivery D-260917-0587, NL-10756",12 cases delivered Sep 17,
+QTY-1048680-NL-12674,invoices.csv,"invoice 1048680, line 1",3 cases at $25.99,4 cases
+QTY-1048680-NL-12674,delivery_log.csv,"delivery D-260917-0594, NL-12674","ordered 4, shipped 4, delivered 4",
+TAX-1048683-NL-19419,invoices.csv,"invoice 1048683, line 2",line tax $0.00 on $401.90,$35.67
+TAX-1048683-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048683-NL-19419,customers.csv,Pepper House,tax exempt N until ,
+PRICE-1048690-NL-10819,invoices.csv,"invoice 1048690, line 7",rate $40.37 x 13 cases,$43.61 a case
+PRICE-1048690-NL-10819,products.csv,NL-10819,list 46.39 (current) less tier B 6%,
+PRICE-1048690-NL-10819,customers.csv,Kebab Biryani House,tier B,
+PRICE-1048690-NL-10819,delivery_log.csv,"delivery D-260918-0633, NL-10819",13 cases delivered Sep 18,
+PRICE-1048694-NL-10756,invoices.csv,"invoice 1048694, line 2",rate $32.00 x 2 cases,$33.92 a case
+PRICE-1048694-NL-10756,products.csv,NL-10756,list 34.97 (current) less tier C 3%,
+PRICE-1048694-NL-10756,customers.csv,Taco Diner,tier C,
+PRICE-1048694-NL-10756,delivery_log.csv,"delivery D-260918-0645, NL-10756",2 cases delivered Sep 18,
+PRICE-1048697-NL-11974,invoices.csv,"invoice 1048697, line 6",rate $37.41 x 9 cases,$42.20 a case
+PRICE-1048697-NL-11974,products.csv,NL-11974,list 43.50 (current) less tier C 3%,
+PRICE-1048697-NL-11974,customers.csv,Thyme Hotel,tier C,
+PRICE-1048697-NL-11974,delivery_log.csv,"delivery D-260918-0652, NL-11974",9 cases delivered Sep 18,
+PRICE-1048698-NL-10868,invoices.csv,"invoice 1048698, line 2",rate $63.04 x 1 cases,$66.82 a case
+PRICE-1048698-NL-10868,products.csv,NL-10868,list 68.89 (current) less tier C 3%,
+PRICE-1048698-NL-10868,customers.csv,Citrus Taqueria,tier C,
+PRICE-1048698-NL-10868,delivery_log.csv,"delivery D-260918-0653, NL-10868",1 cases delivered Sep 18,
+QTY-1048702-NL-11932,invoices.csv,"invoice 1048702, line 5",4 cases at $34.73,5 cases
+QTY-1048702-NL-11932,delivery_log.csv,"delivery D-260917-0592, NL-11932","ordered 5, shipped 5, delivered 5",
+PRICE-1048704-NL-11323,invoices.csv,"invoice 1048704, line 1",rate $28.19 x 16 cases,$32.74 a case
+PRICE-1048704-NL-11323,products.csv,NL-11323,list 33.75 (current) less tier C 3%,
+PRICE-1048704-NL-11323,customers.csv,Thyme Hotel,tier C,
+PRICE-1048704-NL-11323,delivery_log.csv,"delivery D-260917-0600, NL-11323",16 cases delivered Sep 17,
+PRICE-1048704-NL-12485,invoices.csv,"invoice 1048704, line 7",rate $52.92 x 10 cases,$61.11 a case
+PRICE-1048704-NL-12485,products.csv,NL-12485,list 63.00 (current) less tier C 3%,
+PRICE-1048704-NL-12485,customers.csv,Thyme Hotel,tier C,
+PRICE-1048704-NL-12485,delivery_log.csv,"delivery D-260917-0600, NL-12485",10 cases delivered Sep 17,
+PRICE-1048704-NL-11659,invoices.csv,"invoice 1048704, line 8",rate $29.81 x 6 cases,$34.43 a case
+PRICE-1048704-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048704-NL-11659,customers.csv,Thyme Hotel,tier C,
+PRICE-1048704-NL-11659,delivery_log.csv,"delivery D-260917-0600, NL-11659",6 cases delivered Sep 17,
+TAX-1048715-NL-19419,invoices.csv,"invoice 1048715, line 6",line tax $0.00 on $256.50,$22.76
+TAX-1048715-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048715-NL-19419,customers.csv,Thyme Roasters,tax exempt N until ,
+PRICE-1048721-NL-11771,invoices.csv,"invoice 1048721, line 1",rate $45.75 x 1 cases,$49.31 a case
+PRICE-1048721-NL-11771,products.csv,NL-11771,list 50.83 (current) less tier C 3%,
+PRICE-1048721-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048721-NL-11771,delivery_log.csv,"delivery D-260918-0636, NL-11771",1 cases delivered Sep 18,
+PRICE-1048721-NL-11848,invoices.csv,"invoice 1048721, line 2",rate $39.15 x 3 cases,$42.20 a case
+PRICE-1048721-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1048721-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048721-NL-11848,delivery_log.csv,"delivery D-260918-0636, NL-11848",3 cases delivered Sep 18,
+PRICE-1048721-NL-10189,invoices.csv,"invoice 1048721, line 3",rate $57.14 x 4 cases,$61.59 a case
+PRICE-1048721-NL-10189,products.csv,NL-10189,list 63.49 (current) less tier C 3%,
+PRICE-1048721-NL-10189,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048721-NL-10189,delivery_log.csv,"delivery D-260918-0636, NL-10189",4 cases delivered Sep 18,
+PRICE-1048721-NL-10679,invoices.csv,"invoice 1048721, line 4",rate $93.83 x 1 cases,$101.12 a case
+PRICE-1048721-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048721-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048721-NL-10679,delivery_log.csv,"delivery D-260918-0636, NL-10679",1 cases delivered Sep 18,
+PRICE-1048721-NL-10931,invoices.csv,"invoice 1048721, line 5",rate $43.43 x 10 cases,$46.80 a case
+PRICE-1048721-NL-10931,products.csv,NL-10931,list 48.25 (current) less tier C 3%,
+PRICE-1048721-NL-10931,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048721-NL-10931,delivery_log.csv,"delivery D-260918-0636, NL-10931",10 cases delivered Sep 18,
+PRICE-1048721-NL-11659,invoices.csv,"invoice 1048721, line 6",rate $31.94 x 7 cases,$34.43 a case
+PRICE-1048721-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048721-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048721-NL-11659,delivery_log.csv,"delivery D-260918-0636, NL-11659",7 cases delivered Sep 18,
+QTY-1048732-NL-10525,invoices.csv,"invoice 1048732, line 1",4 cases at $57.72,5 cases
+QTY-1048732-NL-10525,delivery_log.csv,"delivery D-260921-0658, NL-10525","ordered 5, shipped 5, delivered 5",
+TAX-1048733-NL-19419,invoices.csv,"invoice 1048733, line 2",line tax $0.00 on $42.75,$3.79
+TAX-1048733-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048733-NL-19419,customers.csv,Cedar Bakehouse,tax exempt N until ,
+TAX-1048734-NL-19419,invoices.csv,"invoice 1048734, line 1",line tax $0.00 on $38.48,$3.42
+TAX-1048734-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048734-NL-19419,customers.csv,Pho Bistro,tax exempt N until ,
+TAX-1048736-NL-19419,invoices.csv,"invoice 1048736, line 2",line tax $0.00 on $384.75,$34.15
+TAX-1048736-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048736-NL-19419,customers.csv,Pepper Plum Noodle Bar,tax exempt N until ,
+TAX-1048747-NL-19419,invoices.csv,"invoice 1048747, line 3",line tax $0.00 on $128.25,$11.38
+TAX-1048747-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048747-NL-19419,customers.csv,Cedar Bakehouse,tax exempt N until ,
+FEE-EXTRA-1048752,invoices.csv,invoice 1048752,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048752,delivery_log.csv,delivery D-260921-0657,fee waived by Dana (M-001843),No fee
+PRICE-1048761-NL-12114,invoices.csv,"invoice 1048761, line 1",rate $40.50 x 2 cases,$43.65 a case
+PRICE-1048761-NL-12114,products.csv,NL-12114,list 45.00 (current) less tier C 3%,
+PRICE-1048761-NL-12114,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048761-NL-12114,delivery_log.csv,"delivery D-260921-0680, NL-12114",2 cases delivered Sep 21,
+PRICE-1048761-NL-11771,invoices.csv,"invoice 1048761, line 2",rate $45.75 x 9 cases,$49.31 a case
+PRICE-1048761-NL-11771,products.csv,NL-11771,list 50.83 (current) less tier C 3%,
+PRICE-1048761-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048761-NL-11771,delivery_log.csv,"delivery D-260921-0680, NL-11771",9 cases delivered Sep 21,
+PRICE-1048761-NL-11715,invoices.csv,"invoice 1048761, line 3",rate $31.14 x 1 cases,$33.56 a case
+PRICE-1048761-NL-11715,products.csv,NL-11715,list 34.60 (current) less tier C 3%,
+PRICE-1048761-NL-11715,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048761-NL-11715,delivery_log.csv,"delivery D-260921-0680, NL-11715",1 cases delivered Sep 21,
+TAX-1048768-NL-19419,invoices.csv,"invoice 1048768, line 5",line tax $0.00 on $346.32,$30.74
+TAX-1048768-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048768-NL-19419,customers.csv,Brick Lane Cafés - Astoria,tax exempt N until ,
+QTY-1048782-NL-12016,invoices.csv,"invoice 1048782, line 1",3 cases at $86.32,2 cases
+QTY-1048782-NL-12016,delivery_log.csv,"delivery D-260922-0732, NL-12016","ordered 3, shipped 2, delivered 2 (Out of stock)",
+QTY-1048788-NL-11743,invoices.csv,"invoice 1048788, line 3",4 cases at $57.50,6 cases
+QTY-1048788-NL-11743,delivery_log.csv,"delivery D-260922-0744, NL-11743","ordered 6, shipped 6, delivered 6",
+TAX-1048798-NL-19419,invoices.csv,"invoice 1048798, line 2",line tax $0.00 on $401.90,$35.67
+TAX-1048798-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048798-NL-19419,customers.csv,Tide Inn,tax exempt N until ,
+FEE-MISSING-1048799,invoices.csv,invoice 1048799,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048799,delivery_log.csv,delivery D-260921-0685,merchandise $82.57 at correct prices,under $300.00
+FEE-MISSING-1048806,invoices.csv,invoice 1048806,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048806,delivery_log.csv,delivery D-260922-0707,merchandise $260.44 at correct prices,under $300.00
+PRICE-1048820-NL-11848,invoices.csv,"invoice 1048820, line 1",rate $39.15 x 3 cases,$42.20 a case
+PRICE-1048820-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1048820-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-11848,delivery_log.csv,"delivery D-260922-0733, NL-11848",3 cases delivered Sep 22,
+PRICE-1048820-NL-12114,invoices.csv,"invoice 1048820, line 2",rate $40.50 x 20 cases,$43.65 a case
+PRICE-1048820-NL-12114,products.csv,NL-12114,list 45.00 (current) less tier C 3%,
+PRICE-1048820-NL-12114,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-12114,delivery_log.csv,"delivery D-260922-0733, NL-12114",20 cases delivered Sep 22,
+PRICE-1048820-NL-11078,invoices.csv,"invoice 1048820, line 3",rate $37.80 x 13 cases,$40.74 a case
+PRICE-1048820-NL-11078,products.csv,NL-11078,list 42.00 (current) less tier C 3%,
+PRICE-1048820-NL-11078,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-11078,delivery_log.csv,"delivery D-260922-0733, NL-11078",13 cases delivered Sep 22,
+PRICE-1048820-NL-10931,invoices.csv,"invoice 1048820, line 4",rate $43.43 x 8 cases,$46.80 a case
+PRICE-1048820-NL-10931,products.csv,NL-10931,list 48.25 (current) less tier C 3%,
+PRICE-1048820-NL-10931,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-10931,delivery_log.csv,"delivery D-260922-0733, NL-10931",8 cases delivered Sep 22,
+PRICE-1048820-NL-11659,invoices.csv,"invoice 1048820, line 5",rate $31.94 x 3 cases,$34.43 a case
+PRICE-1048820-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048820-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-11659,delivery_log.csv,"delivery D-260922-0733, NL-11659",3 cases delivered Sep 22,
+PRICE-1048820-NL-12373,invoices.csv,"invoice 1048820, line 6",rate $69.75 x 2 cases,$75.18 a case
+PRICE-1048820-NL-12373,products.csv,NL-12373,list 77.50 (current) less tier C 3%,
+PRICE-1048820-NL-12373,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-12373,delivery_log.csv,"delivery D-260922-0733, NL-12373",2 cases delivered Sep 22,
+PRICE-1048820-NL-10917,invoices.csv,"invoice 1048820, line 7",rate $36.86 x 1 cases,$39.72 a case
+PRICE-1048820-NL-10917,products.csv,NL-10917,list 40.95 (current) less tier C 3%,
+PRICE-1048820-NL-10917,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-10917,delivery_log.csv,"delivery D-260922-0733, NL-10917",1 cases delivered Sep 22,
+PRICE-1048820-NL-11771,invoices.csv,"invoice 1048820, line 8",rate $45.75 x 10 cases,$49.31 a case
+PRICE-1048820-NL-11771,products.csv,NL-11771,list 50.83 (current) less tier C 3%,
+PRICE-1048820-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-11771,delivery_log.csv,"delivery D-260922-0733, NL-11771",10 cases delivered Sep 22,
+PRICE-1048820-NL-10679,invoices.csv,"invoice 1048820, line 9",rate $93.83 x 5 cases,$101.12 a case
+PRICE-1048820-NL-10679,products.csv,NL-10679,list 104.25 (current) less tier C 3%,
+PRICE-1048820-NL-10679,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048820-NL-10679,delivery_log.csv,"delivery D-260922-0733, NL-10679",5 cases delivered Sep 22,
+FEE-EXTRA-1048825,invoices.csv,invoice 1048825,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048825,customers.csv,Lupa Hospitality - LIC,free-delivery period,No fee
+TAX-1048837-NL-19419,invoices.csv,"invoice 1048837, line 1",line tax $0.00 on $128.25,$11.38
+TAX-1048837-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048837-NL-19419,customers.csv,Plum Grill,tax exempt N until ,
+TAX-1048845-NL-19419,invoices.csv,"invoice 1048845, line 3",line tax $0.00 on $241.14,$21.40
+TAX-1048845-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048845-NL-19419,customers.csv,Cedar Lantern Coffee,tax exempt N until ,
+TAX-1048846-NL-19419,invoices.csv,"invoice 1048846, line 4",line tax $0.00 on $281.33,$24.97
+TAX-1048846-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048846-NL-19419,customers.csv,Plum Bistro,tax exempt N until ,
+TAX-1048852-NL-19419,invoices.csv,"invoice 1048852, line 2",line tax $0.00 on $213.75,$18.97
+TAX-1048852-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048852-NL-19419,customers.csv,Pepper Plum Noodle Bar,tax exempt N until ,
+FEE-EXTRA-1048856,invoices.csv,invoice 1048856,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048856,delivery_log.csv,delivery D-260923-0755,fee waived by Dana (M-001843),No fee
+PRICE-1048871-NL-11771,invoices.csv,"invoice 1048871, line 1",rate $45.75 x 4 cases,$49.31 a case
+PRICE-1048871-NL-11771,products.csv,NL-11771,list 50.83 (current) less tier C 3%,
+PRICE-1048871-NL-11771,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-11771,delivery_log.csv,"delivery D-260923-0790, NL-11771",4 cases delivered Sep 23,
+PRICE-1048871-NL-10189,invoices.csv,"invoice 1048871, line 2",rate $57.14 x 8 cases,$61.59 a case
+PRICE-1048871-NL-10189,products.csv,NL-10189,list 63.49 (current) less tier C 3%,
+PRICE-1048871-NL-10189,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-10189,delivery_log.csv,"delivery D-260923-0790, NL-10189",8 cases delivered Sep 23,
+PRICE-1048871-NL-11078,invoices.csv,"invoice 1048871, line 3",rate $37.80 x 1 cases,$40.74 a case
+PRICE-1048871-NL-11078,products.csv,NL-11078,list 42.00 (current) less tier C 3%,
+PRICE-1048871-NL-11078,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-11078,delivery_log.csv,"delivery D-260923-0790, NL-11078",1 cases delivered Sep 23,
+PRICE-1048871-NL-10210,invoices.csv,"invoice 1048871, line 4",rate $58.95 x 1 cases,$63.54 a case
+PRICE-1048871-NL-10210,products.csv,NL-10210,list 65.50 (current) less tier C 3%,
+PRICE-1048871-NL-10210,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-10210,delivery_log.csv,"delivery D-260923-0790, NL-10210",1 cases delivered Sep 23,
+PRICE-1048871-NL-11659,invoices.csv,"invoice 1048871, line 5",rate $31.94 x 3 cases,$34.43 a case
+PRICE-1048871-NL-11659,products.csv,NL-11659,list 35.49 (current) less tier C 3%,
+PRICE-1048871-NL-11659,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-11659,delivery_log.csv,"delivery D-260923-0790, NL-11659",3 cases delivered Sep 23,
+PRICE-1048871-NL-11848,invoices.csv,"invoice 1048871, line 6",rate $39.15 x 3 cases,$42.20 a case
+PRICE-1048871-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1048871-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-11848,delivery_log.csv,"delivery D-260923-0790, NL-11848",3 cases delivered Sep 23,
+PRICE-1048871-NL-10931,invoices.csv,"invoice 1048871, line 7",rate $43.43 x 8 cases,$46.80 a case
+PRICE-1048871-NL-10931,products.csv,NL-10931,list 48.25 (current) less tier C 3%,
+PRICE-1048871-NL-10931,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-10931,delivery_log.csv,"delivery D-260923-0790, NL-10931",8 cases delivered Sep 23,
+PRICE-1048871-NL-12373,invoices.csv,"invoice 1048871, line 8",rate $69.75 x 2 cases,$75.18 a case
+PRICE-1048871-NL-12373,products.csv,NL-12373,list 77.50 (current) less tier C 3%,
+PRICE-1048871-NL-12373,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1048871-NL-12373,delivery_log.csv,"delivery D-260923-0790, NL-12373",2 cases delivered Sep 23,
+TAX-1048890-NL-19419,invoices.csv,"invoice 1048890, line 4",line tax $0.00 on $80.38,$7.13
+TAX-1048890-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048890-NL-19419,customers.csv,Dumpling Quince Trattoria,tax exempt N until ,
+FEE-DUP-1048895,invoices.csv,invoice 1048895,"2 DEL-FEE lines, $70.00",At most one $35.00 fee
+TAX-1048912-NL-12254,invoices.csv,"invoice 1048912, line 1",line tax $24.97 on $281.33,$0
+TAX-1048912-NL-12254,products.csv,NL-12254,taxable Y,
+TAX-1048912-NL-12254,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048912-NL-12051,invoices.csv,"invoice 1048912, line 2",line tax $20.90 on $235.47,$0
+TAX-1048912-NL-12051,products.csv,NL-12051,taxable Y,
+TAX-1048912-NL-12051,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048912-NL-11848,invoices.csv,"invoice 1048912, line 3",line tax $7.26 on $81.78,$0
+TAX-1048912-NL-11848,products.csv,NL-11848,taxable Y,
+TAX-1048912-NL-11848,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048912-NL-12436,invoices.csv,"invoice 1048912, line 4",line tax $3.79 on $42.76,$0
+TAX-1048912-NL-12436,products.csv,NL-12436,taxable Y,
+TAX-1048912-NL-12436,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048912-NL-11386,invoices.csv,"invoice 1048912, line 6",line tax $29.78 on $335.58,$0
+TAX-1048912-NL-11386,products.csv,NL-11386,taxable Y,
+TAX-1048912-NL-11386,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048912-NL-12807,invoices.csv,"invoice 1048912, line 7",line tax $5.49 on $61.89,$0
+TAX-1048912-NL-12807,products.csv,NL-12807,taxable Y,
+TAX-1048912-NL-12807,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+TAX-1048912-NL-19419,invoices.csv,"invoice 1048912, line 8",line tax $14.27 on $160.76,$0
+TAX-1048912-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048912-NL-19419,customers.csv,Queens Hope Charter School,tax exempt Y until 2027-06-30,
+FEE-EXTRA-1048913,invoices.csv,invoice 1048913,DEL-FEE $35.00,$0.00
+FEE-EXTRA-1048913,delivery_log.csv,delivery D-260924-0806,fee waived by Dana (M-001843),No fee
+TAX-1048915-NL-19419,invoices.csv,"invoice 1048915, line 4",line tax $0.00 on $42.75,$3.79
+TAX-1048915-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048915-NL-19419,customers.csv,Laurel Kebab Trattoria,tax exempt N until ,
+QTY-1048916-NL-11484,invoices.csv,"invoice 1048916, line 1",4 cases at $59.16,3 cases
+QTY-1048916-NL-11484,delivery_log.csv,"delivery D-260924-0815, NL-11484","ordered 4, shipped 3, delivered 3 (Short picked)",
+TAX-1048926-NL-19419,invoices.csv,"invoice 1048926, line 1",line tax $0.00 on $461.76,$40.98
+TAX-1048926-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048926-NL-19419,customers.csv,Quince Olive Trattoria,tax exempt N until ,
+QTY-1048934-NL-10574,invoices.csv,"invoice 1048934, line 1",5 cases at $76.39,6 cases
+QTY-1048934-NL-10574,delivery_log.csv,"delivery D-260924-0858, NL-10574","ordered 6, shipped 6, delivered 6",
+TAX-1048963-NL-19419,invoices.csv,"invoice 1048963, line 2",line tax $0.00 on $373.23,$33.12
+TAX-1048963-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048963-NL-19419,customers.csv,Sparrow Coffee,tax exempt N until ,
+QTY-1048965-NL-12072,invoices.csv,"invoice 1048965, line 2",5 cases at $91.13,6 cases
+QTY-1048965-NL-12072,delivery_log.csv,"delivery D-260925-0874, NL-12072","ordered 6, shipped 6, delivered 6",
+TAX-1048968-NL-19419,invoices.csv,"invoice 1048968, line 6",line tax $0.00 on $562.66,$49.94
+TAX-1048968-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048968-NL-19419,customers.csv,Dumpling Quince Trattoria,tax exempt N until ,
+PRICE-1048978-NL-11974,invoices.csv,"invoice 1048978, line 2",rate $37.41 x 8 cases,$42.20 a case
+PRICE-1048978-NL-11974,products.csv,NL-11974,list 43.50 (current) less tier C 3%,
+PRICE-1048978-NL-11974,customers.csv,Thyme Hotel,tier C,
+PRICE-1048978-NL-11974,delivery_log.csv,"delivery D-260925-0905, NL-11974",8 cases delivered Sep 25,
+PRICE-1048978-NL-12485,invoices.csv,"invoice 1048978, line 3",rate $52.92 x 13 cases,$61.11 a case
+PRICE-1048978-NL-12485,products.csv,NL-12485,list 63.00 (current) less tier C 3%,
+PRICE-1048978-NL-12485,customers.csv,Thyme Hotel,tier C,
+PRICE-1048978-NL-12485,delivery_log.csv,"delivery D-260925-0905, NL-12485",13 cases delivered Sep 25,
+TAX-1048980-NL-19419,invoices.csv,"invoice 1048980, line 3",line tax $0.00 on $342.00,$30.35
+TAX-1048980-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048980-NL-19419,customers.csv,Copper Honey Bistro,tax exempt N until ,
+TAX-1048988-NL-19419,invoices.csv,"invoice 1048988, line 2",line tax $0.00 on $401.90,$35.67
+TAX-1048988-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1048988-NL-19419,customers.csv,Tide Inn,tax exempt N until ,
+FEE-MISSING-1048997,invoices.csv,invoice 1048997,No DEL-FEE line,$35.00 fee
+FEE-MISSING-1048997,delivery_log.csv,delivery D-260925-0895,merchandise $159.57 at correct prices,under $300.00
+TAX-1049004-NL-19419,invoices.csv,"invoice 1049004, line 2",line tax $0.00 on $42.75,$3.79
+TAX-1049004-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049004-NL-19419,customers.csv,Cedar Bakehouse,tax exempt N until ,
+TAX-1049008-NL-19419,invoices.csv,"invoice 1049008, line 3",line tax $0.00 on $128.25,$11.38
+TAX-1049008-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049008-NL-19419,customers.csv,Pizza Kitchen,tax exempt N until ,
+TAX-1049019-NL-19419,invoices.csv,"invoice 1049019, line 1",line tax $0.00 on $165.88,$14.72
+TAX-1049019-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049019-NL-19419,customers.csv,Kettle & Crumb Bakeries - Midtown,tax exempt N until ,
+PRICE-1049020-NL-12114,invoices.csv,"invoice 1049020, line 1",rate $40.50 x 6 cases,$43.65 a case
+PRICE-1049020-NL-12114,products.csv,NL-12114,list 45.00 (current) less tier C 3%,
+PRICE-1049020-NL-12114,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1049020-NL-12114,delivery_log.csv,"delivery D-260928-0938, NL-12114",6 cases delivered Sep 28,
+PRICE-1049020-NL-10168,invoices.csv,"invoice 1049020, line 2",rate $58.50 x 1 cases,$63.05 a case
+PRICE-1049020-NL-10168,products.csv,NL-10168,list 65.00 (current) less tier C 3%,
+PRICE-1049020-NL-10168,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1049020-NL-10168,delivery_log.csv,"delivery D-260928-0938, NL-10168",1 cases delivered Sep 28,
+PRICE-1049020-NL-11848,invoices.csv,"invoice 1049020, line 3",rate $39.15 x 2 cases,$42.20 a case
+PRICE-1049020-NL-11848,products.csv,NL-11848,list 43.50 (current) less tier C 3%,
+PRICE-1049020-NL-11848,customers.csv,Falafel Anchor Taqueria,tier C (was A before 2026-09-01),
+PRICE-1049020-NL-11848,delivery_log.csv,"delivery D-260928-0938, NL-11848",2 cases delivered Sep 28,
+TAX-1049027-NL-19419,invoices.csv,"invoice 1049027, line 2",line tax $0.00 on $153.92,$13.66
+TAX-1049027-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049027-NL-19419,customers.csv,Pho Bistro,tax exempt N until ,
+TAX-1049036-NL-19419,invoices.csv,"invoice 1049036, line 4",line tax $0.00 on $40.19,$3.57
+TAX-1049036-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049036-NL-19419,customers.csv,Plum Bistro,tax exempt N until ,
+TAX-1049053-NL-19419,invoices.csv,"invoice 1049053, line 1",line tax $0.00 on $384.75,$34.15
+TAX-1049053-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049053-NL-19419,customers.csv,Laurel Kebab Trattoria,tax exempt N until ,
+TAX-1049070-NL-19419,invoices.csv,"invoice 1049070, line 1",line tax $0.00 on $384.75,$34.15
+TAX-1049070-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049070-NL-19419,customers.csv,Bianchi & Torres Advisors,tax exempt N until ,
+TAX-1049078-NL-19419,invoices.csv,"invoice 1049078, line 11",line tax $0.00 on $321.52,$28.53
+TAX-1049078-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049078-NL-19419,customers.csv,Rye Café,tax exempt N until ,
+TAX-1049085-NL-19419,invoices.csv,"invoice 1049085, line 5",line tax $0.00 on $281.33,$24.97
+TAX-1049085-NL-19419,products.csv,NL-19419,taxable Y,
+TAX-1049085-NL-19419,customers.csv,Lotus Taqueria,tax exempt N until ,
+OVERPO-B-60107-NL-10469,supplier_bills.csv,"bill B-60107, line 2",unit_cost $18.12 x 10 cases,$17.26 a case
+OVERPO-B-60107-NL-10469,purchase_orders.csv,"PO-26002, line 2",unit_cost $17.26; 10 cases accepted,
+FREIGHT-B-60112,supplier_bills.csv,"bill B-60112, line 8",freight $102.00,$0.00
+FREIGHT-B-60112,suppliers.csv,EcoServe Products,terms PREPAID_OVER (free over $2000),
+FREIGHT-B-60112,purchase_orders.csv,PO-26104,PO total $10195.85,
+OVERPO-B-60137-NL-10952,supplier_bills.csv,"bill B-60137, line 1",unit_cost $51.06 x 8 cases,$45.59 a case
+OVERPO-B-60137-NL-10952,purchase_orders.csv,"PO-26244, line 1",unit_cost $45.59; 8 cases accepted,
+OVERPO-B-60145-NL-10665,supplier_bills.csv,"bill B-60145, line 1",unit_cost $65.94 x 5 cases,$63.40 a case
+OVERPO-B-60145-NL-10665,purchase_orders.csv,"PO-26059, line 1",unit_cost $63.40; 5 cases accepted,
+OVERPO-B-60154-NL-10518,supplier_bills.csv,"bill B-60154, line 3",unit_cost $67.29 x 40 cases,$64.70 a case
+OVERPO-B-60154-NL-10518,purchase_orders.csv,"PO-26554, line 3",unit_cost $64.70; 40 cases accepted,
+OVERPO-B-60163-NL-11351,supplier_bills.csv,"bill B-60163, line 5",unit_cost $42.46 x 5 cases,$37.91 a case
+OVERPO-B-60163-NL-11351,purchase_orders.csv,"PO-26257, line 5",unit_cost $37.91; 5 cases accepted,
+FREIGHT-B-60176,supplier_bills.csv,"bill B-60176, line 4",freight $146.00,$0.00
+FREIGHT-B-60176,suppliers.csv,Summit Liner Co.,terms ALWAYS_PREPAID (free over $0),
+FREIGHT-B-60176,purchase_orders.csv,PO-26306,PO total $950.19,
+OVERPO-B-60222-NL-12142,supplier_bills.csv,"bill B-60222, line 3",unit_cost $25.25 x 20 cases,$24.05 a case
+OVERPO-B-60222-NL-12142,purchase_orders.csv,"PO-26472, line 3",unit_cost $24.05; 20 cases accepted,
+OVERPO-B-60233-NL-10175,supplier_bills.csv,"bill B-60233, line 5",unit_cost $44.73 x 50 cases,$40.66 a case
+OVERPO-B-60233-NL-10175,purchase_orders.csv,"PO-26121, line 5",unit_cost $40.66; 50 cases accepted,
+OVERPO-B-60243-NL-11015,supplier_bills.csv,"bill B-60243, line 1",unit_cost $13.71 x 40 cases,$12.24 a case
+OVERPO-B-60243-NL-11015,purchase_orders.csv,"PO-26110, line 1",unit_cost $12.24; 40 cases accepted,
+FREIGHT-B-60249,supplier_bills.csv,"bill B-60249, line 6",freight $61.00,$0.00
+FREIGHT-B-60249,suppliers.csv,Pine Barrens Paper,terms PREPAID_OVER (free over $1500),
+FREIGHT-B-60249,purchase_orders.csv,PO-26411,PO total $3382.72,
+OVERPO-B-60255-NL-10945,supplier_bills.csv,"bill B-60255, line 4",unit_cost $21.30 x 20 cases,$20.29 a case
+OVERPO-B-60255-NL-10945,purchase_orders.csv,"PO-26092, line 4",unit_cost $20.29; 20 cases accepted,
+BANK-B-60274,supplier_bills.csv,bill B-60274,"remit to ...7731, status Open",...9414
+BANK-B-60274,suppliers.csv,Bayline Packaging,bank on file ...9414 verified 2025-11-03,
+BANK-B-60285,supplier_bills.csv,bill B-60285,"remit to ...7731, status Open",...9414
+BANK-B-60285,suppliers.csv,Bayline Packaging,bank on file ...9414 verified 2025-11-03,
+OVERPO-B-60296-NL-10063,supplier_bills.csv,"bill B-60296, line 2",unit_cost $54.92 x 30 cases,$49.93 a case
+OVERPO-B-60296-NL-10063,purchase_orders.csv,"PO-26123, line 2",unit_cost $49.93; 30 cases accepted,
+OVERPO-B-60297-NL-10952,supplier_bills.csv,"bill B-60297, line 4",unit_cost $50.15 x 6 cases,$45.59 a case
+OVERPO-B-60297-NL-10952,purchase_orders.csv,"PO-26246, line 4",unit_cost $45.59; 6 cases accepted,
+FREIGHT-B-60303,supplier_bills.csv,"bill B-60303, line 8",freight $156.00,$0.00
+FREIGHT-B-60303,suppliers.csv,Saddle River Textiles,terms PREPAID_OVER (free over $750),
+FREIGHT-B-60303,purchase_orders.csv,PO-26435,PO total $4249.49,
+FREIGHT-B-60306,supplier_bills.csv,"bill B-60306, line 6",freight $89.00,$0.00
+FREIGHT-B-60306,suppliers.csv,Liberty Bag Corp,terms PREPAID_OVER (free over $2000),
+FREIGHT-B-60306,purchase_orders.csv,PO-26140,PO total $3671.66,
+BANK-B-60320,supplier_bills.csv,bill B-60320,"remit to ...7731, status Open",...9414
+BANK-B-60320,suppliers.csv,Bayline Packaging,bank on file ...9414 verified 2025-11-03,
+BANK-B-60321,supplier_bills.csv,bill B-60321,"remit to ...7731, status Open",...9414
+BANK-B-60321,suppliers.csv,Bayline Packaging,bank on file ...9414 verified 2025-11-03,
+OVERPO-B-60329-NL-11841,supplier_bills.csv,"bill B-60329, line 1",unit_cost $16.18 x 15 cases,$14.71 a case
+OVERPO-B-60329-NL-11841,purchase_orders.csv,"PO-26382, line 1",unit_cost $14.71; 15 cases accepted,
+OVERPO-B-60334-NL-11428,supplier_bills.csv,"bill B-60334, line 4",unit_cost $42.26 x 5 cases,$39.87 a case
+OVERPO-B-60334-NL-11428,purchase_orders.csv,"PO-26594, line 4",unit_cost $39.87; 5 cases accepted,
+FREIGHT-B-60336,supplier_bills.csv,"bill B-60336, line 6",freight $147.00,$0.00
+FREIGHT-B-60336,suppliers.csv,Raritan Foodservice Pkg,terms ALWAYS_PREPAID (free over $0),
+FREIGHT-B-60336,purchase_orders.csv,PO-26083,PO total $2915.12,
+OVERQTY-B-60127-NL-10686,supplier_bills.csv,bill B-60127,6 cases billed on PO-26107,5 cases
+OVERQTY-B-60127-NL-10686,purchase_orders.csv,PO-26107,"received 6, damaged 1, accepted 5",
+OVERQTY-B-60128-NL-10539,supplier_bills.csv,bill B-60128,16 cases billed on PO-26118,15 cases
+OVERQTY-B-60128-NL-10539,purchase_orders.csv,PO-26118,"received 15, damaged 0, accepted 15",
+OVERQTY-B-60132-NL-12506,supplier_bills.csv,bill B-60132,70 cases billed on PO-26509,60 cases
+OVERQTY-B-60132-NL-12506,purchase_orders.csv,PO-26509,"received 60, damaged 0, accepted 60",
+OVERQTY-B-60151-NL-12884,supplier_bills.csv,bill B-60151,40 cases billed on PO-26484,30 cases
+OVERQTY-B-60151-NL-12884,purchase_orders.csv,PO-26484,"received 30, damaged 0, accepted 30",
+OVERQTY-B-60166-NL-12723,supplier_bills.csv,bill B-60166,7 cases billed on PO-26510,5 cases
+OVERQTY-B-60166-NL-12723,purchase_orders.csv,PO-26510,"received 5, damaged 0, accepted 5",
+OVERQTY-B-60171-NL-11113,supplier_bills.csv,bill B-60171,16 cases billed on PO-26080,12 cases
+OVERQTY-B-60171-NL-11113,purchase_orders.csv,PO-26080,"received 12, damaged 0, accepted 12",
+OVERQTY-B-60204-NL-11099,supplier_bills.csv,bill B-60204,9 cases billed on PO-26572,8 cases
+OVERQTY-B-60204-NL-11099,purchase_orders.csv,PO-26572,"received 8, damaged 0, accepted 8",
+OVERQTY-B-60239-NL-12289,supplier_bills.csv,bill B-60239,8 cases billed on PO-26433,7 cases
+OVERQTY-B-60239-NL-12289,purchase_orders.csv,PO-26433,"received 8, damaged 1, accepted 7",
+OVERQTY-B-60239-NL-12128,supplier_bills.csv,bill B-60239,50 cases billed on PO-26433,47 cases
+OVERQTY-B-60239-NL-12128,purchase_orders.csv,PO-26433,"received 50, damaged 3, accepted 47",
+OVERQTY-B-60239-NL-12170,supplier_bills.csv,bill B-60239,40 cases billed on PO-26433,36 cases
+OVERQTY-B-60239-NL-12170,purchase_orders.csv,PO-26433,"received 40, damaged 4, accepted 36",
+OVERQTY-B-60262-NL-12100,supplier_bills.csv,bill B-60262,34 cases billed on PO-26448,24 cases
+OVERQTY-B-60262-NL-12100,purchase_orders.csv,PO-26448,"received 24, damaged 0, accepted 24",
+OVERQTY-B-60269-NL-11631,supplier_bills.csv,bill B-60269,18 cases billed on PO-26296,15 cases
+OVERQTY-B-60269-NL-11631,purchase_orders.csv,PO-26296,"received 15, damaged 0, accepted 15",
+OVERQTY-B-60288-NL-10448,supplier_bills.csv,bill B-60288,50 cases billed on PO-26234,40 cases
+OVERQTY-B-60288-NL-10448,purchase_orders.csv,PO-26234,"received 40, damaged 0, accepted 40",
+OVERQTY-B-60317-NL-12464,supplier_bills.csv,bill B-60317,10 cases billed on PO-26525,6 cases
+OVERQTY-B-60317-NL-12464,purchase_orders.csv,PO-26525,"received 6, damaged 0, accepted 6",
+OVERQTY-B-60330-NL-12114,supplier_bills.csv,bill B-60330,50 cases billed on PO-26399,46 cases
+OVERQTY-B-60330-NL-12114,purchase_orders.csv,PO-26399,"received 50, damaged 4, accepted 46",
+OVERQTY-B-60330-NL-12051,supplier_bills.csv,bill B-60330,8 cases billed on PO-26399,7 cases
+OVERQTY-B-60330-NL-12051,purchase_orders.csv,PO-26399,"received 8, damaged 1, accepted 7",
+OVERQTY-B-60330-NL-12247,supplier_bills.csv,bill B-60330,15 cases billed on PO-26399,14 cases
+OVERQTY-B-60330-NL-12247,purchase_orders.csv,PO-26399,"received 15, damaged 1, accepted 14",
+DUPBILL-B-60215,supplier_bills.csv,bill B-60117,invoice GF-32036 $3499.03 2026-09-03,
+DUPBILL-B-60215,supplier_bills.csv,bill B-60215,invoice GF32036 $3499.03 2026-09-16,Enter each supplier invoice once
+DUPBILL-B-60292,supplier_bills.csv,bill B-60226,invoice ME-11452 $3669.12 2026-09-16,
+DUPBILL-B-60292,supplier_bills.csv,bill B-60292,invoice ME-11452-1 $3669.12 2026-09-24,Enter each supplier invoice once
+DUPBILL-B-60326,supplier_bills.csv,bill B-60213,invoice AC-47727 $3244.05 2026-09-16,
+DUPBILL-B-60326,supplier_bills.csv,bill B-60326,invoice AC47727 $3244.05 2026-09-29,Enter each supplier invoice once
+NOREPLY-M-001156,inbox.csv,message M-001156,Cohen and Jensen Labs: Delivery window (2026-09-02 11:20),A reply by the end of Sep 03
+NOREPLY-M-001156,inbox.csv,thread T-00550,no reply in the thread,
+NOREPLY-M-000979,inbox.csv,message M-000979,Noodle Union - DUMBO: Invoice #1048106 quantity (2026-09-02 12:40),A reply by the end of Sep 03
+NOREPLY-M-000979,inbox.csv,thread T-00458,first reply Sep 04,
+NOREPLY-M-001152,inbox.csv,message M-001152,Brooks & Patel Capital: Copy of invoice (2026-09-03 11:57),A reply by the end of Sep 04
+NOREPLY-M-001152,inbox.csv,thread T-00546,no reply in the thread,
+NOREPLY-M-001154,inbox.csv,message M-001154,Young & Lam Partners LLP: Statement request (2026-09-04 09:51),A reply by the end of Sep 08
+NOREPLY-M-001154,inbox.csv,thread T-00548,no reply in the thread,
+NOREPLY-M-000985,inbox.csv,message M-000985,Biryani Roasters: Invoice #1048324 quantity (2026-09-10 08:39),A reply by the end of Sep 11
+NOREPLY-M-000985,inbox.csv,thread T-00461,first reply Sep 15,
+NOREPLY-M-000981,inbox.csv,message M-000981,Marrow Bistro: Invoice #1048321 quantity (2026-09-10 11:28),A reply by the end of Sep 11
+NOREPLY-M-000981,inbox.csv,thread T-00459,first reply Sep 14,
+NOREPLY-M-000971,inbox.csv,message M-000971,Brick Lane Cafés - UES: Invoice #1048371 quantity (2026-09-11 09:04),A reply by the end of Sep 14
+NOREPLY-M-000971,inbox.csv,thread T-00454,first reply Sep 16,
+NOREPLY-M-001155,inbox.csv,message M-001155,Walsh and Abbott Media: Statement request (2026-09-15 16:41),A reply by the end of Sep 16
+NOREPLY-M-001155,inbox.csv,thread T-00549,no reply in the thread,
+NOREPLY-M-001151,inbox.csv,message M-001151,Kettle & Crumb Bakeries - Williamsburg: Price check (2026-09-16 12:15),A reply by the end of Sep 17
+NOREPLY-M-001151,inbox.csv,thread T-00545,no reply in the thread,
+NOREPLY-M-000983,inbox.csv,message M-000983,Biryani Diner: Invoice #1048631 quantity (2026-09-18 08:14),A reply by the end of Sep 21
+NOREPLY-M-000983,inbox.csv,thread T-00460,first reply Sep 23,
+PHISH-M-001820,inbox.csv,message M-001820,From accounts@baylinepack-payments.com: URGENT: updated banking details - Bayline Packaging,Verify by calling the number on file
+PHISH-M-001820,suppliers.csv,Bayline Packaging,"emails @baylinepack.com, phone (908) 555-6148",
+NOREPLY-M-001153,inbox.csv,message M-001153,Greco & Lam Capital: Price check (2026-09-22 11:46),A reply by the end of Sep 23
+NOREPLY-M-001153,inbox.csv,thread T-00547,no reply in the thread,
+NOREPLY-M-000973,inbox.csv,message M-000973,Copper Citrus Eatery: Invoice #1048784 quantity (2026-09-23 15:39),A reply by the end of Sep 24
+NOREPLY-M-000973,inbox.csv,thread T-00455,first reply Sep 28,
+NOREPLY-M-000967,inbox.csv,message M-000967,Tide House: Invoice #1048797 quantity (2026-09-24 16:32),A reply by the end of Sep 25
+NOREPLY-M-000967,inbox.csv,thread T-00452,first reply Sep 29,
+NOREPLY-M-001150,inbox.csv,message M-001150,Copper Citrus Eatery: Certificate of insurance (2026-09-25 10:17),A reply by the end of Sep 28
+NOREPLY-M-001150,inbox.csv,thread T-00544,no reply in the thread,
+NOREPLY-M-001149,inbox.csv,message M-001149,Meridian Workplace Services - FiDi: Statement request (2026-09-28 15:22),A reply by the end of Sep 29
+NOREPLY-M-001149,inbox.csv,thread T-00543,no reply in the thread,
+CREDIT-M-000994,inbox.csv,message M-000994,Promised $98.79 credit on invoice 1048153 (2026-09-02 11:27),Credit memo by Sep 10
+CREDIT-M-000994,invoices.csv,invoice 1048153,No credit memo against this invoice,
+CREDIT-M-000992,inbox.csv,message M-000992,Promised $148.90 credit on invoice 1048198 (2026-09-04 14:04),Credit memo by Sep 14
+CREDIT-M-000992,invoices.csv,invoice 1048198,No credit memo against this invoice,
+CREDIT-M-000990,inbox.csv,message M-000990,Promised $63.45 credit on invoice 1048552 (2026-09-16 10:34),Credit memo by Sep 23
+CREDIT-M-000990,invoices.csv,invoice 1048552,No credit memo against this invoice,
+CREDIT-M-000996,inbox.csv,message M-000996,Promised $156.52 credit on invoice 1048624 (2026-09-17 13:53),Credit memo by Sep 24
+CREDIT-M-000996,invoices.csv,invoice 1048624,No credit memo against this invoice,
+CREDIT-M-000988,inbox.csv,message M-000988,Promised $100.41 credit on invoice 1048726 (2026-09-21 09:50),Credit memo by Sep 28
+CREDIT-M-000988,invoices.csv,invoice 1048726,No credit memo against this invoice,

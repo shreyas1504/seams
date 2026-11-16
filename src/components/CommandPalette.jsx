@@ -7,6 +7,7 @@ import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@
 import { loadDemoData } from "@/actions/loadDemoData.js";
 import { paletteApprovalBlock } from "@/components/paletteActionGate.js";
 import { displayText } from "@/lib/displayText.js";
+import { useKitFlags, kitAsk } from "@/lib/kitData.js";
 
 const PALETTE_EXAMPLE_QUESTIONS = ["What did we lose this month?", "Which customer owes the most?", "Which customers do we owe money to?", "What changed after the returns file?"];
 
@@ -24,8 +25,9 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
   const [actionBlocked, setActionBlocked] = useState("");
   const [hasData, setHasData] = useState(false);
   useEffect(() => {
-    base44.entities.Invoice.list(undefined, 1).then((r) => setHasData((r || []).length > 0)).catch(() => {});
+    base44.entities.Finding.list(undefined, 1).then((r) => setHasData((r || []).length > 0)).catch(() => {});
   }, []);
+  const [kitFlags] = useKitFlags();
   const root = useRef(null);
   const input = useRef(null);
   const generation = useRef(0);
@@ -41,17 +43,14 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
     setBusy(true);
     const id = setTimeout(async () => {
       try {
-        // While typing: record lookup + a rules-only preview. No AI call and nothing stored per keystroke.
-        const [record, asked] = await Promise.all([
-          base44.functions.invoke("lookupRecord", {id:query.trim()}),
-          base44.functions.invoke("askSeams", {question:query.trim(), dry_run:true, no_ai:true}),
-        ]);
-        if (token === generation.current) { setLookup(record.data); setAnswer(asked.data); setActionBlocked(""); }
+        // While typing: answer from the loaded findings in code. No AI call and nothing stored per keystroke.
+        const asked = kitAsk(query.trim(), kitFlags);
+        if (token === generation.current) { setLookup(null); setAnswer(asked ? { ...asked, routed_by: "rules" } : null); setActionBlocked(""); }
       } catch (e) { if(token===generation.current) setError(e?.response?.data?.error || e.message); }
       finally { if(token===generation.current) setBusy(false); }
     }, 350);
     return () => clearTimeout(id);
-  }, [query]);
+  }, [query, kitFlags.length]);
   // Enter: ask in full (the AI may route unusual wording). Still a preview: nothing is stored.
   const askFull = async () => {
     const q = query.trim();
@@ -59,10 +58,21 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
     const token = ++generation.current;
     setBusy(true); setError("");
     try {
-      const { data } = await base44.functions.invoke("askSeams", { question: q, dry_run: true });
-      if (token === generation.current) setAnswer({ ...data, asked_full: true });
-    } catch (e) { if (token === generation.current) setError(e?.response?.data?.error || e.message); }
-    finally { if (token === generation.current) setBusy(false); }
+      let ans = kitAsk(q, kitFlags);
+      let routed = "rules";
+      if (!ans || ans.refused) {
+        // Base44 AI only rewrites the question into a short query; the answer still comes from findings in code.
+        try {
+          const res = await base44.integrations.Core.InvokeLLM({
+            prompt: `Rewrite this question as a short search query for a list of billing findings. Use one of: a customer or supplier name, a record ID, "biggest causes", "what do we owe customers", "emails needing a reply", "supplier bills", "bank details", "total this month", or a problem type like "old price" or "delivery fee". Reply with the query only.\n\nQuestion: ${q}`,
+          });
+          const rq = String(typeof res === "string" ? res : res?.text || "").trim();
+          const again = rq ? kitAsk(rq, kitFlags) : null;
+          if (again && !again.refused) { ans = again; routed = "base44-ai"; }
+        } catch { /* AI offline: keep the code answer */ }
+      }
+      if (token === generation.current) setAnswer(ans ? { ...ans, routed_by: routed, asked_full: true } : null);
+    } finally { if (token === generation.current) setBusy(false); }
   };
   // "Draft this fix": only now is a proposed SuggestedAction stored, and it still waits for Approve.
   const draftFix = async () => {
@@ -81,18 +91,18 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
     finally { actionLock.current = false; setWorking(false); }
   };
   // Opened from the Today "Ask Seams" bar: ask in full straight away.
+  // Opened from the header: ask in full once the findings have loaded.
   useEffect(() => {
-    if (!autoAsk || !initialQuery) return;
-    const id = setTimeout(() => askFull(), 400);
+    if (!autoAsk || !initialQuery || !kitFlags.length) return;
+    const id = setTimeout(() => askFull(), 50);
     return () => clearTimeout(id);
-  }, []);
+  }, [kitFlags.length]);
   const openFlag = (flag) => { setSelectedSeam(flag.seam); setSelectedFlagKey(flag.stable_key); onNavigate("Today"); onClose(); };
+  // Record chip: jump to the finding that contains this record ID.
   const openRecord = async (id) => {
-    try {
-      const {data} = await base44.functions.invoke("lookupRecord",{id});
-      if (data.flags?.length) openFlag(data.flags[0]);
-      else { setQuery(id); setLookup(data); }
-    } catch(e) { setError(e?.response?.data?.error || e.message); }
+    const hit = kitFlags.find((f) => f.ids.some((x) => String(x).toLowerCase() === String(id).toLowerCase()));
+    if (hit) openFlag({ ...hit, seam: "__all" });
+    else setQuery(id);
   };
   const act = async (approve) => {
     if (actionLock.current || !answer?.suggested_action_id) return;
@@ -129,12 +139,12 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
       <div className="palette-search"><input ref={input} value={query} onChange={(e)=>setQuery(e.target.value)} onKeyDown={(e)=>{ if (e.key === "Enter") { e.preventDefault(); askFull(); } }} aria-label="Look up a record or ask Seams" placeholder="Ask about the money, look up a record, or say “fix Greenpoint”…" /><button aria-label="Close command palette" className="chip chip-neutral" onClick={onClose}>esc</button></div>
       <div className="palette-results">
         <h2 className="brief-label mb-2">Records</h2>
-        {busy ? <p className="text-xs text-[#6B635A]" role="status">Looking through checked records…</p> : lookup?.kind==="flagged" ? lookup.flags.map((f)=><button data-command key={f.stable_key} className="palette-record" onClick={()=>openFlag(f)}>Flagged: {displayText(f.title)} · <span className="money">{fmt(f.amount_cents)}</span></button>) : lookup?.kind==="ruled_out" ? lookup.ruled.map((r,i)=><p className="palette-record" key={i}>Ruled out: {displayText(r.reason)}</p>) : query.trim() && lookup && /\d/.test(query) && !/\s/.test(query.trim()) ? <p className="palette-record">Not found in any loaded system</p> : query.trim() && lookup ? <p className="text-xs text-[#6B635A]">No record ID in this question.</p> : <p className="text-xs text-[#6B635A]">Search a business ID such as INV-5078 or SH-3058.</p>}
+        {busy ? <p className="text-xs text-[#6B635A]" role="status">Looking through checked records…</p> : lookup?.kind==="flagged" ? lookup.flags.map((f)=><button data-command key={f.stable_key} className="palette-record" onClick={()=>openFlag(f)}>Flagged: {displayText(f.title)} · <span className="money">{fmt(f.amount_cents)}</span></button>) : lookup?.kind==="ruled_out" ? lookup.ruled.map((r,i)=><p className="palette-record" key={i}>Ruled out: {displayText(r.reason)}</p>) : query.trim() && lookup && /\d/.test(query) && !/\s/.test(query.trim()) ? <p className="palette-record">Not in any finding</p> : query.trim() && lookup ? <p className="text-xs text-[#6B635A]">No record ID in this question.</p> : <p className="text-xs text-[#6B635A]">Search a business ID such as INV-5078 or SH-3058.</p>}
         <h2 className="brief-label mt-5 mb-2">Ask Seams</h2>
         {!query.trim() ? <div className="grid gap-1">{PALETTE_EXAMPLE_QUESTIONS.map(q=><button data-command className="palette-action" key={q} onClick={()=>setQuery(q)}>{q}</button>)}</div> : answer ? <div className="card p-3 text-[13px]">
           <p>{displayText(answer.answer)}</p>
           {answer.refused && !answer.asked_full ? <p className="text-xs text-[#6B635A] mt-2">Press Enter to ask Seams in full.</p> : null}
-          {answer.routed_by === "nemotron" ? <p className="text-[11px] text-[#0F766E] mt-2">Understood by NVIDIA Nemotron · numbers computed from records</p> : answer.routed_by === "base44-ai" ? <p className="text-[11px] text-[#6B635A] mt-2">Understood by Base44 AI · numbers computed from records</p> : null}
+          {answer.routed_by === "base44-ai" ? <p className="text-[11px] text-[#0F766E] mt-2">Question understood by Base44 AI · numbers from findings.csv</p> : <p className="text-[11px] text-[#6B635A] mt-2">Numbers from findings.csv</p>}
           {answer.would_propose ? <div className="flex gap-2 mt-3"><button data-command className="fix-pill" disabled={working||role!=="admin"} onClick={draftFix}>{working?"Drafting…":"Draft this fix"}</button><span className="text-xs text-[#6B635A] self-center">Nothing is sent until a Controller approves.</span></div> : null}
           <div className="flex flex-wrap gap-1 mt-2">{[...new Set(answer.ids||[])].map(id=><button data-command className="record-chip" key={id} onClick={()=>openRecord(id)}>{id}</button>)}</div>
           {answer.suggested_action_id ? <div className="flex gap-2 mt-3"><button data-command className="fix-pill" disabled={working||role!=="admin"||Boolean(actionBlocked)} onClick={()=>act(true)}>{working?"Sending…":"Approve"}</button><button data-command className="seam-chip" disabled={working} onClick={()=>act(false)}>Reject</button></div> : null}

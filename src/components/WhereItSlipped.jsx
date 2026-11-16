@@ -23,6 +23,7 @@ export default function WhereItSlipped({ flags, ruledCount, stages, onPicked }) 
   // Default selection: the seam with the most recoverable cents (also when the selected seam has closed).
   useEffect(() => {
     if (!rows.length) return;
+    if (selectedSeam === "__all") return;
     if (!selectedSeam || !rows.some((r) => r.seam === selectedSeam)) setSelectedSeam(seamFlowDefault(rows));
   }, [rows, selectedSeam, setSelectedSeam]);
 
