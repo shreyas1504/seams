@@ -22,12 +22,13 @@ function FixDismissPopover({ onConfirm, onCancel }) {
   const ref = useRef(null);
 
   useEffect(() => {
+    const previous = document.activeElement;
     ref.current?.querySelector("input")?.focus();
     const onKey = (e) => {
       if (e.key === "Escape") onCancel();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); previous?.focus?.(); };
   }, [onCancel]);
 
   const reason = choice === "Other" ? other.trim() : choice;
@@ -80,7 +81,7 @@ function FixDismissPopover({ onConfirm, onCancel }) {
   );
 }
 
-function FixCard({ flag, selected, isNew, stamp, onSelect, onAct, onDismiss }) {
+function FixCard({ flag, selected, isNew, stamp, onSelect, onAct, onDismiss, customerLabel }) {
   const [asking, setAsking] = useState(false);
   const [collapsing, setCollapsing] = useState(false);
 
@@ -133,7 +134,7 @@ function FixCard({ flag, selected, isNew, stamp, onSelect, onAct, onDismiss }) {
                 <span className="fix-stamp fix-stamp-approval">NEEDS APPROVAL</span>
               ) : (
                 <button type="button" className="fix-pill" onClick={() => onAct(flag)}>
-                  {fixActionLabel(flag)}
+                  {flag.bucket === "credit_owed" ? `Include in ${flag.party} letter` : flag.lane === "vendor" ? fixActionLabel(flag) : customerLabel}
                 </button>
               )}
             </div>
@@ -149,21 +150,23 @@ function FixCard({ flag, selected, isNew, stamp, onSelect, onAct, onDismiss }) {
   );
 }
 
-export default function TodaysFixes({ seam, cards, rootCause, selectedKey, newKeys, stamps, lookAlikes, onSelect, onAct, onDismiss }) {
+export default function TodaysFixes({ seam, cards, rootCause, selectedKey, newKeys, stamps, lookAlikes, onSelect, onAct, onDismiss, customerLabels }) {
+  const regular = cards.filter((f) => f.bucket !== "credit_owed");
+  const credits = cards.filter((f) => f.bucket === "credit_owed");
   return (
     <section className="rise lg:col-span-6" aria-label="Today's fixes">
       <h2 className="font-display text-[22px] font-semibold leading-tight text-ink">
-        Today's fixes{seam ? ` · ${seamLabel(seam)}` : ""}
+        Today's fixes{seam ? ` · ${seamLabel(seam)} (${regular.filter((f) => (f.status || "open") === "open").length})` : ""}
       </h2>
       {rootCause ? <p className="mt-1 text-[12.5px] text-muted">Root cause: {rootCause}</p> : null}
 
-      {!cards.length ? (
+      {!regular.length ? (
         <p className="card mt-4 px-4 py-6 text-center text-[14px] text-muted">
           Nothing open on this seam. {lookAlikes} look-alikes checked.
         </p>
       ) : (
         <ul className="mt-4" aria-label={`Open findings on ${seamLabel(seam)}`}>
-          {cards.map((f) => (
+          {regular.map((f) => (
             <FixCard
               key={f.stable_key}
               flag={f}
@@ -173,10 +176,17 @@ export default function TodaysFixes({ seam, cards, rootCause, selectedKey, newKe
               onSelect={onSelect}
               onAct={onAct}
               onDismiss={onDismiss}
+              customerLabel={customerLabels.get(f.party)}
             />
           ))}
         </ul>
       )}
+      {credits.length ? <>
+        <h3 className="mt-4 text-[13px] font-semibold text-credit">Credits we owe ({credits.length})</h3>
+        <ul className="mt-2" aria-label="Credits we owe">
+          {credits.map((f) => <FixCard key={f.stable_key} flag={f} selected={f.stable_key === selectedKey} isNew={newKeys.has(f.stable_key)} stamp={stamps.get(f.stable_key)} onSelect={onSelect} onAct={onAct} onDismiss={onDismiss} />)}
+        </ul>
+      </> : null}
     </section>
   );
 }

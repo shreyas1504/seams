@@ -1,8 +1,9 @@
 // Vendor refund drawer — one direction, lines from vendor-lane flags.
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
 import SideBySide from "@/components/SideBySide.jsx";
+import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 
 export default function RefundDrawer({ party, role = "admin", pendingAction = null, onClose, onSent, onPending }) {
   const [draft, setDraft] = useState(null);
@@ -11,6 +12,9 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [pendingSecond, setPendingSecond] = useState(pendingAction);
+  const sendLock = useRef(false);
+  useSeamsDrawerLifecycle(onClose);
+  useEffect(() => { if (err) seamsNotifyFeedback({ error: true, message: err }); }, [err]);
 
   const load = async (excl = exclude) => {
     setErr("");
@@ -37,7 +41,9 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
   };
 
   const send = async () => {
+    if (sendLock.current || pendingSecond) return;
     if (role !== "admin") { setErr("Controller only"); return; }
+    sendLock.current = true;
     setBusy(true);
     setErr("");
     try {
@@ -53,27 +59,33 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
         setPendingSecond(data.pending_second);
         onPending?.(data);
       } else {
+        void seamsNotifySent(data).catch(() => seamsNotifyFeedback({ message: `Sent to ${party} · ${fmt(Math.abs(draft.total_cents))}.` }));
         onSent?.(data);
         onClose?.();
       }
     } catch (e) {
       setErr(e?.response?.data?.error || e.message);
     } finally {
+      sendLock.current = false;
       setBusy(false);
     }
   };
 
   // A different Controller completes a pending four-eyes send.
   const approve = async () => {
+    if (sendLock.current) return;
+    sendLock.current = true;
     setBusy(true);
     setErr("");
     try {
       const { data } = await base44.functions.invoke("approveSecond", { action_id: pendingSecond });
+      void seamsNotifySent(data).catch(() => seamsNotifyFeedback({ message: `Sent to ${party} · ${fmt(Math.abs(draft.total_cents))}.` }));
       onSent?.(data);
       onClose?.();
     } catch (e) {
       setErr(e?.response?.data?.error || e.message);
     } finally {
+      sendLock.current = false;
       setBusy(false);
     }
   };
@@ -81,7 +93,10 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
   if (!draft) {
     return (
       <div className="fixed inset-0 z-40 flex justify-end bg-ink/30">
-        <div className="h-full w-full max-w-lg bg-white p-6 text-sm text-muted">Building refund…</div>
+        <div className="h-full w-full max-w-lg bg-white p-6 text-sm text-muted" role="dialog" aria-label="Refund letter">
+          <button onClick={onClose}>Close</button>
+          {err ? <p role="alert">{err}</p> : <><p>Building refund…</p><div className="seams-skeleton mt-4 h-32" /></>}
+        </div>
       </div>
     );
   }
@@ -137,19 +152,22 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
                 onClick={approve}
                 className="mt-2 min-h-[36px] rounded-full border border-[#4338CA] px-3 font-medium disabled:opacity-40"
               >
-                Approve as second Controller
+                {busy ? <><span className="seams-spinner" /> Sending…</> : "Approve as second Controller"}
               </button>
             </div>
           ) : null}
           {err ? <p className="text-xs text-owed">{err}</p> : null}
           <button
             type="button"
-            disabled={busy || role !== "admin" || !!pendingSecond}
+            disabled={busy || role !== "admin" || !!pendingSecond || !draft.flag_keys?.length || !draft.to}
             onClick={send}
             className="min-h-[44px] w-full rounded-2xl bg-ink text-sm font-medium text-white disabled:opacity-40"
           >
-            {role !== "admin" ? "Controller only" : `Request ${fmt(draft.total_cents)} refund`}
+            {busy ? <><span className="seams-spinner" /> Sending…</> : role !== "admin" ? "Controller only" : `Request ${fmt(draft.total_cents)} refund`}
           </button>
+          <p className="text-xs text-muted" role="status">
+            {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : Math.abs(draft.total_cents) >= 500000 ? "Needs a second Controller over $5,000" : ""}
+          </p>
         </div>
       </div>
     </div>

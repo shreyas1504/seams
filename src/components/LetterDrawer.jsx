@@ -1,8 +1,9 @@
 // Customer / correction letter drawer: sections, SideBySide, exclude toggles, receipt, send gate.
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
 import SideBySide from "@/components/SideBySide.jsx";
+import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 
 export default function LetterDrawer({ party, kind = "customer", role = "admin", cardNet, pendingAction = null, onClose, onSent, onPending }) {
   const [draft, setDraft] = useState(null);
@@ -12,6 +13,9 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [pendingSecond, setPendingSecond] = useState(pendingAction);
+  const sendLock = useRef(false);
+  useSeamsDrawerLifecycle(onClose);
+  useEffect(() => { if (err) seamsNotifyFeedback({ error: true, message: err }); }, [err]);
 
   const load = async (excl = exclude, t = tone) => {
     setErr("");
@@ -39,7 +43,9 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
   };
 
   const send = async () => {
+    if (sendLock.current || pendingSecond) return;
     if (role !== "admin") { setErr("Controller only"); return; }
+    sendLock.current = true;
     setBusy(true);
     setErr("");
     try {
@@ -55,12 +61,14 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
         setPendingSecond(data.pending_second);
         onPending?.(data);
       } else {
+        void seamsNotifySent(data).catch(() => seamsNotifyFeedback({ message: `Sent to ${party} · ${fmt(Math.abs(draft.total_cents))}.` }));
         onSent?.(data);
         onClose?.();
       }
     } catch (e) {
       setErr(e?.response?.data?.error || e.message);
     } finally {
+      sendLock.current = false;
       setBusy(false);
     }
   };
@@ -92,15 +100,19 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
 
   // A different Controller completes a pending four-eyes send.
   const approve = async () => {
+    if (sendLock.current) return;
+    sendLock.current = true;
     setBusy(true);
     setErr("");
     try {
       const { data } = await base44.functions.invoke("approveSecond", { action_id: pendingSecond });
+      void seamsNotifySent(data).catch(() => seamsNotifyFeedback({ message: `Sent to ${party} · ${fmt(Math.abs(draft.total_cents))}.` }));
       onSent?.(data);
       onClose?.();
     } catch (e) {
       setErr(e?.response?.data?.error || e.message);
     } finally {
+      sendLock.current = false;
       setBusy(false);
     }
   };
@@ -108,7 +120,10 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
   if (!draft) {
     return (
       <div className="fixed inset-0 z-40 flex justify-end bg-ink/30">
-        <div className="h-full w-full max-w-lg bg-white p-6 text-sm text-muted">Building letter…</div>
+        <div className="h-full w-full max-w-lg bg-white p-6 text-sm text-muted" role="dialog" aria-label="Letter">
+          <button onClick={onClose}>Close</button>
+          {err ? <p role="alert">{err}</p> : <><p>Building letter…</p><div className="seams-skeleton mt-4 h-32" /></>}
+        </div>
       </div>
     );
   }
@@ -227,7 +242,7 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
                 onClick={approve}
                 className="mt-2 min-h-[36px] rounded-full border border-[#4338CA] px-3 font-medium disabled:opacity-40"
               >
-                Approve as second Controller
+                {busy ? <><span className="seams-spinner" /> Sending…</> : "Approve as second Controller"}
               </button>
             </div>
           ) : null}
@@ -237,12 +252,12 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              disabled={busy || role !== "admin" || !!pendingSecond}
+              disabled={busy || role !== "admin" || !!pendingSecond || !draft.flag_keys?.length || !draft.to}
               onClick={send}
               className="min-h-[44px] flex-1 rounded-2xl bg-ink px-4 text-sm font-medium text-white disabled:opacity-40"
               title={role !== "admin" ? "Controller only" : undefined}
             >
-              {role !== "admin" ? "Controller only" : primary}
+              {busy ? <><span className="seams-spinner" /> Sending…</> : role !== "admin" ? "Controller only" : primary}
             </button>
             <button type="button" disabled={busy} onClick={() => dismiss("Not a leak")} className="min-h-[44px] rounded-2xl border border-line bg-white px-3 text-xs">
               Not a leak
@@ -251,6 +266,9 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
               Already handled
             </button>
           </div>
+          <p className="text-xs text-muted" role="status">
+            {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : Math.abs(draft.total_cents) >= 500000 ? "Needs a second Controller over $5,000" : ""}
+          </p>
         </div>
       </div>
     </div>

@@ -201,6 +201,11 @@ function fixMathCandidate(flag) {
 /** One line computing the amount from evidence, or the rule fallback when the fields can't reproduce it exactly. */
 export function fixMathLine(flag) {
   if (!flag) return "";
+  if (flag.rule_id === "overdue") {
+    const match = String(flag.why || "").match(/for \$([\d,.]+).*still open (\d+) days later/);
+    const invoice = (flag.evidence || []).find((e) => e.system === "Billing")?.id;
+    if (invoice && match && toCents(match[1]) === flag.amount_cents) return `${invoice} open ${fmt(flag.amount_cents)}, ${match[2]} days past due`;
+  }
   const c = fixMathCandidate(flag);
   if (c && c.cents === flag.amount_cents) return c.bare ? c.text : `${c.text} = ${fmt(c.cents)}`;
   return `Amount computed by rule ${flag.rule || flag.rule_id}`;

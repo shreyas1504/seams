@@ -596,6 +596,30 @@ body {
   opacity: 0;
 }
 
+/* Shared interaction states, including SVG keyboard targets. */
+:where(button,a,input,select,textarea,[tabindex],[role="button"]):focus-visible {
+  outline: 2px solid #1F4D3A;
+  outline-offset: 2px;
+}
+button[class], .fix-card { transition: transform 90ms ease-out, background-color 90ms ease-out, border-color 90ms ease-out, opacity 90ms ease-out; }
+button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
+.avatar { width: auto; min-width: 38px; padding: 0 10px; }
+.fix-card { flex-wrap: wrap; }
+.fix-card > .min-w-0 { min-width: 140px; }
+.fix-card .fix-pill { white-space: normal; text-align: left; max-width: 100%; padding-top: 6px; padding-bottom: 6px; }
+.seam-tooltip { transition: opacity 150ms ease; }
+.seams-toast-region { position: fixed; left: 20px; bottom: 20px; z-index: 70; max-width: calc(100vw - 40px); }
+.seams-toast { display: flex; align-items: center; gap: 16px; background: #0F766E; color: white; border-radius: 12px; padding: 14px 18px; box-shadow: 0 6px 24px #0002; font-size: 13px; }
+.seams-toast button { text-decoration: underline; font-weight: 600; }
+.seams-toast.is-error { background: #9F1239; }
+.seams-shortcuts { position: fixed; z-index: 80; inset: 25% auto auto 50%; transform: translateX(-50%); width: min(360px,90vw); background: white; border: 1px solid #ECE4D8; padding: 24px; border-radius: 16px; box-shadow: 0 0 0 100vmax #1c191755; }
+.seams-shortcuts p { margin-top: 10px; font-size: 13px; }
+@keyframes seams-shimmer { to { background-position: -200% 0; } }
+.seams-skeleton { border-radius: 14px; background: linear-gradient(90deg,#ECE4D8 25%,#F9F5EE 50%,#ECE4D8 75%); background-size: 200% 100%; animation: seams-shimmer 1.2s linear infinite; }
+.seams-skeleton-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; }
+@keyframes seams-spin { to { transform: rotate(360deg); } }
+.seams-spinner { display: inline-block; height: 13px; width: 13px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; margin-right: 6px; animation: seams-spin .8s linear infinite; vertical-align: middle; }
+@media (max-width: 640px) { .seams-skeleton-grid { grid-template-columns: 1fr; } .fix-card > div { max-width: 100%; } }
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

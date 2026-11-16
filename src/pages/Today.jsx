@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useEntity } from "@/lib/useEntity";
-import { totalsOf, fmt } from "@/lib/engine/engine.js";
+import { totalsOf, fmt, buildLetterDraft, DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
 import { useSelectedSeam } from "@/context/SelectedSeam.jsx";
 import { seamLabel, seamTint, shortDate } from "@/components/systems.js";
 import WhereItSlipped from "@/components/WhereItSlipped.jsx";
@@ -13,6 +13,7 @@ import LetterDrawer from "@/components/LetterDrawer.jsx";
 import RefundDrawer from "@/components/RefundDrawer.jsx";
 import { fixPatternFor, fixRootCause } from "@/components/fixProof.js";
 import { announceSeamsDataChanged, onSeamsDataChanged } from "@/actions/dataChanged.js";
+import { SeamsSkeleton } from "@/components/InteractionFeedback.jsx";
 
 const TODAY_LIVE = new Set(["open", "sent", "disputed"]);
 const TODAY_GONE = new Set(["dismissed", "cleared"]);
@@ -70,6 +71,7 @@ export default function Today({ role = "admin" }) {
   const [ruled, reloadRuled] = useEntity("RuledOut");
   const [patterns, reloadPatterns] = useEntity("Pattern");
   const [actions, reloadActions] = useEntity("SuggestedAction");
+  const [fixSettings] = useEntity("Setting");
   const [contracts] = useEntity("Contract");
   const [shipments] = useEntity("Shipment");
   const [invoices] = useEntity("Invoice");
@@ -202,6 +204,16 @@ export default function Today({ role = "admin" }) {
         .sort((a, b) => (b.amount_cents || 0) - (a.amount_cents || 0)),
     [flags, selectedSeam, sentKeys],
   );
+  const customerLabels = useMemo(() => {
+    const labels = new Map();
+    for (const f of flags) {
+      if (f.lane === "vendor" || labels.has(f.party)) continue;
+      const total = buildLetterDraft({ party: f.party, flags, contracts, rule_enabled: { ...DEFAULT_SETTINGS.rule_enabled, ...(fixSettings[0]?.rule_enabled || {}) } }).total_cents;
+      const approval = Math.abs(total) >= (fixSettings[0]?.four_eyes_threshold_cents ?? 500000);
+      labels.set(f.party, approval ? `Request approval · ${fmt(Math.abs(total))}` : `Settle ${f.party} · ${fmt(Math.abs(total))}`);
+    }
+    return labels;
+  }, [flags, contracts, fixSettings]);
 
   // Default selected flag: the largest open flag in the seam.
   useEffect(() => {
@@ -258,12 +270,31 @@ export default function Today({ role = "admin" }) {
     },
     [pendingByParty, setSelectedFlagKey],
   );
+  useEffect(() => {
+    const key = (e) => {
+      if (e.target.closest?.("input,textarea,select,[contenteditable=true]") || e.metaKey || e.ctrlKey || e.altKey || document.querySelector("[role=dialog]")) return;
+      const ordered = [...fixCards.filter((f) => f.bucket !== "credit_owed"), ...fixCards.filter((f) => f.bucket === "credit_owed")];
+      const i = ordered.findIndex((f) => f.stable_key === selectedFlagKey);
+      if (["j", "k"].includes(e.key.toLowerCase()) && ordered.length) {
+        e.preventDefault();
+        const next = ordered[Math.max(0, Math.min(ordered.length - 1, i + (e.key.toLowerCase() === "j" ? 1 : -1)))];
+        setSelectedFlagKey(next.stable_key);
+        document.querySelectorAll(".fix-card button[aria-pressed]")[ordered.indexOf(next)]?.focus();
+      } else if (e.key === "Enter" && selectedFlag && (!e.target.closest?.("button,a") || e.target.matches?.(".fix-card button[aria-pressed]"))) {
+        e.preventDefault();
+        openFix(selectedFlag);
+      }
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [fixCards, selectedFlagKey, selectedFlag, openFix, setSelectedFlagKey]);
 
-  const onDrawerSent = useCallback((data) => {
+  const onDrawerSent = useCallback(async (data) => {
     if (drawer && !data?.dismissed) {
       // Everything for this party in this lane that was open went out in the letter.
       const lane = drawer.kind === "vendor" ? "vendor" : "customer";
-      const went = flags.filter((f) => f.party === drawer.party && (f.lane || "customer") === lane && (f.status || "open") === "open");
+      const sentRows = await base44.entities.Flag.filter({ party: drawer.party });
+      const went = sentRows.filter((f) => (f.lane || "customer") === lane && f.status === "sent");
       setSentKeys((prev) => new Set([...prev, ...went.map((f) => f.stable_key)]));
     }
     setDrawer(null);
@@ -273,13 +304,14 @@ export default function Today({ role = "admin" }) {
   const dismissFix = useCallback(async (f, reason, startCollapse) => {
     await base44.functions.invoke("transitionFlag", { flag_id: f.id, to_status: "dismissed", reason });
     startCollapse();
-    await new Promise((r) => setTimeout(r, FIX_COLLAPSE_MS));
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) await new Promise((r) => setTimeout(r, FIX_COLLAPSE_MS));
     announceSeamsDataChanged();
   }, []);
 
   const showSince = Boolean(visit?.last_seen_at);
   const since = visit?.since || {};
 
+  if (!flags.length) return <SeamsSkeleton />;
   return (
     <div className="grid gap-5 lg:grid-cols-12">
       <section className="rise lg:col-span-4" aria-label="Morning brief">
@@ -372,6 +404,7 @@ export default function Today({ role = "admin" }) {
             onSelect={selectFix}
             onAct={openFix}
             onDismiss={dismissFix}
+            customerLabels={customerLabels}
           />
           <ProofTrace flag={selectedFlag} rootCause={proofRootCause} ruled={ruled} />
         </>

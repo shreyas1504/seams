@@ -1,6 +1,7 @@
 // System map: one SVG node per system, one connector per seam with open findings.
 // Connector width scales with dollars; a dashed "drip" stroke animates along it.
 import React from "react";
+import SeamConnector from "@/components/SeamConnector.jsx";
 import { fmt } from "@/lib/engine/engine.js";
 import { SYSTEM_TINT, seamLabel } from "@/components/systems.js";
 import { SEAM_FLOW_COLORS, SEAM_FLOW_OVERDUE_SEAM, seamFlowWidth, seamFlowTextWidth } from "@/components/seamFlow.js";
@@ -72,11 +73,18 @@ export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onS
     <svg
       viewBox={`0 0 760 ${height}`}
       width="100%"
-      role="img"
+      role="group"
       aria-label={seamMapAriaLabel(rows)}
       className="block"
       onMouseLeave={() => onHover(null)}
     >
+      {Object.entries(nodes).map(([key, n]) => (
+        <g key={key}>
+          <rect x={n.x} y={n.y} width={SEAM_MAP_NODE_W} height={SEAM_MAP_NODE_H} rx={14} fill={n.tint.bg} stroke={n.tint.ink} strokeOpacity={0.18} />
+          <text x={n.x + SEAM_MAP_NODE_W / 2} y={n.sub ? n.y + 22 : n.y + 30} textAnchor="middle" fontFamily="IBM Plex Sans, system-ui, sans-serif" fontSize="14" fontWeight="600" fill={n.tint.ink}>{n.label}</text>
+          {n.sub ? <text x={n.x + SEAM_MAP_NODE_W / 2} y={n.y + 38} textAnchor="middle" fontFamily="IBM Plex Sans, system-ui, sans-serif" fontSize="11" fill={n.tint.ink} fillOpacity={0.8}>{n.sub}</text> : null}
+        </g>
+      ))}
       {rows.map((r) => {
         const a = nodes[r.from];
         const b = nodes[r.to];
@@ -90,12 +98,10 @@ export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onS
         const cy = geo.mid[1] - geo.lift;
         const dim = activeSeam && activeSeam !== r.seam;
         return (
-          <g
+          <SeamConnector
             key={r.seam}
-            className="seam-conn"
-            style={{ opacity: dim ? 0.35 : 1, cursor: "pointer" }}
-            onMouseEnter={() => onHover(r.seam)}
-            onClick={() => onSelect(r.seam)}
+            row={r} dim={dim} onHover={onHover} onSelect={onSelect}
+            x={Math.max(125, Math.min(635, cx))} y={Math.max(78, cy)}
           >
             <path
               d={geo.d}
@@ -144,48 +150,10 @@ export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onS
                 </text>
               </g>
             )}
-          </g>
+          </SeamConnector>
         );
       })}
 
-      {Object.entries(nodes).map(([key, n]) => (
-        <g key={key}>
-          <rect
-            x={n.x}
-            y={n.y}
-            width={SEAM_MAP_NODE_W}
-            height={SEAM_MAP_NODE_H}
-            rx={14}
-            fill={n.tint.bg}
-            stroke={n.tint.ink}
-            strokeOpacity={0.18}
-          />
-          <text
-            x={n.x + SEAM_MAP_NODE_W / 2}
-            y={n.sub ? n.y + 22 : n.y + 30}
-            textAnchor="middle"
-            fontFamily="IBM Plex Sans, system-ui, sans-serif"
-            fontSize="14"
-            fontWeight="600"
-            fill={n.tint.ink}
-          >
-            {n.label}
-          </text>
-          {n.sub ? (
-            <text
-              x={n.x + SEAM_MAP_NODE_W / 2}
-              y={n.y + 38}
-              textAnchor="middle"
-              fontFamily="IBM Plex Sans, system-ui, sans-serif"
-              fontSize="11"
-              fill={n.tint.ink}
-              fillOpacity={0.8}
-            >
-              {n.sub}
-            </text>
-          ) : null}
-        </g>
-      ))}
     </svg>
   );
 }

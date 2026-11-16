@@ -1,6 +1,7 @@
 // Money journey: the customer money band with four gates, and tributaries where money leaks out.
 // Paying vendors is a second, thinner band with its own tributary.
 import React from "react";
+import SeamConnector from "@/components/SeamConnector.jsx";
 import { fmt } from "@/lib/engine/engine.js";
 import { SYSTEM_TINT, seamLabel } from "@/components/systems.js";
 import { SEAM_FLOW_COLORS, SEAM_FLOW_OVERDUE_SEAM, seamFlowWidth, seamFlowTextWidth } from "@/components/seamFlow.js";
@@ -48,7 +49,7 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
     <svg
       viewBox="0 0 1300 380"
       width="100%"
-      role="img"
+      role="group"
       aria-label={journeyAriaLabel(rows)}
       className="block"
       onMouseLeave={() => onHover(null)}
@@ -106,12 +107,10 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
         const cardY = t.y1 - cardH / 2;
         const dim = activeSeam && activeSeam !== r.seam;
         return (
-          <g
+          <SeamConnector
             key={r.seam}
-            className="seam-conn"
-            style={{ opacity: dim ? 0.35 : 1, cursor: "pointer" }}
-            onMouseEnter={() => onHover(r.seam)}
-            onClick={() => onSelect(r.seam)}
+            row={r} dim={dim} onHover={onHover} onSelect={onSelect}
+            x={Math.min(1160, cardX + cardW / 2)} y={cardY}
           >
             <title>{`${seamLabel(r.seam)}: ${t.label}`}</title>
             <path d={d} fill="none" stroke={colors.soft} strokeWidth={strokeW} strokeLinecap="round" opacity={0.8} />
@@ -131,7 +130,7 @@ export default function MoneyJourney({ rows, maxCents, stages, activeSeam, onHov
             >
               {amount}
             </text>
-          </g>
+          </SeamConnector>
         );
       })}
     </svg>

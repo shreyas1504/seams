@@ -12,6 +12,7 @@ import { SelectedSeamProvider } from "./context/SelectedSeam.jsx";
 import { loadDemoData } from "./actions/loadDemoData.js";
 import { shortDate } from "./components/systems.js";
 import { setLocalUser } from "./lib/local/localBase44.js";
+import InteractionFeedback, { SeamsSkeleton } from "./components/InteractionFeedback.jsx";
 
 // Accounts and Activity show the previous Overview and Ledger pages until they are rebuilt.
 const NAV = [
@@ -23,8 +24,9 @@ const NAV = [
 ];
 
 const USERS = {
-  admin: { name: "Dana Controller", email: "dana@northline.example", roleLabel: "Controller" },
-  user: { name: "Analyst", email: "analyst@northline.example", roleLabel: "Analyst" },
+  admin: { name: "Dana", email: "dana@northline.example", roleLabel: "Controller", role: "admin" },
+  sam: { name: "Sam", email: "sam@northline.example", roleLabel: "Controller, second approver", role: "admin" },
+  user: { name: "Alex", email: "alex@northline.example", roleLabel: "Analyst", role: "user" },
 };
 
 function SearchIcon() {
@@ -80,21 +82,22 @@ function AvatarMenu({ role, onSwitchRole }) {
         aria-label={`Account: ${u.name}, ${u.roleLabel}`}
         onClick={() => setOpen((o) => !o)}
       >
-        {u.name.slice(0, 1)}
+        {u.name}
       </button>
       {open ? (
         <div className="card rise absolute right-0 top-[calc(100%+8px)] z-30 w-[240px] p-3 shadow-lift" role="menu">
           <p className="text-[13px] font-semibold text-ink">{u.name}</p>
           <p className="text-[11px] text-muted">{u.email}</p>
           <label className="mt-3 block text-[11px] font-medium text-muted">
-            Role
+            Demo identity
             <select
               value={role}
               onChange={(e) => onSwitchRole(e.target.value)}
               className="mt-1 min-h-[36px] w-full rounded-[10px] border border-line bg-paper px-2 text-[13px] font-medium text-ink"
             >
-              <option value="admin">Controller</option>
-              <option value="user">Analyst</option>
+              <option value="admin">Dana · Controller</option>
+              <option value="sam">Sam · Controller, second approver</option>
+              <option value="user">Alex · Analyst</option>
             </select>
           </label>
         </div>
@@ -148,7 +151,8 @@ function EmptyState({ role }) {
 
 export default function App() {
   const [tab, setTab] = useState("Today");
-  const [role, setRole] = useState("admin");
+  const [identity, setIdentity] = useState("admin");
+  const role = USERS[identity].role;
   const [lookupQ, setLookupQ] = useState("");
   const [lookupSignal, setLookupSignal] = useState(0);
   const [settings] = useEntity("Setting");
@@ -156,9 +160,10 @@ export default function App() {
   const searchRef = useRef(null);
 
   const switchRole = (r) => {
-    setRole(r);
-    setLocalUser({ email: USERS[r].email, role: r });
+    setIdentity(r);
+    setLocalUser({ email: USERS[r].email, role: USERS[r].role, full_name: USERS[r].name });
   };
+  useEffect(() => { switchRole("admin"); }, []);
 
   const runHeaderSearch = (e) => {
     e.preventDefault();
@@ -168,6 +173,7 @@ export default function App() {
   };
 
   const onKey = useCallback((e) => {
+    if (e.target.closest?.("input,textarea,select,[contenteditable=true]")) return;
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
       searchRef.current?.focus();
@@ -182,7 +188,7 @@ export default function App() {
 
   let page;
   if (tab === "Today") {
-    page = !flagState.loaded ? null : flagState.n ? <Today role={role} /> : <EmptyState role={role} />;
+    page = !flagState.loaded ? <SeamsSkeleton /> : flagState.n ? <Today role={role} /> : <EmptyState role={role} />;
   } else if (tab === "Accounts") {
     page = (
       <Home
@@ -261,7 +267,7 @@ export default function App() {
               <button type="button" className="btn-forest" onClick={() => setTab("Data")}>
                 Upload new data
               </button>
-              <AvatarMenu role={role} onSwitchRole={switchRole} />
+              <AvatarMenu role={identity} onSwitchRole={switchRole} />
             </div>
           </div>
         </header>
@@ -269,6 +275,7 @@ export default function App() {
         <main id="main" className="mx-auto max-w-[1280px] px-5 py-6 md:px-8 md:py-7">
           {page}
         </main>
+        <InteractionFeedback />
       </div>
     </SelectedSeamProvider>
   );
