@@ -6,7 +6,7 @@ export const SEAM_FLOW_OVERDUE_SEAM = "Billing→Cash";
 export const SEAM_FLOW_COLORS = {
   owed: { soft: "#E8A585", drip: "#C2410C", label: "#7C2D12" },
   credit: { soft: "#9FD4C8", drip: "#0F766E", label: "#115E59" },
-  overdue: { soft: "#F0B8C4", drip: "#9F1239", label: "#881337" },
+  overdue: { soft: "#E9A3B4", drip: "#9F1239", label: "#881337" },
 };
 
 /**

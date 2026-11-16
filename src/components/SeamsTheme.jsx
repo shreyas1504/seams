@@ -281,9 +281,11 @@ body {
     stroke-dashoffset: -18;
   }
 }
-.seam-drip {
-  animation: seam-drip-flow 1.2s linear infinite;
-}
+.seam-drip { animation: none; }
+.seam-drip--on, .seam-conn:hover .seam-drip, .seam-conn:focus-visible .seam-drip { animation: seam-drip-flow 1.2s linear infinite; }
+.seam-conn:focus-visible { outline: none; }
+.seam-conn:focus-visible .seam-label-pill { stroke: #1F4D3A; stroke-width: 3; stroke-opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .seam-drip--on, .seam-conn:hover .seam-drip { animation: none; } }
 
 .seam-chip {
   display: inline-flex;

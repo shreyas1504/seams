@@ -81,10 +81,10 @@ export default function WhereItSlipped({ flags, ruledCount, stages, onPicked }) 
           </div>
 
           <p className="slip-legend mt-2" aria-hidden="true">
-            <span><i className="legend-dot legend-owed" /> Owed to us</span>
-            <span><i className="legend-dot legend-late" /> Late, not lost</span>
-            <span><i className="legend-dot legend-credit" /> We owe customers</span>
-            <span>Wider line = more money · click a seam to see its fixes</span>
+            {rows.some((r) => !r.overdue && !r.creditOnly) ? <span><i className="legend-dot legend-owed" /> Owed to us</span> : null}
+            {rows.some((r) => r.overdue) ? <span><i className="legend-dot legend-late" /> Late, not lost</span> : null}
+            {rows.some((r) => r.creditOnly) ? <span><i className="legend-dot legend-credit" /> We owe customers</span> : null}
+            <span>Click an amount to see its fixes</span>
           </p>
           <div className="slip-rows mt-3 flex flex-wrap gap-2" role="group" aria-label="Seams">
             {rows.map((r) => (
