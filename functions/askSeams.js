@@ -45,7 +45,7 @@ function envGet(name) {
 }
 const nvidiaKey = () => envGet("NVIDIA_API_KEY");
 // Request format per build.nvidia.com API reference for this model (OpenAI-compatible chat completions).
-async function classifyWithNemotron(key, prompt) {
+async function classifyWithNemotron(key, prompt, useTemplateKwargs = false) {
   const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", accept: "application/json", authorization: `Bearer ${key}` },
@@ -56,7 +56,9 @@ async function classifyWithNemotron(key, prompt) {
         { role: "user", content: prompt },
       ],
       stream: false, // the endpoint streams by default
-      reasoning_effort: "none", // routing needs no reasoning: faster
+      // Thinking off: routing needs no reasoning trace. The API reference prefers reasoning_effort; NVIDIA's
+      // code sample uses chat_template_kwargs, so a 400 on the first form retries once with the second.
+      ...(useTemplateKwargs ? { chat_template_kwargs: { enable_thinking: false } } : { reasoning_effort: "none" }),
       temperature: 0,
       max_tokens: 300,
       response_format: {
@@ -79,6 +81,7 @@ async function classifyWithNemotron(key, prompt) {
       },
     }),
   });
+  if (res.status === 400 && !useTemplateKwargs) return classifyWithNemotron(key, prompt, true);
   if (res.status !== 200) throw new Error(`NVIDIA ${res.status}`); // 202 = queued: do not wait, fall back
   const msg = (await res.json())?.choices?.[0]?.message || {};
   const json = String(msg.content || "").match(/\{[\s\S]*\}/);
