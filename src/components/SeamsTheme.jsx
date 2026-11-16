@@ -1154,6 +1154,9 @@ button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
 .settings-input:focus { outline: 2px solid var(--s-forest); outline-offset: 1px; }
 .settings-input:disabled { background: var(--s-paper); color: var(--s-muted); }
 .settings-check { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; cursor: pointer; }
+.finding-chart { margin-top: 12px; border: 1px solid var(--s-line); border-radius: 12px; background: #fff; padding: 10px 12px 8px; }
+.finding-chart__title { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--s-muted); margin-bottom: 4px; }
+.finding-chart__caption { margin-top: 4px; font-size: 12px; color: #44403c; }
 `;
 
 export default function SeamsTheme() {

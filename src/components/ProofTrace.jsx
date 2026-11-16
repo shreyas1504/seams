@@ -4,6 +4,7 @@ import { fmt } from "@/lib/engine/engine.js";
 import { SYSTEM_TINT } from "@/components/systems.js";
 import { fixTitle, fixRecords, fixMathLine, fixRuledOutFor, fixDownloadEvidence } from "@/components/fixProof.js";
 import { displayText, displayField } from "@/lib/displayText.js";
+import FindingChart from "@/components/FindingChart.jsx";
 import { openSeamsLookup } from "@/actions/dataChanged.js";
 
 function ProofStep({ dot, label, last, children }) {
@@ -17,7 +18,7 @@ function ProofStep({ dot, label, last, children }) {
   );
 }
 
-export default function ProofTrace({ flag, rootCause, ruled }) {
+export default function ProofTrace({ flag, rootCause, ruled, flags = [], invoices = [] }) {
   if (!flag) {
     return (
       <section className="card rise flex min-h-[220px] items-center justify-center p-5 lg:col-span-6" aria-label="Proof trace">
@@ -94,6 +95,7 @@ export default function ProofTrace({ flag, rootCause, ruled }) {
 
         <ProofStep dot={{ background: "#6B635A" }} label="Math" last={!ruledOut}>
           <p className="money text-[13px] text-[#1C1917]">{math}</p>
+          <FindingChart flag={flag} flags={flags} invoices={invoices} />
         </ProofStep>
 
         {ruledOut ? (

@@ -35,31 +35,53 @@ const reply = (answer, ids = [], extra = {}) => Response.json({ answer: tidy(ans
 
 // Optional: NVIDIA Nemotron (free at build.nvidia.com). Used only when the app has an NVIDIA_API_KEY secret;
 // otherwise Base44's built-in InvokeLLM is used. Same prompt, same enum check, same fallback to the rules.
-const NVIDIA_MODEL = "nvidia/nemotron-3-nano-30b-a3b";
-function nvidiaKey() {
+const NVIDIA_DEFAULT_MODEL = "nvidia/nemotron-3.5-super-vl-120b-a12b"; // override with an NVIDIA_MODEL secret
+function envGet(name) {
   try {
-    return globalThis.Deno?.env?.get?.("NVIDIA_API_KEY") || "";
+    return globalThis.Deno?.env?.get?.(name) || "";
   } catch {
     return "";
   }
 }
+const nvidiaKey = () => envGet("NVIDIA_API_KEY");
+// Request format per build.nvidia.com API reference for this model (OpenAI-compatible chat completions).
 async function classifyWithNemotron(key, prompt) {
   const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
     method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+    headers: { "content-type": "application/json", accept: "application/json", authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: NVIDIA_MODEL,
-      temperature: 0,
-      max_tokens: 200,
+      model: envGet("NVIDIA_MODEL") || NVIDIA_DEFAULT_MODEL,
       messages: [
-        { role: "system", content: "Reply with ONE JSON object only, no prose: {\"intent\":...,\"bucket\":...,\"action\":...,\"party\":...,\"n\":...}" },
+        { role: "system", content: "You classify questions. Reply with one JSON object that matches the schema. No prose." },
         { role: "user", content: prompt },
       ],
+      stream: false, // the endpoint streams by default
+      reasoning_effort: "none", // routing needs no reasoning: faster
+      temperature: 0,
+      max_tokens: 300,
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "seams_intent",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              intent: { type: "string", enum: ASK_INTENTS },
+              bucket: { type: "string", enum: ASK_BUCKETS },
+              action: { type: "string", enum: ASK_ACTIONS },
+              party: { type: "string" },
+              n: { type: "number" },
+            },
+            required: ["intent"],
+          },
+        },
+      },
     }),
   });
-  if (!res.ok) throw new Error(`NVIDIA ${res.status}`);
-  const text = (await res.json())?.choices?.[0]?.message?.content || "";
-  const json = text.replace(/<think>[\s\S]*?<\/think>/g, "").match(/\{[\s\S]*\}/);
+  if (res.status !== 200) throw new Error(`NVIDIA ${res.status}`); // 202 = queued: do not wait, fall back
+  const msg = (await res.json())?.choices?.[0]?.message || {};
+  const json = String(msg.content || "").match(/\{[\s\S]*\}/);
   return json ? JSON.parse(json[0]) : null;
 }
 

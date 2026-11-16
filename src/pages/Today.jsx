@@ -515,7 +515,7 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
             causes={cardCauses}
             approvalLimit={approvalLimit}
           />
-          <ProofTrace flag={selectedFlag} rootCause={proofRootCause} ruled={ruled} />
+          <ProofTrace flag={selectedFlag} rootCause={proofRootCause} ruled={ruled} flags={flags} invoices={invoices} />
         </>
       ) : null}
 
