@@ -44,16 +44,22 @@ function seamsWriteDemoUser(u) {
   }
 }
 async function seamsDetectLocal() {
+  let local = false;
   try {
-    const prev = globalThis.localStorage?.getItem(SEAMS_USER_KEY);
-    seamsWriteDemoUser({ email: "probe@seams.local", role: "admin", full_name: "Probe" });
-    const me = await base44.auth.me();
-    if (prev == null) globalThis.localStorage?.removeItem(SEAMS_USER_KEY);
-    else globalThis.localStorage?.setItem(SEAMS_USER_KEY, prev);
-    return { local: me?.email === "probe@seams.local", me };
+    const store = globalThis.localStorage;
+    if (store) {
+      const prev = store.getItem(SEAMS_USER_KEY);
+      seamsWriteDemoUser({ email: "probe@seams.local", role: "admin", full_name: "Probe" });
+      const probe = await base44.auth.me().catch(() => null);
+      if (prev == null) store.removeItem(SEAMS_USER_KEY);
+      else store.setItem(SEAMS_USER_KEY, prev);
+      local = probe?.email === "probe@seams.local";
+    }
   } catch {
-    return { local: false, me: null };
+    local = false; // storage blocked (sandboxed frame): treat as the real Base44 app
   }
+  const me = local ? null : await base44.auth.me().catch(() => null);
+  return { local, me };
 }
 
 function SearchIcon() {
@@ -210,7 +216,8 @@ function SeamsAppShell() {
   useEffect(() => {
     seamsDetectLocal().then(({ local, me }) => {
       if (local) switchRole("admin");
-      else if (me) {
+      else {
+        if (!me) { setRealUser({ name: "Signed out", email: "", role: "user", roleLabel: "Analyst" }); return; }
         const r = me.role === "admin" ? "admin" : "user";
         setRealUser({ name: me.full_name || me.email, email: me.email, role: r, roleLabel: r === "admin" ? "Controller" : "Analyst" });
       }
@@ -222,8 +229,19 @@ function SeamsAppShell() {
   };
   const onTwistApproved = (data) => {
     setTwistNotice(data.checks?.counts || {new:0,cleared:0});
-    setTwistNewKeys([...(data.dry?.new_recoverable||[]),...(data.dry?.new_credit||[])].map(f=>f.stable_key));
+    const fresh = [...(data.dry?.new_recoverable||[]),...(data.dry?.new_credit||[])];
+    setTwistNewKeys(fresh.map(f=>f.stable_key));
+    // Show the change: open the seam the new file created, largest new finding selected.
+    const top = [...fresh].sort((a,b)=>(b.amount_cents||0)-(a.amount_cents||0))[0];
+    if (top?.stable_key) {
+      // The dry-run rows carry no seam; read it from the stored finding.
+      base44.entities.Flag.filter({ stable_key: top.stable_key }).then((rows) => {
+        const f = (rows || [])[0];
+        if (f?.seam) { setSelectedSeam(f.seam); setSelectedFlagKey(f.stable_key); }
+      }).catch(() => {});
+    }
     setUploadOpen(false);setTab("Today");
+    requestAnimationFrame(()=>window.scrollTo({top:0,behavior:"smooth"}));
   };
 
   const onKey = useCallback((e) => {

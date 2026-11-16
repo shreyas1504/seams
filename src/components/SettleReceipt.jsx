@@ -1,9 +1,17 @@
 // Receipt under a letter or refund: the records behind each line, in plain words.
 // Import batches and row numbers (where a value came from) hide behind "Source rows".
 import React, { useState } from "react";
-import { displayText, plainFieldLabel } from "@/lib/displayText.js";
+import { displayField, plainFieldLabel } from "@/lib/displayText.js";
+import { fixFieldValue } from "@/components/fixProof.js";
 import { SBS_LINEAGE_KEYS } from "@/components/SideBySide.jsx";
 import { openSeamsLookup } from "@/actions/dataChanged.js";
+
+/** Money fields as "$34.00", dates as "Oct 21", yes/no flags in words. */
+function seamsReceiptValue(k, v) {
+  if (v === "Y") return "yes";
+  if (v === "N") return "no";
+  return displayField(k, fixFieldValue(k, v));
+}
 
 export default function SettleReceipt({ receipt }) {
   const [showSource, setShowSource] = useState(false);
@@ -46,7 +54,7 @@ export default function SettleReceipt({ receipt }) {
                     )}
                   </td>
                   <td>
-                    {plain.map(([k, v]) => `${plainFieldLabel(k)} ${displayText(v)}`).join(" · ")}
+                    {plain.map(([k, v]) => `${plainFieldLabel(k)} ${seamsReceiptValue(k, v)}`).join(" · ")}
                     {showSource && source.length ? (
                       <span className="block text-[11px] text-[#6B635A]">{source.map(([k, v]) => `${k === "source_row" ? "row" : "batch"} ${v}`).join(" · ")}</span>
                     ) : null}

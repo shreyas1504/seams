@@ -14,7 +14,7 @@ import RefundDrawer from "@/components/RefundDrawer.jsx";
 import { fixPatternFor, fixRootCause } from "@/components/fixProof.js";
 import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { SeamsSkeleton } from "@/components/InteractionFeedback.jsx";
-import { fixCauseLabel, fixCausePattern, fixIsCausePattern } from "@/components/fixProof.js";
+import { fixCauseLabel, fixCausePattern, fixIsCausePattern, fixPatternName } from "@/components/fixProof.js";
 
 // Every number on Today (headline, chips, map, pills, root cause) counts OPEN flags only, so they always add up.
 // Money already sent shows in the "Fixes sent" tracker instead.
@@ -130,6 +130,13 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
   }, []);
 
   const live = useMemo(() => flags.filter((f) => (f.status || "open") === "open"), [flags]);
+  // "Leaked" is history: it does not shrink when a fix is sent. Open / sent / recovered are shown under it.
+  const leaked = useMemo(() => {
+    const rec = flags.filter((f) => f.bucket === "recoverable" && ((f.status || "open") === "open" || TODAY_SENT.has(f.status)));
+    const sent = rec.filter((f) => f.status === "sent" || f.status === "disputed");
+    const recovered = rec.filter((f) => f.status === "recovered");
+    return { cents: sumCents(rec), sentCents: sumCents(sent), recoveredCents: sumCents(recovered) };
+  }, [flags]);
   const totals = useMemo(() => totalsOf(live), [live]);
   const needsReview = useMemo(() => flags.filter((f) => f.status === "needs_review").length, [flags]);
   const systemCount = [contracts, shipments, invoices, bills, returns].filter((r) => r.length > 0).length;
@@ -227,15 +234,24 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
     const limit = settings.four_eyes_threshold_cents ?? DEFAULT_SETTINGS.four_eyes_threshold_cents;
     const rule_enabled = { ...DEFAULT_SETTINGS.rule_enabled, ...(settings.rule_enabled || {}) };
     for (const f of flags) {
-      if (f.lane === "vendor" || labels.has(f.party)) continue;
+      if (f.lane === "vendor") {
+        // Vendors: the refund drawer sends every open item for that vendor, so label from the vendor draft total.
+        const vk = `vendor:${f.party}`;
+        if (labels.has(vk)) continue;
+        const vItems = flags.filter((x) => x.party === f.party && x.lane === "vendor" && (x.status || "open") === "open").length;
+        const vDraft = buildLetterDraft({ party: f.party, kind: "vendor", flags, contracts, rule_enabled });
+        labels.set(vk, { label: vItems > 1 ? `Open ${f.party} refund` : null, sub: vItems > 1 ? `Refund: ${vItems} items · ${fmt(vDraft.total_cents)}` : "", approval: Math.abs(vDraft.total_cents) >= limit, limitText: `over ${fmt(limit)} needs a 2nd approval` });
+        continue;
+      }
+      if (labels.has(f.party)) continue;
       const draft = buildLetterDraft({ party: f.party, flags, contracts, rule_enabled });
       const items = flags.filter((x) => x.party === f.party && x.lane !== "vendor" && (x.status || "open") === "open").length;
       const approval = Math.abs(draft.total_cents) >= limit;
       labels.set(
         f.party,
         items > 1
-          ? { label: `Open ${f.party} letter`, sub: `${items} items · ${fmt(draft.total_cents)}`, approval }
-          : { label: approval ? `Send for second approval · ${fmt(draft.total_cents)}` : `Settle ${f.party} · ${fmt(draft.total_cents)}`, sub: "", approval },
+          ? { label: `Open ${f.party} letter`, sub: `Letter: ${items} items · ${fmt(draft.total_cents)}`, approval, limitText: `over ${fmt(limit)} needs a 2nd approval` }
+          : { label: approval ? `Send for second approval · ${fmt(draft.total_cents)}` : `Settle ${f.party} · ${fmt(draft.total_cents)}`, sub: "", approval, limitText: `over ${fmt(limit)} needs a 2nd approval` },
       );
     }
     return labels;
@@ -262,7 +278,7 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
   }, [seamOpen, patterns, selectedSeam]);
   // Cause tag on a card only when a pattern explains it; otherwise the card title already names the rule.
   const cardCauses = useMemo(
-    () => new Map(fixCards.map((f) => [f.stable_key, fixCausePattern(f, seamOpen, patterns)?.title || null])),
+    () => new Map(fixCards.map((f) => [f.stable_key, fixPatternName(fixCausePattern(f, seamOpen, patterns)) || null])),
     [fixCards, seamOpen, patterns],
   );
   const approvalLimit = fixSettings[0]?.four_eyes_threshold_cents ?? DEFAULT_SETTINGS.four_eyes_threshold_cents;
@@ -378,18 +394,25 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
   const sinceText = earliest ? ` since ${shortDate(earliest)}` : "";
   return (
     <div className="grid gap-5 lg:grid-cols-12">
-      {notice ? <div className="twist-banner lg:col-span-12" role="status"><p>New data in. {notice.new||0} new, {notice.cleared||0} cleared. Nothing rebuilt.</p><button aria-label="Dismiss new data banner" onClick={onDismissNotice}>×</button></div> : null}
+      {notice ? <div className="twist-banner lg:col-span-12" role="status"><p><strong>New data in:</strong> {notice.new||0} new, {notice.cleared||0} cleared. Fixes already sent are unchanged. Nothing rebuilt.</p><button aria-label="Dismiss new data banner" onClick={onDismissNotice}>×</button></div> : null}
       <section className="rise lg:col-span-4" aria-label="Morning brief">
         <p className="brief-label">Morning brief · computed from {systemCount} system{systemCount === 1 ? "" : "s"}</p>
-        {nothingOpen ? (
+        {nothingOpen && !leaked.cents ? (
           <h1 className="brief-headline mt-3 font-display font-medium text-[#1C1917]">Nothing slipped{sinceText}.</h1>
         ) : (
           <h1 className="brief-headline mt-3 font-display font-medium text-[#1C1917]">
             Northline leaked{" "}
-            <span className="text-[#C2410C]">{fmt(totals.recoverable.cents)}</span>
+            <span className="text-[#C2410C]">{fmt(leaked.cents)}</span>
             {sinceText}.
           </h1>
         )}
+        {leaked.sentCents || leaked.recoveredCents ? (
+          <p className="brief-progress mt-2" role="status">
+            <span className="money">{fmt(totals.recoverable.cents)}</span> still open ·{" "}
+            <span className="money">{fmt(leaked.sentCents)}</span> sent, waiting ·{" "}
+            <span className="money">{fmt(leaked.recoveredCents)}</span> recovered
+          </p>
+        ) : null}
 
         <p className="mt-4 text-[14px] leading-[1.7] text-[#1C1917]">
           {leak ? (
@@ -416,8 +439,8 @@ export default function Today({ role = "admin", notice = null, onDismissNotice, 
           {rootCause ? (
             <>
               {" "}One root cause explains {rootCause.invoices} invoice{rootCause.invoices === 1 ? "" : "s"}:{" "}
-              <SeamPill seam={rootCause.seam} label={`Show root cause ${rootCause.pattern.title}`} onPicked={scrollToFixes}>
-                {rootCause.pattern.title}
+              <SeamPill seam={rootCause.seam} label={`Show root cause ${fixPatternName(rootCause.pattern)}`} onPicked={scrollToFixes}>
+                {fixPatternName(rootCause.pattern)}
               </SeamPill>{" "}
               (<span className="money font-semibold">{fmt(rootCause.cents)}</span>).
             </>

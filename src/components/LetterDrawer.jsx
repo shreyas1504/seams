@@ -5,6 +5,7 @@ import { fmt } from "@/lib/engine/engine.js";
 import { useEntity } from "@/lib/useEntity";
 import { settleCreditCopy } from "@/components/settleCreditCopy.js";
 import SettleReceipt from "@/components/SettleReceipt.jsx";
+import { settleRequestedBySelf, settlePendingParams, settleFriendlyError } from "@/components/settleApproval.js";
 import { displayText } from "@/lib/displayText.js";
 import { DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
 import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
@@ -21,6 +22,12 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
   const [busy, setBusy] = useState(false);
   const [pendingSecond, setPendingSecond] = useState(pendingAction);
   const sendLock = useRef(false);
+  const [selfRequested, setSelfRequested] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    settleRequestedBySelf(pendingSecond).then((v) => alive && setSelfRequested(v));
+    return () => { alive = false; };
+  }, [pendingSecond]);
   useSeamsDrawerLifecycle(onClose);
   useEffect(() => { if (err) seamsNotifyFeedback({ error: true, message: err }); }, [err]);
 
@@ -40,9 +47,23 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
     }
   };
 
-  useEffect(() => { load([], "warm"); }, [party, kind]);
+  // A pending four-eyes request shows exactly what the requester asked for (same lines, same tone), locked.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const params = await settlePendingParams(pendingAction);
+      if (!alive) return;
+      const excl = params?.exclude_keys || [];
+      const t = params?.tone || "warm";
+      setExclude(excl);
+      setTone(t);
+      load(excl, t);
+    })();
+    return () => { alive = false; };
+  }, [party, kind]);
 
   const toggleKey = (key) => {
+    if (pendingSecond) return;
     if (key.startsWith("_")) return;
     const next = exclude.includes(key) ? exclude.filter((k) => k !== key) : [...exclude, key];
     setExclude(next);
@@ -88,7 +109,8 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
         .map((k) => draft.sections.flatMap((s) => s.lines).find((l) => l.key === k)?.flag)
         .filter(Boolean);
       const flags = await base44.entities.Flag.filter({ party });
-      for (const f of flags.filter((x) => x.status === "open" && (draft?.flag_keys || []).includes(x.stable_key))) {
+      // Credits we owe this customer are never dismissed along with the charges.
+      for (const f of flags.filter((x) => x.status === "open" && x.bucket !== "credit_owed" && (draft?.flag_keys || []).includes(x.stable_key))) {
         await base44.functions.invoke("transitionFlag", {
           flag_id: f.id,
           to_status: "dismissed",
@@ -105,6 +127,25 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
     }
   };
 
+  // Withdraw a pending request (e.g. a line changed since it was requested). Uses the existing rejectAction call.
+  const cancelRequest = async () => {
+    if (sendLock.current || !pendingSecond) return;
+    sendLock.current = true;
+    setBusy(true);
+    try {
+      await base44.functions.invoke("rejectAction", { action_id: pendingSecond });
+      setPendingSecond(null);
+      setSelfRequested(false);
+      seamsNotifyFeedback({ message: "Request cancelled. Nothing was sent." });
+      onPending?.();
+    } catch (e) {
+      setErr(e?.response?.data?.error || e.message);
+    } finally {
+      sendLock.current = false;
+      setBusy(false);
+    }
+  };
+
   // A different Controller completes a pending four-eyes send.
   const approve = async () => {
     if (sendLock.current) return;
@@ -112,7 +153,9 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
     setBusy(true);
     setErr("");
     try {
-      const { data } = await base44.functions.invoke("approveSecond", { action_id: pendingSecond });
+      const { data } = await base44.functions.invoke("approveSecond", { action_id: pendingSecond }).catch((e) => {
+        throw new Error(settleFriendlyError(e));
+      });
       void seamsNotifySent(data).catch(() => seamsNotifyFeedback({ message: `Sent to ${party} · ${fmt(Math.abs(draft.total_cents))}.` }));
       onSent?.(data);
       onClose?.();
@@ -185,6 +228,7 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
                         <input
                           type="checkbox"
                           checked={!exclude.includes(line.key)}
+                          disabled={Boolean(pendingSecond)}
                           onChange={() => toggleKey(line.key)}
                           aria-label={`Include ${line.text}`}
                         />
@@ -210,9 +254,12 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
           </div>
           {pendingSecond ? (
             <div className="seams-settle-sheet__approval">
-              <p>Waiting for a second Controller to approve this send.</p>
-              <button type="button" disabled={busy || role !== "admin"} onClick={approve}>
+              <p>{selfRequested ? "You requested this send. A different Controller has to approve it." : "Waiting for a second Controller to approve this send."}</p>
+              <button type="button" disabled={busy || role !== "admin" || selfRequested} onClick={approve}>
                 {busy ? <><span className="seams-spinner" /> Sending…</> : "Approve as second Controller"}
+              </button>
+              <button type="button" className="fix-quiet mt-2" disabled={busy || role !== "admin"} onClick={cancelRequest}>
+                Cancel this request
               </button>
             </div>
           ) : null}
@@ -230,8 +277,8 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
             <button type="button" disabled={busy} onClick={onClose} className="seams-settle-sheet__cancel">Cancel</button>
           </div>
           <div className="seams-settle-sheet__footer-tools">
-            <button type="button" disabled={busy} onClick={() => dismiss("Not a leak")} className="seams-settle-sheet__quiet">Not a leak</button>
-            <button type="button" disabled={busy} onClick={() => dismiss("Already handled")} className="seams-settle-sheet__quiet">Already handled</button>
+            <button type="button" disabled={busy || Boolean(pendingSecond)} onClick={() => dismiss("Not a leak")} className="seams-settle-sheet__quiet">Not a leak</button>
+            <button type="button" disabled={busy || Boolean(pendingSecond)} onClick={() => dismiss("Already handled")} className="seams-settle-sheet__quiet">Already handled</button>
           </div>
           <p className="seams-settle-sheet__status" role="status">
             {busy ? "Sending…" : role !== "admin" ? "Controller approval needed" : pendingSecond ? "Waiting for a second Controller" : !draft.flag_keys?.length ? "Nothing left to send" : !draft.to ? "No recipient on file" : overLimit ? `A second Controller approves sends over ${fmt(limit)}` : ""}

@@ -3,7 +3,7 @@ import React, { useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { useEntity } from "@/lib/useEntity";
-import { seamsActorName, seamsAuditSentence } from "@/components/auditPresentation.js";
+import { seamsActorName, seamsAuditSentence, seamsAuditTime, seamsEntityLabel } from "@/components/auditPresentation.js";
 import { seamsNotifyFeedback } from "@/components/InteractionFeedback.jsx";
 import { displayText } from "@/lib/displayText.js";
 
@@ -66,7 +66,7 @@ export default function Ledger({ role = "admin" }) {
           className="min-h-[44px] rounded-full border border-[#E4E4E8] bg-white px-3 text-sm font-semibold"
         >
           <option value="">All entities</option>
-          {entities.map((a) => <option key={a} value={a}>{a}</option>)}
+          {entities.map((a) => <option key={a} value={a}>{seamsEntityLabel(a)}</option>)}
         </select>
       </div>
 
@@ -85,12 +85,12 @@ export default function Ledger({ role = "admin" }) {
                 </p>
                 <p className="mt-1 text-xs text-[#6B6B76]">
                   {seamsActorName(ev.actor_email)} · {ev.actor_role === "admin" ? "Controller" : ev.actor_role === "user" ? "Analyst" : ev.actor_role}
-                  {ev.entity_type ? ` · ${ev.entity_type}` : ""}
+                  {ev.entity_type ? ` · ${seamsEntityLabel(ev.entity_type)}` : ""}
                 </p>
                 {ev.reason ? <p className="mt-1 text-xs text-[#111]">{displayText(ev.reason)}</p> : null}
               </div>
               <div className="text-right">
-                <p className="font-mono text-[11px] text-[#6B6B76]">{(ev.created_at || ev.created_date || "").slice(0, 19)}</p>
+                <p className="text-[11px] text-[#6B635A]">{seamsAuditTime(ev.created_at || ev.created_date)}</p>
                 {ev.reversible && !ev.undone ? (
                   <button
                     type="button"

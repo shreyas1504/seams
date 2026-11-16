@@ -490,7 +490,7 @@ body {
 }
 .fix-quiet {
   font-size: 11.5px;
-  color: var(--s-muted);
+  color: #57534e;
   text-decoration: underline;
   text-decoration-color: transparent;
   text-underline-offset: 3px;
@@ -1140,6 +1140,12 @@ button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
   .mobile-search { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--s-line); background: #fff; color: var(--s-ink); }
   .fix-card { flex-direction: column; }
 }
+.brief-progress { font-size: 12.5px; color: #57534e; }
+.brief-progress .money { color: var(--s-ink); font-weight: 600; }
+.settings-input { width: 100%; min-height: 42px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; padding: 0 12px; font: inherit; font-weight: 400; color: var(--s-ink); }
+.settings-input:focus { outline: 2px solid var(--s-forest); outline-offset: 1px; }
+.settings-input:disabled { background: var(--s-paper); color: var(--s-muted); }
+.settings-check { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; cursor: pointer; }
 `;
 
 export default function SeamsTheme() {

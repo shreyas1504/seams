@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
 import { useEntity } from "@/lib/useEntity";
 import SettleReceipt from "@/components/SettleReceipt.jsx";
+import { settleRequestedBySelf, settlePendingParams, settleFriendlyError } from "@/components/settleApproval.js";
 import { displayText } from "@/lib/displayText.js";
 import { DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
 import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
@@ -17,6 +18,12 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
   const [busy, setBusy] = useState(false);
   const [pendingSecond, setPendingSecond] = useState(pendingAction);
   const sendLock = useRef(false);
+  const [selfRequested, setSelfRequested] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    settleRequestedBySelf(pendingSecond).then((v) => alive && setSelfRequested(v));
+    return () => { alive = false; };
+  }, [pendingSecond]);
   useSeamsDrawerLifecycle(onClose);
   useEffect(() => { if (err) seamsNotifyFeedback({ error: true, message: err }); }, [err]);
 
@@ -36,9 +43,21 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
     }
   };
 
-  useEffect(() => { load([]); }, [party]);
+  // A pending four-eyes request shows exactly what the requester asked for (same lines), locked.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const params = await settlePendingParams(pendingAction);
+      if (!alive) return;
+      const excl = params?.exclude_keys || [];
+      setExclude(excl);
+      load(excl);
+    })();
+    return () => { alive = false; };
+  }, [party]);
 
   const toggleKey = (key) => {
+    if (pendingSecond) return;
     const next = exclude.includes(key) ? exclude.filter((k) => k !== key) : [...exclude, key];
     setExclude(next);
     load(next);
@@ -75,6 +94,25 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
     }
   };
 
+  // Withdraw a pending request (e.g. a line changed since it was requested). Uses the existing rejectAction call.
+  const cancelRequest = async () => {
+    if (sendLock.current || !pendingSecond) return;
+    sendLock.current = true;
+    setBusy(true);
+    try {
+      await base44.functions.invoke("rejectAction", { action_id: pendingSecond });
+      setPendingSecond(null);
+      setSelfRequested(false);
+      seamsNotifyFeedback({ message: "Request cancelled. Nothing was sent." });
+      onPending?.();
+    } catch (e) {
+      setErr(e?.response?.data?.error || e.message);
+    } finally {
+      sendLock.current = false;
+      setBusy(false);
+    }
+  };
+
   // A different Controller completes a pending four-eyes send.
   const approve = async () => {
     if (sendLock.current) return;
@@ -82,7 +120,9 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
     setBusy(true);
     setErr("");
     try {
-      const { data } = await base44.functions.invoke("approveSecond", { action_id: pendingSecond });
+      const { data } = await base44.functions.invoke("approveSecond", { action_id: pendingSecond }).catch((e) => {
+        throw new Error(settleFriendlyError(e));
+      });
       void seamsNotifySent(data).catch(() => seamsNotifyFeedback({ message: `Sent to ${party} · ${fmt(Math.abs(draft.total_cents))}.` }));
       onSent?.(data);
       onClose?.();
@@ -137,7 +177,7 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
                 <div className="seams-settle-sheet__lines">
                   {sec.lines.map((line) => (
                     <div className="seams-settle-sheet__line" key={line.key}>
-                      <input type="checkbox" checked={!exclude.includes(line.key)} onChange={() => toggleKey(line.key)} aria-label={`Include ${line.text}`} />
+                      <input type="checkbox" checked={!exclude.includes(line.key)} disabled={Boolean(pendingSecond)} onChange={() => toggleKey(line.key)} aria-label={`Include ${line.text}`} />
                       <span className="seams-settle-sheet__line-copy">{displayText(line.text)}</span>
                       <span className="seams-settle-sheet__line-amount">{fmt(line.signed_cents ?? line.amount_cents)}</span>
                     </div>
@@ -157,9 +197,12 @@ export default function RefundDrawer({ party, role = "admin", pendingAction = nu
           </div>
           {pendingSecond ? (
             <div className="seams-settle-sheet__approval">
-              <p>Waiting for a second Controller to approve this send.</p>
-              <button type="button" disabled={busy || role !== "admin"} onClick={approve}>
+              <p>{selfRequested ? "You requested this send. A different Controller has to approve it." : "Waiting for a second Controller to approve this send."}</p>
+              <button type="button" disabled={busy || role !== "admin" || selfRequested} onClick={approve}>
                 {busy ? <><span className="seams-spinner" /> Sending…</> : "Approve as second Controller"}
+              </button>
+              <button type="button" className="fix-quiet mt-2" disabled={busy || role !== "admin"} onClick={cancelRequest}>
+                Cancel this request
               </button>
             </div>
           ) : null}

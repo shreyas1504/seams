@@ -4,6 +4,11 @@ import { base44 } from "@/api/base44Client";
 import { DEFAULT_SETTINGS, RULES } from "@/lib/engine/engine.js";
 import { TWIST_RULE_IDS } from "@/lib/twistSpec.js";
 
+const TWIST_RULE_NAMES = {
+  dup_credit_memo: "Credit memo applied twice",
+  missing_credit: "Return with no credit issued",
+  return_explains_short: "Return explains a short shipment",
+};
 const RULE_IDS = [...Object.keys(RULES), ...TWIST_RULE_IDS.filter((id) => !RULES[id])];
 
 export default function Settings({ role = "admin" }) {
@@ -57,44 +62,67 @@ export default function Settings({ role = "admin" }) {
     load();
   }
 
-  if (!row) return <p className="text-[#5B5F68]">Loading…</p>;
+  if (!row) return <p className="text-[#6B635A]">Loading…</p>;
 
   const enabled = { ...DEFAULT_SETTINGS.rule_enabled, ...(row.rule_enabled || {}) };
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[28px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="mt-1 text-sm text-[#5B5F68]">
-          {readOnly ? "Read-only for Analyst — Controller only to change." : "Every change writes a reversible AuditEvent."}
+      <div className="card p-6">
+        <p className="brief-label">How Seams checks</p>
+        <h1 className="mt-1 font-display text-[28px] font-medium text-[#1C1917]">Settings</h1>
+        <p className="mt-1 text-[13px] text-[#6B635A]">
+          {readOnly ? "Read-only for Analysts. A Controller can change these." : "Every change is logged in Activity and can be undone."}
         </p>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {[
-            ["as_of_date", "As-of date", "text"],
-            ["overdue_days", "Overdue days", "number"],
-            ["po_abs_cents", "PO tolerance (¢)", "number"],
-            ["po_pct", "PO tolerance (%)", "number"],
-            ["match_window_days", "Match window (days)", "number"],
-            ["four_eyes_threshold_cents", "Four-eyes threshold (¢)", "number"],
-          ].map(([key, label, type]) => (
-            <label key={key} className="block text-sm">
+            ["as_of_date", "Check data as of", "text", "Date the overdue clock counts from"],
+            ["overdue_days", "Overdue after (days past due)", "number", "Invoices unpaid this long count as late"],
+            ["po_abs_cents", "Vendor bill may exceed its PO by ($)", "dollars", "Smaller differences are ignored"],
+            ["po_pct", "…or by (%)", "percent", "Whichever is larger"],
+            ["match_window_days", "Match shipments to invoices within (days)", "number", "How far apart the dates may be"],
+            ["four_eyes_threshold_cents", "Second Controller must approve sends over ($)", "dollars", "Four-eyes rule for letters and refunds"],
+          ].map(([key, label, type, hint]) => (
+            <label key={key} className="block text-[13px] font-medium text-[#1C1917]">
               {label}
               <input
-                type={type}
+                type={type === "dollars" || type === "percent" ? "number" : type}
+                step={type === "dollars" ? "0.01" : type === "percent" ? "0.1" : undefined}
+                min={type === "text" ? undefined : 0}
                 disabled={readOnly}
-                value={row[key] ?? ""}
-                onChange={(e) => setRow({ ...row, [key]: e.target.value })}
-                className="mt-1 min-h-[44px] w-full rounded-2xl border border-[#E2DDD2] bg-[#F5F5F5] px-3 disabled:opacity-60"
+                value={
+                  row[key] === "" || row[key] == null
+                    ? ""
+                    : type === "dollars"
+                      ? Number(row[key]) / 100
+                      : type === "percent"
+                        ? Math.round(Number(row[key]) * 10000) / 100
+                        : row[key]
+                }
+                onChange={(e) =>
+                  setRow({
+                    ...row,
+                    [key]:
+                      e.target.value === "" || type === "text" || type === "number"
+                        ? e.target.value
+                        : type === "dollars"
+                          ? Math.round(Number(e.target.value) * 100)
+                          : Number(e.target.value) / 100,
+                  })
+                }
+                className="settings-input mt-1"
               />
+              <span className="mt-1 block text-[11.5px] font-normal text-[#6B635A]">{hint}</span>
             </label>
           ))}
         </div>
 
-        <h2 className="mt-6 text-sm font-semibold">Rules</h2>
+        <h2 className="mt-7 font-display text-[18px] font-semibold text-[#1C1917]">Checks</h2>
+        <p className="mt-1 text-[12px] text-[#6B635A]">Turn a check off if the data can't support it. Returns checks switch on when you approve a returns file.</p>
         <div className="mt-2 grid gap-2 md:grid-cols-2">
           {RULE_IDS.map((id) => (
-            <label key={id} className="flex min-h-[44px] items-center gap-2 rounded-2xl bg-[#F5F5F5] px-3 text-sm">
+            <label key={id} className="settings-check" title={id}>
               <input
                 type="checkbox"
                 disabled={readOnly}
@@ -106,8 +134,7 @@ export default function Settings({ role = "admin" }) {
                   })
                 }
               />
-              <span className="font-mono text-xs">{id}</span>
-              <span className="text-[#5B5F68]">{RULES[id]?.name || id}</span>
+              <span className="text-[13px] text-[#1C1917]">{RULES[id]?.name || TWIST_RULE_NAMES[id] || id.replace(/_/g, " ")}</span>
             </label>
           ))}
         </div>
@@ -128,12 +155,12 @@ export default function Settings({ role = "admin" }) {
                 rule_enabled: row.rule_enabled,
               })
             }
-            className="min-h-[44px] rounded-2xl bg-[#000000] px-4 text-sm text-white disabled:opacity-40"
+            className="btn-forest"
           >
             Save settings
           </button>
         </div>
-        {msg ? <p className="mt-2 text-xs text-[#5B5F68]">{msg}</p> : null}
+        {msg ? <p className="mt-2 text-[12px] text-[#0F766E]" role="status">{msg}</p> : null}
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ const SEAMS_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "S
 /** "2026-09-12" -> "Sep 12". Anything else comes back unchanged. */
 export function displayDate(iso) {
   const m = String(iso ?? "").match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${SEAMS_MONTHS[Number(m[2]) - 1]} ${Number(m[3])}` : String(iso ?? "");
+  return m && SEAMS_MONTHS[Number(m[2]) - 1] ? `${SEAMS_MONTHS[Number(m[2]) - 1]} ${Number(m[3])}` : String(iso ?? "");
 }
 
 /** Money with two decimals becomes "$1,234.56"; ISO dates become "Sep 12". */
@@ -16,7 +16,13 @@ export function displayText(s) {
   return String(s ?? "")
     .replace(/\$\s?(-?\d[\d,]*\.\d{2})(?!\d)/g, (_, n) => fmt(toCents(n.replace(/,/g, ""))))
     .replace(/(?<![\w$.,/-])(\d{1,3}(?:,\d{3})+|\d+)\.\d{2}(?![\d%])/g, (m) => fmt(toCents(m.replace(/,/g, ""))))
-    .replace(/\b(20\d{2})-(\d{2})-(\d{2})\b/g, (_, y, mo, d) => `${SEAMS_MONTHS[Number(mo) - 1]} ${Number(d)}`);
+    .replace(/(?<![\w-])(20\d{2})-(\d{2})-(\d{2})(?![\w-])/g, (m, y, mo, d) => (SEAMS_MONTHS[Number(mo) - 1] ? `${SEAMS_MONTHS[Number(mo) - 1]} ${Number(d)}` : m));
+}
+
+const SEAMS_DATE_KEY = /(^|_)(date|paid|due|shipped|from|to)$|_at$/;
+/** One record field for display: dates become "Sep 12"; everything else unchanged (money is formatted upstream). */
+export function displayField(key, value) {
+  return SEAMS_DATE_KEY.test(String(key)) ? displayDate(value) : String(value ?? "");
 }
 
 /** Field labels people understand, for record tables in drawers. */

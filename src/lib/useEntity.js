@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { onSeamsDataChanged } from "@/actions/dataChanged.js";
 
@@ -11,17 +11,21 @@ import { onSeamsDataChanged } from "@/actions/dataChanged.js";
 export function useEntity(name) {
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState({ loaded: false, error: null });
-  const reload = useCallback(
-    () =>
-      base44.entities[name]
-        .list(undefined, 5000)
-        .then((r) => {
-          setRows(r || []);
-          setMeta({ loaded: true, error: null });
-        })
-        .catch((e) => setMeta({ loaded: true, error: e?.message || "Could not load " + name })),
-    [name],
-  );
+  const seq = useRef(0); // only the newest response may land, so an old list never overwrites a newer one
+  const reload = useCallback(() => {
+    const mine = ++seq.current;
+    return base44.entities[name]
+      .list(undefined, 5000)
+      .then((r) => {
+        if (mine !== seq.current) return;
+        setRows(r || []);
+        setMeta({ loaded: true, error: null });
+      })
+      .catch((e) => {
+        if (mine !== seq.current) return;
+        setMeta({ loaded: true, error: e?.message || "Could not load " + name });
+      });
+  }, [name]);
   useEffect(() => {
     reload();
     const un = base44.entities[name].subscribe?.(() => reload());

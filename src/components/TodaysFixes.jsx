@@ -140,21 +140,19 @@ function FixCard({ flag, selected, isNew, stamp, cause, approvalLimit = Infinity
                   {flag.bucket === "credit_owed"
                     ? `Include in ${flag.party} letter`
                     : flag.lane === "vendor"
-                      ? fixActionLabel(flag)
+                      ? customerLabel?.label || fixActionLabel(flag)
                       : customerLabel?.label || "Open letter"}
                 </button>
               )}
             </div>
-            {!stamp && flag.lane !== "vendor" && flag.bucket !== "credit_owed" && (customerLabel?.sub || customerLabel?.approval) ? (
+            {!stamp && flag.bucket !== "credit_owed" && (customerLabel?.sub || customerLabel?.approval) ? (
               <p className="fix-sub">
                 {customerLabel.sub}
                 {customerLabel.approval && customerLabel.sub ? " · " : ""}
-                {customerLabel.approval ? <span className="fix-approval-tag">Needs 2nd approval</span> : null}
+                {customerLabel.approval ? <span className="fix-approval-tag">{customerLabel.sub ? customerLabel.limitText : "Needs 2nd approval"}</span> : null}
               </p>
             ) : null}
-            {!stamp && flag.lane === "vendor" && Math.abs(flag.amount_cents || 0) >= approvalLimit ? (
-              <p className="fix-sub"><span className="fix-approval-tag">Needs 2nd approval</span></p>
-            ) : null}
+
             {stamp === "approval" ? (
               <button type="button" className="fix-quiet" onClick={() => onAct(flag)}>
                 Waiting for a second Controller
@@ -195,7 +193,7 @@ export default function TodaysFixes({ seam, cards, rootCause, causes, approvalLi
               onSelect={onSelect}
               onAct={onAct}
               onDismiss={onDismiss}
-              customerLabel={customerLabels.get(f.party)}
+              customerLabel={customerLabels.get(f.lane === "vendor" ? `vendor:${f.party}` : f.party)}
             />
           ))}
         </ul>

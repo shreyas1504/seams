@@ -3,7 +3,7 @@ import React from "react";
 import { fmt } from "@/lib/engine/engine.js";
 import { SYSTEM_TINT } from "@/components/systems.js";
 import { fixTitle, fixRecords, fixMathLine, fixRuledOutFor, fixDownloadEvidence } from "@/components/fixProof.js";
-import { displayText } from "@/lib/displayText.js";
+import { displayText, displayField } from "@/lib/displayText.js";
 import { openSeamsLookup } from "@/actions/dataChanged.js";
 
 function ProofStep({ dot, label, last, children }) {
@@ -74,14 +74,14 @@ export default function ProofTrace({ flag, rootCause, ruled }) {
                   {r.primary ? (
                     <>
                       <p className="mt-1.5 text-[11.5px] text-[#6B635A]">{r.primary.label}</p>
-                      <p className="proof-value money text-[15px] font-medium">{displayText(r.primary.value)}</p>
+                      <p className="proof-value money text-[15px] font-medium">{displayField(r.primary.key, r.primary.value)}</p>
                     </>
                   ) : null}
                   {r.others.length ? (
                     <p className="mt-1.5 text-[10.5px] leading-[1.5] text-[#6B635A]">
                       {r.others.map((o) => (
                         <span key={o.key} className="mr-2 inline-block">
-                          {o.label} <span className="money text-[#1C1917]">{displayText(o.value)}</span>
+                          {o.label} <span className="money text-[#1C1917]">{displayField(o.key, o.value)}</span>
                         </span>
                       ))}
                     </p>
