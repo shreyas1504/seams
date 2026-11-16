@@ -658,16 +658,17 @@ export function buildLetterDraft({
 
 // ---------- Ask Seams intent routing (keyword fallback; LLM schema in askSeams.js) ----------
 export function fuzzyPartyChoices(query, parties) {
-  const q = normName(query);
+  // Words under 3 letters ("it", "to", "of") never match a party: "fix it" must not pick "Hospital".
+  const q = normName(query).split(" ").filter((t) => t.length >= 3).join(" ");
   if (!q) return [];
   const scored = [...new Set(parties)].map((p) => {
     const n = normName(p);
     let score = 0;
     if (n === q) score = 1;
-    else if (n.includes(q) || q.includes(n)) score = 0.9;
+    else if (new RegExp(`(^| )${q}( |$)`).test(n) || new RegExp(`(^| )${n}( |$)`).test(q)) score = 0.9;
     else {
       const qt = new Set(q.split(" "));
-      const pt = n.split(" ");
+      const pt = n.split(" ").filter((t) => t.length >= 3);
       const hit = pt.filter((t) => qt.has(t)).length;
       score = pt.length ? hit / pt.length : 0;
     }
@@ -676,31 +677,62 @@ export function fuzzyPartyChoices(query, parties) {
   return scored;
 }
 
-/** Deterministic keyword router used when InvokeLLM is offline. */
-export function routeAskQuestion(question) {
-  const q = String(question || "").toLowerCase();
-  if (!q.trim()) return { type: "unsupported" };
-  if (/forecast|next quarter|predict|outside/.test(q)) return { type: "unsupported" };
-  if (/\b(owe|credit)\b/.test(q) && /customer/.test(q)) return { type: "query", query: "by_bucket", bucket: "credit_owed" };
-  if (/\b(owe|credit)\b/.test(q)) return { type: "query", query: "by_bucket", bucket: "credit_owed" };
-  if (/(why|not flagged)/.test(q)) {
-    const m = q.match(/why wasn'?t the (.+?) (?:rent |bill )?flagged/) || q.match(/why .+? (.+?) (?:not|wasn't)/);
-    return { type: "query", query: "ruled_out", target: m ? m[1].replace(/\s+rent$/, "").trim() : q };
+/** Ask Seams intents. The LLM may only return one of these; anything else falls back to this router. */
+export const ASK_INTENTS = ["by_bucket", "party", "ruled_out", "top_parties", "top_n", "changes", "patterns", "summary", "suggest_action", "unsupported"];
+export const ASK_BUCKETS = ["recoverable", "overdue", "credit_owed"];
+export const ASK_ACTIONS = ["send_letter", "send_correction", "request_refund", "dismiss"];
+
+/** Best party named in the question (whole words, 3+ letters), or "". */
+export function askFindParty(question, parties) {
+  const q = normName(question);
+  let best = null;
+  for (const p of new Set(parties || [])) {
+    const words = normName(p).split(" ").filter((t) => t.length >= 3 && !/^(inc|llc|the|and|co|group|offices?|company)$/.test(t));
+    const hits = words.filter((w) => new RegExp(`(^| )${w}( |$)`).test(q)).length;
+    if (!hits) continue;
+    const score = hits / Math.max(1, words.length);
+    if (!best || score > best.score) best = { party: p, score };
   }
-  if (/(changed|after).*(return|twist)/.test(q) || /what changed after/.test(q)) {
-    return { type: "query", query: "changes" };
+  return best ? best.party : "";
+}
+
+/**
+ * Deterministic router. Runs FIRST (instant, free, works with no AI); the LLM is only asked about phrasing
+ * this returns "unsupported" for. `parties` lets it recognise a customer or vendor named in the question.
+ */
+export function routeAskQuestion(question, parties = []) {
+  const q = String(question || "").toLowerCase().replace(/[’']/g, "'").trim();
+  if (!q) return { type: "unsupported" };
+  if (/forecast|next (quarter|month|year)|predict|projection|stock price|weather/.test(q)) return { type: "unsupported" };
+  const party = askFindParty(q, parties);
+  const action = /\b(fix|send|correct|draft|settle|refund|dispute|dismiss|chase|bill)\b/.test(q) && !/\b(why|what|which|how)\b/.test(q);
+  if (action) {
+    let a = "send_letter";
+    if (/\b(correct|correction)\b/.test(q)) a = "send_correction";
+    if (/\b(refund|dispute)\b/.test(q)) a = "request_refund";
+    if (/\bdismiss\b/.test(q)) a = "dismiss";
+    return { type: "suggest_action", action: a, target: party };
   }
-  if (/\b(biggest|top)\b/.test(q)) return { type: "query", query: "top_n", n: 3 };
-  if (/\b(fix|send|correct)\b/.test(q)) {
-    let target = "";
-    const m = q.match(/(?:fix|send|correct)\s+(?:the\s+)?(.+)/i);
-    if (m) target = m[1].replace(/\s+towels?$/, "").replace(/\s+letter$/, "").trim();
-    let action = "send_letter";
-    if (/correct/.test(q) || /towel/.test(q)) action = "send_correction";
-    if (/refund/.test(q)) action = "request_refund";
-    if (/dismiss/.test(q)) action = "dismiss";
-    return { type: "suggest_action", action, target };
+  if (/(why (was|wasn't|isn't|is not|wasnt|isnt)|not flagged|ruled out|look-?alike)/.test(q) && !/why is .+ flagged/.test(q)) {
+    const m = q.match(/why (?:wasn'?t|isn'?t|is not|was) (?:the )?(.+?) (?:rent |bill |payment )?(?:not )?flagged/);
+    return { type: "query", query: "ruled_out", target: party || (m ? m[1].replace(/\s+rent$/, "").trim() : "") };
   }
+  if (/(changed|what's new|whats new|new data|after the (return|twist|upload|file))/.test(q)) return { type: "query", query: "changes" };
+  if (/(pattern|root cause|keeps? happening|why does this|repeat)/.test(q)) return { type: "query", query: "patterns" };
+  if (party) return { type: "query", query: "party", target: party };
+  if (/(which|who).*(customer|vendor|account|party).*(most|biggest|largest)|owes? (us )?the most|biggest (customer|account)/.test(q)) {
+    return { type: "query", query: "top_parties", n: 3, lane: /vendor/.test(q) ? "vendor" : /customer/.test(q) ? "customer" : "" };
+  }
+  if (/\b(owe us|owed to us|owes us|recover|recoverable|missed billing|unbilled|underbill)/.test(q)) return { type: "query", query: "by_bucket", bucket: "recoverable" };
+  if (/\b(we owe|owe (them|customers?)|credits?|refund (customers?|them))\b/.test(q) || (/\bowe\b/.test(q) && /customer/.test(q))) {
+    return { type: "query", query: "by_bucket", bucket: "credit_owed" };
+  }
+  if (/\b(overdue|late|unpaid|past due|collect)/.test(q)) return { type: "query", query: "by_bucket", bucket: "overdue" };
+  if (/\b(biggest|top|largest|worst)\b/.test(q)) {
+    const n = Number((q.match(/\b(\d{1,2})\b/) || [])[1]) || 3;
+    return { type: "query", query: "top_n", n: Math.min(10, n) };
+  }
+  if (/(lose|lost|leak|slip|how much|total|summary|overview|today|this month|morning|status)/.test(q)) return { type: "query", query: "summary" };
   return { type: "unsupported" };
 }
 

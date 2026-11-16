@@ -8,9 +8,9 @@ import { loadDemoData } from "@/actions/loadDemoData.js";
 import { paletteApprovalBlock } from "@/components/paletteActionGate.js";
 import { displayText } from "@/lib/displayText.js";
 
-const PALETTE_EXAMPLE_QUESTIONS = ["Which customers do we owe money to?", "Why wasn't the Bronx Realty rent flagged?", "Fix the Chelsea towels", "What changed after the returns file?"];
+const PALETTE_EXAMPLE_QUESTIONS = ["What did we lose this month?", "Which customer owes the most?", "Which customers do we owe money to?", "What changed after the returns file?"];
 
-export default function CommandPalette({ role, onClose, onNavigate, onUpload, initialQuery = "", showRuled = false }) {
+export default function CommandPalette({ role, onClose, onNavigate, onUpload, initialQuery = "", autoAsk = false, showRuled = false }) {
   useSeamsDrawerLifecycle(onClose);
   const { setSelectedSeam, setSelectedFlagKey } = useSelectedSeam();
   const [query, setQuery] = useState(initialQuery);
@@ -41,21 +41,51 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
     setBusy(true);
     const id = setTimeout(async () => {
       try {
+        // While typing: record lookup + a rules-only preview. No AI call and nothing stored per keystroke.
         const [record, asked] = await Promise.all([
           base44.functions.invoke("lookupRecord", {id:query.trim()}),
-          base44.functions.invoke("askSeams", {question:query.trim()}),
+          base44.functions.invoke("askSeams", {question:query.trim(), dry_run:true, no_ai:true}),
         ]);
-        let blocked = "";
-        if (asked.data.suggested_action_id) {
-          const suggestion = await base44.entities.SuggestedAction.get(asked.data.suggested_action_id);
-          if (suggestion?.action_type === "send_correction") blocked = paletteApprovalBlock(suggestion, await base44.entities.Flag.filter({party:suggestion.params?.party}));
-        }
-        if (token === generation.current) { setLookup(record.data); setAnswer(asked.data); setActionBlocked(blocked); }
+        if (token === generation.current) { setLookup(record.data); setAnswer(asked.data); setActionBlocked(""); }
       } catch (e) { if(token===generation.current) setError(e?.response?.data?.error || e.message); }
       finally { if(token===generation.current) setBusy(false); }
     }, 350);
     return () => clearTimeout(id);
   }, [query]);
+  // Enter: ask in full (the AI may route unusual wording). Still a preview: nothing is stored.
+  const askFull = async () => {
+    const q = query.trim();
+    if (!q || actionLock.current) return;
+    const token = ++generation.current;
+    setBusy(true); setError("");
+    try {
+      const { data } = await base44.functions.invoke("askSeams", { question: q, dry_run: true });
+      if (token === generation.current) setAnswer({ ...data, asked_full: true });
+    } catch (e) { if (token === generation.current) setError(e?.response?.data?.error || e.message); }
+    finally { if (token === generation.current) setBusy(false); }
+  };
+  // "Draft this fix": only now is a proposed SuggestedAction stored, and it still waits for Approve.
+  const draftFix = async () => {
+    const q = query.trim();
+    if (!q || actionLock.current) return;
+    actionLock.current = true; setWorking(true); setError("");
+    try {
+      const { data } = await base44.functions.invoke("askSeams", { question: q });
+      let blocked = "";
+      if (data.suggested_action_id) {
+        const suggestion = await base44.entities.SuggestedAction.get(data.suggested_action_id);
+        if (suggestion?.action_type === "send_correction") blocked = paletteApprovalBlock(suggestion, await base44.entities.Flag.filter({party:suggestion.params?.party}));
+      }
+      setAnswer({ ...data, asked_full: true }); setActionBlocked(blocked);
+    } catch (e) { setError(e?.response?.data?.error || e.message); }
+    finally { actionLock.current = false; setWorking(false); }
+  };
+  // Opened from the Today "Ask Seams" bar: ask in full straight away.
+  useEffect(() => {
+    if (!autoAsk || !initialQuery) return;
+    const id = setTimeout(() => askFull(), 400);
+    return () => clearTimeout(id);
+  }, []);
   const openFlag = (flag) => { setSelectedSeam(flag.seam); setSelectedFlagKey(flag.stable_key); onNavigate("Today"); onClose(); };
   const openRecord = async (id) => {
     try {
@@ -96,13 +126,15 @@ export default function CommandPalette({ role, onClose, onNavigate, onUpload, in
   };
   return <div className="palette-overlay" onMouseDown={(e)=>{if(e.target===e.currentTarget)onClose();}}>
     <section ref={root} role="dialog" aria-modal="true" aria-label="Look up, ask, act" className="command-palette card" onKeyDown={keys}>
-      <div className="palette-search"><input ref={input} value={query} onChange={(e)=>setQuery(e.target.value)} aria-label="Look up a record or ask Seams" placeholder="Look up a record, ask, or act…" /><button aria-label="Close command palette" className="chip chip-neutral" onClick={onClose}>esc</button></div>
+      <div className="palette-search"><input ref={input} value={query} onChange={(e)=>setQuery(e.target.value)} onKeyDown={(e)=>{ if (e.key === "Enter") { e.preventDefault(); askFull(); } }} aria-label="Look up a record or ask Seams" placeholder="Ask about the money, look up a record, or say “fix Greenpoint”…" /><button aria-label="Close command palette" className="chip chip-neutral" onClick={onClose}>esc</button></div>
       <div className="palette-results">
         <h2 className="brief-label mb-2">Records</h2>
-        {busy ? <p className="text-xs text-[#6B635A]" role="status">Looking through checked records…</p> : lookup?.kind==="flagged" ? lookup.flags.map((f)=><button data-command key={f.stable_key} className="palette-record" onClick={()=>openFlag(f)}>Flagged: {displayText(f.title)} · <span className="money">{fmt(f.amount_cents)}</span></button>) : lookup?.kind==="ruled_out" ? lookup.ruled.map((r,i)=><p className="palette-record" key={i}>Ruled out: {displayText(r.reason)}</p>) : query.trim() && lookup ? <p className="palette-record">Not found in any loaded system</p> : <p className="text-xs text-[#6B635A]">Search a business ID such as INV-5078 or SH-3058.</p>}
+        {busy ? <p className="text-xs text-[#6B635A]" role="status">Looking through checked records…</p> : lookup?.kind==="flagged" ? lookup.flags.map((f)=><button data-command key={f.stable_key} className="palette-record" onClick={()=>openFlag(f)}>Flagged: {displayText(f.title)} · <span className="money">{fmt(f.amount_cents)}</span></button>) : lookup?.kind==="ruled_out" ? lookup.ruled.map((r,i)=><p className="palette-record" key={i}>Ruled out: {displayText(r.reason)}</p>) : query.trim() && lookup && /\d/.test(query) && !/\s/.test(query.trim()) ? <p className="palette-record">Not found in any loaded system</p> : query.trim() && lookup ? <p className="text-xs text-[#6B635A]">No record ID in this question.</p> : <p className="text-xs text-[#6B635A]">Search a business ID such as INV-5078 or SH-3058.</p>}
         <h2 className="brief-label mt-5 mb-2">Ask Seams</h2>
         {!query.trim() ? <div className="grid gap-1">{PALETTE_EXAMPLE_QUESTIONS.map(q=><button data-command className="palette-action" key={q} onClick={()=>setQuery(q)}>{q}</button>)}</div> : answer ? <div className="card p-3 text-[13px]">
           <p>{displayText(answer.answer)}</p>
+          {answer.refused && !answer.asked_full ? <p className="text-xs text-[#6B635A] mt-2">Press Enter to ask Seams in full.</p> : null}
+          {answer.would_propose ? <div className="flex gap-2 mt-3"><button data-command className="fix-pill" disabled={working||role!=="admin"} onClick={draftFix}>{working?"Drafting…":"Draft this fix"}</button><span className="text-xs text-[#6B635A] self-center">Nothing is sent until a Controller approves.</span></div> : null}
           <div className="flex flex-wrap gap-1 mt-2">{[...new Set(answer.ids||[])].map(id=><button data-command className="record-chip" key={id} onClick={()=>openRecord(id)}>{id}</button>)}</div>
           {answer.suggested_action_id ? <div className="flex gap-2 mt-3"><button data-command className="fix-pill" disabled={working||role!=="admin"||Boolean(actionBlocked)} onClick={()=>act(true)}>{working?"Sending…":"Approve"}</button><button data-command className="seam-chip" disabled={working} onClick={()=>act(false)}>Reject</button></div> : null}
           {answer.suggested_action_id && actionBlocked ? <p className="text-xs text-[#6B635A] mt-2">{actionBlocked}</p> : null}

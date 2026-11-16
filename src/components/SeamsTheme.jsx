@@ -1146,6 +1146,10 @@ button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
 .settings-input:focus { outline: 2px solid var(--s-forest); outline-offset: 1px; }
 .settings-input:disabled { background: var(--s-paper); color: var(--s-muted); }
 .settings-check { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; cursor: pointer; }
+.ask-input { flex: 1; min-width: 0; min-height: 36px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; padding: 0 12px; font: inherit; font-size: 13px; color: var(--s-ink); }
+.ask-input:focus { outline: 2px solid var(--s-forest); outline-offset: 1px; }
+.ask-chip { border-radius: 999px; border: 1px solid var(--s-line); background: #fff; padding: 3px 10px; font-size: 11.5px; color: #44403c; cursor: pointer; }
+.ask-chip:hover { border-color: var(--s-ink); color: var(--s-ink); }
 `;
 
 export default function SeamsTheme() {

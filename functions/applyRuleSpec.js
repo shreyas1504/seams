@@ -115,16 +115,13 @@ export default async function (req) {
     undone: false,
   });
 
-  // Run checks via the same function module
-  const run = (await import("./runChecks.js")).default;
-  const checkRes = await run(
-    new Request("http://local/fn/runChecks", {
-      method: "POST",
-      body: JSON.stringify({}),
-      headers: { "content-type": "application/json" },
-    }),
-  );
-  const checkBody = await checkRes.json();
-  if (!checkRes.ok) return Response.json(checkBody, { status: checkRes.status });
+  // Re-run checks through the SDK (in Base44 each backend function is deployed separately,
+  // so one function calls another with base44.functions.invoke, never a file import).
+  let checkBody;
+  try {
+    checkBody = (await base44.functions.invoke("runChecks", {})).data;
+  } catch (e) {
+    return Response.json(e?.response?.data || { error: e?.message || "runChecks failed" }, { status: e?.response?.status || 500 });
+  }
   return Response.json({ ok: true, mode, audit_event_id: audit.id, checks: checkBody });
 }

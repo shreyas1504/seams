@@ -19,40 +19,28 @@ export default async function (req) {
   let undoable = false;
   const party = action.params?.party;
 
+  // In Base44 each backend function is deployed separately: call siblings through the SDK, never a file import.
+  const call = async (name, payload) => {
+    try {
+      return { ok: true, data: (await base44.functions.invoke(name, payload)).data };
+    } catch (e) {
+      return { ok: false, status: e?.response?.status || 500, data: e?.response?.data || { error: e?.message || `${name} failed` } };
+    }
+  };
+
   if (action.action_type === "send_letter" || action.action_type === "send_correction") {
-    const send = (await import("./sendLetter.js")).default;
     const kind = action.action_type === "send_correction" ? "correction" : "customer";
-    const res = await send(
-      new Request("http://local/fn/sendLetter", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ party, kind, tone: "warm", exclude_keys: [] }),
-      }),
-    );
-    result = await res.json();
-    if (!res.ok) return Response.json(result, { status: res.status });
+    const r = await call("sendLetter", { party, kind, tone: "warm", exclude_keys: [] });
+    result = r.data;
+    if (!r.ok) return Response.json(result, { status: r.status });
   } else if (action.action_type === "request_refund") {
-    const send = (await import("./sendLetter.js")).default;
-    const res = await send(
-      new Request("http://local/fn/sendLetter", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ party, kind: "vendor", tone: "firm", exclude_keys: [] }),
-      }),
-    );
-    result = await res.json();
-    if (!res.ok) return Response.json(result, { status: res.status });
+    const r = await call("sendLetter", { party, kind: "vendor", tone: "firm", exclude_keys: [] });
+    result = r.data;
+    if (!r.ok) return Response.json(result, { status: r.status });
   } else if (action.action_type === "dismiss") {
     const flags = await db.Flag.filter({ party });
-    const transition = (await import("./transitionFlag.js")).default;
     for (const f of flags.filter((x) => x.status === "open")) {
-      await transition(
-        new Request("http://local/fn/transitionFlag", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ flag_id: f.id, to_status: "dismissed", reason: "Already handled" }),
-        }),
-      );
+      await call("transitionFlag", { flag_id: f.id, to_status: "dismissed", reason: "Already handled" });
     }
     result = { dismissed: true };
     undoable = true;

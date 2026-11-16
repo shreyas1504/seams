@@ -15,12 +15,12 @@ export function onSeamsDataChanged(cb) {
 
 // Open the ⌘K palette on a record from anywhere (proof chips, letters). SeamsApp listens.
 const SEAMS_LOOKUP_EVENT = "seams:lookup";
-export function openSeamsLookup(query) {
-  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(SEAMS_LOOKUP_EVENT, { detail: { query } }));
+export function openSeamsLookup(query, opts = {}) {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(SEAMS_LOOKUP_EVENT, { detail: { query, ask: Boolean(opts.ask) } }));
 }
 export function onSeamsLookup(cb) {
   if (typeof window === "undefined") return () => {};
-  const h = (e) => cb(e.detail?.query || "");
+  const h = (e) => cb(e.detail?.query || "", Boolean(e.detail?.ask));
   window.addEventListener(SEAMS_LOOKUP_EVENT, h);
   return () => window.removeEventListener(SEAMS_LOOKUP_EVENT, h);
 }

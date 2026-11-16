@@ -200,7 +200,8 @@ function SeamsAppShell() {
   const role = realUser ? realUser.role : USERS[identity].role;
   const [palette, setPalette] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState("");
-  useEffect(() => onSeamsLookup((q) => { setPaletteQuery(q); setPalette(true); }), []);
+  const [paletteAsk, setPaletteAsk] = useState(false);
+  useEffect(() => onSeamsLookup((q, ask) => { setPaletteQuery(q); setPaletteAsk(ask); setPalette(true); }), []);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [twistNotice, setTwistNotice] = useState(null);
   const [twistNewKeys, setTwistNewKeys] = useState([]);
@@ -343,7 +344,7 @@ function SeamsAppShell() {
         </main>
         <InteractionFeedback />
         {uploadOpen ? <SeamsSheet title="Upload new data" eyebrow="Data stays in your systems" wide onClose={()=>setUploadOpen(false)}><Data role={role} onApproved={onTwistApproved}/></SeamsSheet> : null}
-        {palette ? <CommandPalette key={paletteQuery} initialQuery={paletteQuery} role={role} onClose={()=>{setPalette(false);setPaletteQuery("");}} onNavigate={setTab} onUpload={()=>setUploadOpen(true)} /> : null}
+        {palette ? <CommandPalette key={paletteQuery + (paletteAsk ? ":ask" : "")} initialQuery={paletteQuery} autoAsk={paletteAsk} role={role} onClose={()=>{setPalette(false);setPaletteQuery("");setPaletteAsk(false);}} onNavigate={setTab} onUpload={()=>setUploadOpen(true)} /> : null}
       </div>
   );
 }
