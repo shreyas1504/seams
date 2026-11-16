@@ -182,7 +182,7 @@ export default function App() {
 
   let page;
   if (tab === "Today") {
-    page = !flagState.loaded ? null : flagState.n ? <Today /> : <EmptyState role={role} />;
+    page = !flagState.loaded ? null : flagState.n ? <Today role={role} /> : <EmptyState role={role} />;
   } else if (tab === "Accounts") {
     page = (
       <Home

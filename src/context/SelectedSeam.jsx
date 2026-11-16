@@ -1,12 +1,21 @@
-// Shared selection: which seam (e.g. "AP→Vendors") the user picked from the brief.
-// Later parts (Where it slipped, Today's fixes, Proof trace) read this.
+// Shared selection on Today: which seam (e.g. "AP→Vendors") and which flag (by stable_key) the user picked.
+// The brief, the map, Today's fixes and the proof trace all read this.
 import React, { createContext, useContext, useMemo, useState } from "react";
 
-const SelectedSeamContext = createContext({ selectedSeam: null, setSelectedSeam: () => {} });
+const SelectedSeamContext = createContext({
+  selectedSeam: null,
+  setSelectedSeam: () => {},
+  selectedFlagKey: null,
+  setSelectedFlagKey: () => {},
+});
 
 export function SelectedSeamProvider({ children }) {
   const [selectedSeam, setSelectedSeam] = useState(null);
-  const value = useMemo(() => ({ selectedSeam, setSelectedSeam }), [selectedSeam]);
+  const [selectedFlagKey, setSelectedFlagKey] = useState(null);
+  const value = useMemo(
+    () => ({ selectedSeam, setSelectedSeam, selectedFlagKey, setSelectedFlagKey }),
+    [selectedSeam, selectedFlagKey],
+  );
   return <SelectedSeamContext.Provider value={value}>{children}</SelectedSeamContext.Provider>;
 }
 

@@ -8,9 +8,9 @@ const SBS_COLOR = {
   AP: "bg-[#7A4FC9]",
   Returns: "bg-[#5B5F68]",
 };
-const SBS_LINEAGE_KEYS = new Set(["import_batch", "source_row"]);
+export const SBS_LINEAGE_KEYS = new Set(["import_batch", "source_row"]);
 
-function sbsFieldHighlight(flag, key) {
+export function sbsFieldHighlight(flag, key) {
   if (key === flag.diff_field) return true;
   if (flag.diff_field === "qty" && String(key).includes("qty")) return true;
   return false;

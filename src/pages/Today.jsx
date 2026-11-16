@@ -1,13 +1,18 @@
-// Today: morning brief (left) + "Where it slipped" (right, filled in a later step).
+// Today: morning brief + "Where it slipped" on top; "Today's fixes" + "Proof · Trace" below.
 // Every sentence is a code template over engine numbers. No LLM text.
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useEntity } from "@/lib/useEntity";
 import { totalsOf, fmt } from "@/lib/engine/engine.js";
 import { useSelectedSeam } from "@/context/SelectedSeam.jsx";
 import { seamLabel, seamTint, shortDate } from "@/components/systems.js";
 import WhereItSlipped from "@/components/WhereItSlipped.jsx";
-import { onSeamsDataChanged } from "@/actions/dataChanged.js";
+import TodaysFixes, { FIX_COLLAPSE_MS } from "@/components/TodaysFixes.jsx";
+import ProofTrace from "@/components/ProofTrace.jsx";
+import LetterDrawer from "@/components/LetterDrawer.jsx";
+import RefundDrawer from "@/components/RefundDrawer.jsx";
+import { fixPatternFor, fixRootCause } from "@/components/fixProof.js";
+import { announceSeamsDataChanged, onSeamsDataChanged } from "@/actions/dataChanged.js";
 
 const TODAY_LIVE = new Set(["open", "sent", "disputed"]);
 const TODAY_GONE = new Set(["dismissed", "cleared"]);
@@ -59,7 +64,7 @@ function SeamPill({ seam, children, label }) {
   );
 }
 
-export default function Today() {
+export default function Today({ role = "admin" }) {
   // One flag list feeds both the brief and the map, so they always update together.
   const [flags, reloadFlags] = useEntity("Flag");
   const [ruled, reloadRuled] = useEntity("RuledOut");
@@ -71,6 +76,10 @@ export default function Today() {
   const [bills] = useEntity("VendorBill");
   const [returns] = useEntity("Return");
   const [visit, setVisit] = useState(null);
+  const { selectedSeam, selectedFlagKey, setSelectedFlagKey } = useSelectedSeam();
+  // Flags whose letter/refund was sent from this page this session: their cards stay with a SENT stamp.
+  const [sentKeys, setSentKeys] = useState(() => new Set());
+  const [drawer, setDrawer] = useState(null);
 
   // After any import or approval elsewhere in the app, refetch.
   useEffect(
@@ -175,6 +184,99 @@ export default function Today() {
     };
   }, [flags, actions]);
 
+  // Look-alikes checked: ruled-out rows plus findings a person marked "not an issue".
+  const lookAlikes = useMemo(
+    () => ruled.length + flags.filter((f) => f.status === "dismissed").length,
+    [ruled, flags],
+  );
+
+  // Cards: open flags in the selected seam (plus ones sent from here this session), largest first.
+  const seamOpen = useMemo(
+    () => flags.filter((f) => f.seam === selectedSeam && (f.status || "open") === "open"),
+    [flags, selectedSeam],
+  );
+  const fixCards = useMemo(
+    () =>
+      flags
+        .filter((f) => f.seam === selectedSeam && ((f.status || "open") === "open" || sentKeys.has(f.stable_key)))
+        .sort((a, b) => (b.amount_cents || 0) - (a.amount_cents || 0)),
+    [flags, selectedSeam, sentKeys],
+  );
+
+  // Default selected flag: the largest open flag in the seam.
+  useEffect(() => {
+    if (!fixCards.length) return;
+    if (!fixCards.some((f) => f.stable_key === selectedFlagKey)) setSelectedFlagKey(fixCards[0].stable_key);
+  }, [fixCards, selectedFlagKey, setSelectedFlagKey]);
+
+  const selectedFlag = fixCards.find((f) => f.stable_key === selectedFlagKey) || null;
+  const seamRootCause = useMemo(() => {
+    const p = fixPatternFor(seamOpen, patterns);
+    return p ? p.title : seamOpen[0]?.rule || null;
+  }, [seamOpen, patterns]);
+  const proofRootCause = useMemo(() => fixRootCause(selectedFlag, seamOpen, patterns), [selectedFlag, seamOpen, patterns]);
+
+  const newKeys = useMemo(() => {
+    const last = Date.parse(visit?.last_seen_at || "");
+    if (!Number.isFinite(last)) return new Set();
+    return new Set(
+      flags.filter((f) => Date.parse(f.created_date || f.created_at || "") > last).map((f) => f.stable_key),
+    );
+  }, [flags, visit]);
+
+  // Pending four-eyes sends, by party: flags in that send show NEEDS APPROVAL.
+  const pendingByParty = useMemo(() => {
+    const m = new Map();
+    for (const a of actions) if (a.status === "pending_second" && a.action_type === "send_letter" && a.params?.party) m.set(a.params.party, a);
+    return m;
+  }, [actions]);
+
+  const stamps = useMemo(() => {
+    const m = new Map();
+    for (const f of fixCards) {
+      if (sentKeys.has(f.stable_key) && (f.status || "open") !== "open") m.set(f.stable_key, "sent");
+      else {
+        const a = pendingByParty.get(f.party);
+        const kind = f.lane === "vendor" ? "vendor" : "customer";
+        if (a && (a.params?.kind || "customer") === kind && !(a.params?.exclude_keys || []).includes(f.stable_key)) {
+          m.set(f.stable_key, "approval");
+        }
+      }
+    }
+    return m;
+  }, [fixCards, sentKeys, pendingByParty]);
+
+  const selectFix = useCallback((f) => setSelectedFlagKey(f.stable_key), [setSelectedFlagKey]);
+
+  const openFix = useCallback(
+    (f) => {
+      setSelectedFlagKey(f.stable_key);
+      const kind = f.lane === "vendor" ? "vendor" : "customer";
+      const a = pendingByParty.get(f.party);
+      const pendingAction = a && (a.params?.kind || "customer") === kind ? a.id : null;
+      setDrawer({ party: f.party, kind, lane: f.lane, pendingAction });
+    },
+    [pendingByParty, setSelectedFlagKey],
+  );
+
+  const onDrawerSent = useCallback((data) => {
+    if (drawer && !data?.dismissed) {
+      // Everything for this party in this lane that was open went out in the letter.
+      const lane = drawer.kind === "vendor" ? "vendor" : "customer";
+      const went = flags.filter((f) => f.party === drawer.party && (f.lane || "customer") === lane && (f.status || "open") === "open");
+      setSentKeys((prev) => new Set([...prev, ...went.map((f) => f.stable_key)]));
+    }
+    setDrawer(null);
+    announceSeamsDataChanged();
+  }, [drawer, flags]);
+
+  const dismissFix = useCallback(async (f, reason, startCollapse) => {
+    await base44.functions.invoke("transitionFlag", { flag_id: f.id, to_status: "dismissed", reason });
+    startCollapse();
+    await new Promise((r) => setTimeout(r, FIX_COLLAPSE_MS));
+    announceSeamsDataChanged();
+  }, []);
+
   const showSince = Boolean(visit?.last_seen_at);
   const since = visit?.since || {};
 
@@ -219,7 +321,7 @@ export default function Today() {
           <span className="chip chip-credit">
             We owe customers <span className="money font-semibold">{fmt(totals.credit_owed.cents)}</span>
           </span>
-          <span className="chip chip-neutral">{ruled.length} look-alikes checked, 0 flagged</span>
+          <span className="chip chip-neutral">{lookAlikes} look-alikes checked, 0 flagged</span>
         </div>
 
         {showSince ? (
@@ -255,7 +357,46 @@ export default function Today() {
         </article>
       </section>
 
-      <WhereItSlipped flags={flags} ruledCount={ruled.length} stages={stages} />
+      <WhereItSlipped flags={flags} ruledCount={lookAlikes} stages={stages} />
+
+      {selectedSeam ? (
+        <>
+          <TodaysFixes
+            seam={selectedSeam}
+            cards={fixCards}
+            rootCause={seamRootCause}
+            selectedKey={selectedFlag?.stable_key || null}
+            newKeys={newKeys}
+            stamps={stamps}
+            lookAlikes={lookAlikes}
+            onSelect={selectFix}
+            onAct={openFix}
+            onDismiss={dismissFix}
+          />
+          <ProofTrace flag={selectedFlag} rootCause={proofRootCause} ruled={ruled} />
+        </>
+      ) : null}
+
+      {drawer?.kind === "vendor" ? (
+        <RefundDrawer
+          party={drawer.party}
+          role={role}
+          pendingAction={drawer.pendingAction}
+          onClose={() => setDrawer(null)}
+          onSent={onDrawerSent}
+          onPending={() => announceSeamsDataChanged()}
+        />
+      ) : drawer ? (
+        <LetterDrawer
+          party={drawer.party}
+          kind="customer"
+          role={role}
+          pendingAction={drawer.pendingAction}
+          onClose={() => setDrawer(null)}
+          onSent={onDrawerSent}
+          onPending={() => announceSeamsDataChanged()}
+        />
+      ) : null}
     </div>
   );
 }
