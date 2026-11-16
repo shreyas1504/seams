@@ -20,6 +20,12 @@ description: Template rules for the Today morning brief that the user explicitly
 - Fix in Run 5: customer card buttons must show the letter total, not the single flag amount.
 **Why:** "one number everywhere" — any button or count must equal what actually gets sent or shown elsewhere.
 
+## Before-and-after total checks
+Check matching letter totals both before and after new data is approved. New credits must reduce the post-twist total rather than keeping the pre-twist total fixed.
+
+**Why:** the user explicitly clarified that both stages must agree across the card button, Accounts row and Settle sheet.
+**How to apply:** compare all three surfaces at the same data stage; include the newly owed credits after the twist.
+
 ## Sent-letter undo
 Keep sent money letters irreversible. Undo must show “Send a correction instead”.
 

@@ -2,9 +2,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fmt } from "@/lib/engine/engine.js";
+import { useEntity } from "@/lib/useEntity";
+import { settleCreditCopy } from "@/components/settleCreditCopy.js";
 import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 
 export default function LetterDrawer({ party, kind = "customer", role = "admin", pendingAction = null, onClose, onSent, onPending }) {
+  const [returnRows] = useEntity("Return");
+  const [invoiceRows] = useEntity("Invoice");
   const [draft, setDraft] = useState(null);
   const [exclude, setExclude] = useState([]);
   const [subject, setSubject] = useState("");
@@ -179,8 +183,8 @@ export default function LetterDrawer({ party, kind = "customer", role = "admin",
                           aria-label={`Include ${line.text}`}
                         />
                       )}
-                      <span className="seams-settle-sheet__line-copy">{line.text}</span>
-                      {line.amount_cents ? <span className="seams-settle-sheet__line-amount">{fmt(line.signed_cents ?? line.amount_cents)}</span> : null}
+                       <span className="seams-settle-sheet__line-copy">{settleCreditCopy(line, returnRows, invoiceRows)}</span>
+                       {line.amount_cents ? <span className="seams-settle-sheet__line-amount">{fmt(line.signed_cents ?? line.amount_cents).replace(/^-/, "−")}</span> : null}
                     </div>
                   ))}
                 </div>
