@@ -1,6 +1,7 @@
 // Ledger: all AuditEvents newest first, filter by action/entity, Undo on reversible (admin).
 import React, { useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { useEntity } from "@/lib/useEntity";
 
 export default function Ledger({ role = "admin" }) {
@@ -27,6 +28,7 @@ export default function Ledger({ role = "admin" }) {
     setBusy(id);
     try {
       await base44.functions.invoke("undoAction", { audit_event_id: id });
+      announceSeamsDataChanged();
       reload();
     } catch (e) {
       setErr(e?.response?.data?.error || e.message);

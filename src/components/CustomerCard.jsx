@@ -4,7 +4,7 @@ import { fmt } from "@/lib/engine/engine.js";
 import { formatNetCents, squareUpLabel } from "@/lib/format.js";
 import SideBySide from "@/components/SideBySide.jsx";
 
-const STEPS = ["Found", "Letter ready", "Sent"];
+const CUSTOMER_STEPS = ["Found", "Letter ready", "Sent"];
 
 function customerStepIndex(flags) {
   if (flags.some((f) => ["sent", "disputed", "recovered", "credited"].includes(f.status))) return 2;
@@ -39,7 +39,7 @@ export default function CustomerCard({ party, onSquareUp, onOpenFlag }) {
       </div>
 
       <div className="mt-3 flex items-center gap-1">
-        {STEPS.map((label, i) => (
+        {CUSTOMER_STEPS.map((label, i) => (
           <React.Fragment key={label}>
             <div className="flex flex-col items-center gap-1">
               <span
@@ -47,7 +47,7 @@ export default function CustomerCard({ party, onSquareUp, onOpenFlag }) {
               />
               <span className={`text-[10px] ${i <= step ? "text-[#14171F]" : "text-[#5B5F68]"}`}>{label}</span>
             </div>
-            {i < STEPS.length - 1 ? <div className={`mb-4 h-px flex-1 ${i < step ? "bg-[#3B5BDB]" : "bg-[#E5E5E5]"}`} /> : null}
+            {i < CUSTOMER_STEPS.length - 1 ? <div className={`mb-4 h-px flex-1 ${i < step ? "bg-[#3B5BDB]" : "bg-[#E5E5E5]"}`} /> : null}
           </React.Fragment>
         ))}
       </div>

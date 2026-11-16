@@ -232,6 +232,68 @@ body {
   filter: brightness(0.97);
 }
 
+/* ---------- Where it slipped ---------- */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #f4efe7;
+}
+.segmented-option {
+  min-height: 30px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  transition: background 180ms var(--ease), color 180ms var(--ease), box-shadow 180ms var(--ease);
+}
+.segmented-option:hover {
+  color: var(--ink);
+}
+.segmented-option[aria-pressed="true"] {
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.08);
+}
+
+.seam-conn {
+  transition: opacity 220ms var(--ease);
+}
+
+@keyframes seam-drip-flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+.seam-drip {
+  animation: seam-drip-flow 1.2s linear infinite;
+}
+
+.seam-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 32px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #e0d8cb;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background 180ms var(--ease), color 180ms var(--ease), border-color 180ms var(--ease);
+}
+.seam-chip:hover {
+  border-color: var(--ink);
+}
+.seam-chip[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
 .chip {
   display: inline-flex;
   align-items: center;

@@ -1,6 +1,7 @@
 // Overview — CRMEdge layout: KPIs, gauge, top parties, document-style settlement cards.
 import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { useEntity } from "@/lib/useEntity";
 import { rankParties, totalsOf, fmt } from "@/lib/engine/engine.js";
 import { formatNetCents, squareUpLabel } from "@/lib/format.js";
@@ -108,6 +109,7 @@ export default function Home({ role = "admin", headerLookup = "", headerLookupSi
 
   const onTransition = async (payload) => {
     await base44.functions.invoke("transitionFlag", payload);
+    announceSeamsDataChanged();
     reloadFlags();
     reloadAudits();
   };
@@ -371,6 +373,7 @@ export default function Home({ role = "admin", headerLookup = "", headerLookupSi
             role={role}
             rowsImported={returns.length}
             onDone={(data) => {
+              announceSeamsDataChanged();
               reloadFlags();
               reloadAudits();
               reloadPatterns();
@@ -430,6 +433,7 @@ export default function Home({ role = "admin", headerLookup = "", headerLookupSi
           cardNet={letterParty.net}
           onClose={() => setLetterParty(null)}
           onSent={() => {
+            announceSeamsDataChanged();
             reloadFlags();
             reloadAudits();
             setLetterParty(null);
@@ -442,6 +446,7 @@ export default function Home({ role = "admin", headerLookup = "", headerLookupSi
           role={role}
           onClose={() => setRefundParty(null)}
           onSent={() => {
+            announceSeamsDataChanged();
             reloadFlags();
             reloadAudits();
             setRefundParty(null);

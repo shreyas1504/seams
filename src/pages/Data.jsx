@@ -1,6 +1,7 @@
 // Data page: parse in code → map columns → ISO dates → saveMapping → importRows → runChecks.
 import React, { useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { parseCsv, headerHash } from "@/lib/csv.js";
 import {
   ENTITY_CANONICAL_FIELDS,
@@ -144,6 +145,7 @@ export default function Data({ role = "admin" }) {
       });
       say(`rows parsed ${parsed.rows.length} · imported ${r.data.imported}`);
       const c = await base44.functions.invoke("runChecks");
+      announceSeamsDataChanged();
       say(
         `runChecks: +${c.data.counts.new} new · ${c.data.counts.cleared} cleared · ${c.data.counts.needs_review} needs review · recoverable ${c.data.totals.recoverable.n} (${c.data.totals.recoverable.cents}¢)`,
       );

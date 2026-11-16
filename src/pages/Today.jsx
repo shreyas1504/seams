@@ -6,6 +6,8 @@ import { useEntity } from "@/lib/useEntity";
 import { totalsOf, fmt } from "@/lib/engine/engine.js";
 import { useSelectedSeam } from "@/context/SelectedSeam.jsx";
 import { seamLabel, seamTint, shortDate } from "@/components/systems.js";
+import WhereItSlipped from "@/components/WhereItSlipped.jsx";
+import { onSeamsDataChanged } from "@/actions/dataChanged.js";
 
 const TODAY_LIVE = new Set(["open", "sent", "disputed"]);
 const TODAY_GONE = new Set(["dismissed", "cleared"]);
@@ -50,7 +52,7 @@ function SeamPill({ seam, children, label }) {
       style={{ background: tint.bg, color: tint.ink, boxShadow: active ? `inset 0 0 0 1.5px ${tint.ink}` : undefined }}
       aria-pressed={active}
       aria-label={label}
-      onClick={() => setSelectedSeam(active ? null : seam)}
+      onClick={() => setSelectedSeam(seam)}
     >
       {children}
     </button>
@@ -58,15 +60,39 @@ function SeamPill({ seam, children, label }) {
 }
 
 export default function Today() {
-  const [flags] = useEntity("Flag");
-  const [ruled] = useEntity("RuledOut");
-  const [patterns] = useEntity("Pattern");
-  const [actions] = useEntity("SuggestedAction");
+  // One flag list feeds both the brief and the map, so they always update together.
+  const [flags, reloadFlags] = useEntity("Flag");
+  const [ruled, reloadRuled] = useEntity("RuledOut");
+  const [patterns, reloadPatterns] = useEntity("Pattern");
+  const [actions, reloadActions] = useEntity("SuggestedAction");
+  const [contracts] = useEntity("Contract");
   const [shipments] = useEntity("Shipment");
   const [invoices] = useEntity("Invoice");
   const [bills] = useEntity("VendorBill");
   const [returns] = useEntity("Return");
   const [visit, setVisit] = useState(null);
+
+  // After any import or approval elsewhere in the app, refetch.
+  useEffect(
+    () =>
+      onSeamsDataChanged(() => {
+        reloadFlags();
+        reloadRuled();
+        reloadPatterns();
+        reloadActions();
+      }),
+    [reloadFlags, reloadRuled, reloadPatterns, reloadActions],
+  );
+
+  const stages = useMemo(
+    () => ({
+      contracted: contracts.length > 0,
+      shipped: shipments.length > 0,
+      invoiced: invoices.length > 0,
+      collected: invoices.some((r) => r.paid_date || String(r.status || "").toLowerCase() === "paid"),
+    }),
+    [contracts, shipments, invoices],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -229,9 +255,7 @@ export default function Today() {
         </article>
       </section>
 
-      <section className="card rise min-h-[360px] p-5 lg:col-span-8" aria-label="Where it slipped">
-        <h2 className="font-display text-[17px] font-semibold text-ink">Where it slipped</h2>
-      </section>
+      <WhereItSlipped flags={flags} ruledCount={ruled.length} stages={stages} />
     </div>
   );
 }

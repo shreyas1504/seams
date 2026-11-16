@@ -1,6 +1,7 @@
 // Shared "Reset demo" logic: wipe, import the four seed CSVs, then runChecks.
 // Used by the Data page (Reset demo) and the empty state (Load demo data).
 import { base44 } from "@/api/base44Client";
+import { announceSeamsDataChanged } from "./dataChanged.js";
 import { parseCsv, headerHash } from "@/lib/csv.js";
 
 export const SEED = {
@@ -27,5 +28,6 @@ export async function loadDemoData(say = () => {}) {
   say(
     `Checks: ${c.data.counts.new} new flags · recoverable ${c.data.totals.recoverable.n} · ruled out ${c.data.totals.ruled_out}`,
   );
+  announceSeamsDataChanged();
   return c.data;
 }

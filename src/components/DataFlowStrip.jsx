@@ -1,7 +1,7 @@
 // Compact how-data-works bar — AA contrast, tight spacing.
 import React from "react";
 
-const STEPS = [
+const FLOW_STEPS = [
   { id: "CRM", label: "CRM", color: "#2F5BD3" },
   { id: "WH", label: "Warehouse", color: "#B85E10" },
   { id: "BILL", label: "Billing", color: "#0F6B40" },
@@ -15,13 +15,13 @@ export default function DataFlowStrip() {
       aria-label="How Seams data works"
     >
       <p className="mr-1 text-xs font-bold text-[#0A0A0A]">Data flow</p>
-      {STEPS.map((s, i) => (
+      {FLOW_STEPS.map((s, i) => (
         <React.Fragment key={s.id}>
           <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#ECECF0] px-2 py-1 text-xs font-semibold text-[#0A0A0A]">
             <span className="h-2 w-2 rounded-full" style={{ background: s.color }} aria-hidden />
             {s.label}
           </span>
-          {i < STEPS.length - 1 ? (
+          {i < FLOW_STEPS.length - 1 ? (
             <span className="text-[#4A4A52]" aria-hidden>
               →
             </span>

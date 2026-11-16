@@ -1,6 +1,7 @@
 // H10 — Ask Seams input, suggested questions, answer + suggested-action card.
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
 import { fmt } from "@/lib/engine/engine.js";
 
 const SUGGESTED_QUESTIONS = [
@@ -41,6 +42,7 @@ export default function AskSeams({ role = "admin", onOpenId }) {
     setBusy(true);
     try {
       await base44.functions.invoke("executeAction", { action_id: answer.suggested_action_id });
+      announceSeamsDataChanged();
       setActionMsg("Done. Check the Ledger for the audit trail.");
       setAnswer((a) => (a ? { ...a, suggested_action_id: null } : a));
     } catch (e) {

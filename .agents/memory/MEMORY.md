@@ -1,2 +1,3 @@
+- [Today brief decisions](today-brief-decisions.md) — user-approved template rules for the morning brief (root cause, dates, fonts, tracker).
 - [Transfer bundle names](transfer-bundle-names.md) — top-level names must be unique across src files or the Base44 one-file bundle fails.
 - [Dev server quirks](dev-server-quirks.md) — restart `npm run dev` after Tailwind theme edits or new color classes render unstyled.
