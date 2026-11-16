@@ -4,11 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useEntity } from "@/lib/useEntity";
 import { DEFAULT_SETTINGS } from "@/lib/engine/engine.js";
-import Today from "@/pages/Today.jsx";
-import Accounts from "@/pages/Accounts.jsx";
-import Data from "@/pages/Data.jsx";
-import Ledger from "@/pages/Ledger.jsx";
-import Settings from "@/pages/Settings.jsx";
 import { SelectedSeamProvider, useSelectedSeam } from "@/context/SelectedSeam.jsx";
 import { loadDemoData, DEMO_LOAD_FAILED } from "@/actions/loadDemoData.js";
 import { onSeamsLookup, onSeamsDataChanged } from "@/actions/dataChanged.js";
@@ -268,14 +263,8 @@ function SeamsAppShell() {
     page = <KitDecisions />;
   } else if (tab === "Data") {
     page = <KitData role={role} />;
-  } else if (tab === "Accounts") {
-    page = <Accounts role={role} onOpenFlag={openFlag} />;
-  } else if (tab === "Activity") {
-    page = <Ledger role={role} />;
-  } else if (tab === "Settings") {
-    page = <Settings role={role} />;
   } else {
-    page = <Data role={role} onApproved={onTwistApproved} />;
+    page = <KitData role={role} />;
   }
 
   return (

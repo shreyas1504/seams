@@ -8,7 +8,8 @@
     "build": "vite build",
     "test": "node --test",
     "check": "node --test && python3 -I tools/data/reference_checks.py tools/data/clean",
-    "transfer": "node tools/make-transfer.mjs"
+    "transfer": "node tools/make-transfer.mjs",
+    "parts": "node tools/make-parts.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
