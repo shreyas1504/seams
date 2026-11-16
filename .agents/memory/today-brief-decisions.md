@@ -19,3 +19,9 @@ description: Template rules for the Today morning brief that the user explicitly
 - Fix in Run 5: credit_owed findings must not inflate a seam's card count vs its pill; put them in their own small labelled group.
 - Fix in Run 5: customer card buttons must show the letter total, not the single flag amount.
 **Why:** "one number everywhere" — any button or count must equal what actually gets sent or shown elsewhere.
+
+## Sent-letter undo
+Keep sent money letters irreversible. Undo must show “Send a correction instead”.
+
+**Why:** the user confirmed that a sent money letter should not be reversible and that this is an honest answer for judges.
+**How to apply:** preserve this behavior in later interaction changes; do not implement a reversal of a sent letter.
