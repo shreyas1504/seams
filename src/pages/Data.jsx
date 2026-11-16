@@ -1,4 +1,4 @@
-// Starter Data page: Reset demo (seed), CSV upload with header mapping by exact canonical names (M1 adds the AI-suggested mapper).
+// Starter Data page: Reset demo (seed), CSV upload. M2 adds AI/fuzzy mapper.
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { parseCsv, headerHash } from "@/lib/csv.js";
@@ -33,14 +33,21 @@ export default function Data() {
     } catch (e2) { say(`Error: ${err(e2)}`); }
   }
   return (
-    <div className="rounded-xl border border-[#E2DDD2] bg-white p-4 text-sm">
-      <button onClick={resetDemo} className="rounded bg-[#14171F] px-3 py-2 text-white">Reset demo (load mock data)</button>
-      <div className="mt-4 grid gap-2 md:grid-cols-2">
+    <div className="rounded-[28px] bg-white p-5 text-sm shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+      <h1 className="text-2xl font-semibold text-[#14171F]">Data</h1>
+      <p className="mt-1 text-[#5B5F68]">Import Northline systems or reset the mock demo.</p>
+      <button onClick={resetDemo} className="mt-4 min-h-[44px] rounded-2xl bg-[#000000] px-4 py-2 text-white">
+        Reset demo (load mock data)
+      </button>
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
         {["Contract", "Shipment", "Invoice", "VendorBill", "Return"].map((E) => (
-          <label key={E} className="block">Import {E} CSV <input type="file" accept=".csv" onChange={(e) => upload(e, E)} className="block" /></label>
+          <label key={E} className="block rounded-2xl border border-[#EFEFEF] bg-[#F5F5F5] p-3">
+            Import {E} CSV
+            <input type="file" accept=".csv" onChange={(e) => upload(e, E)} className="mt-2 block w-full text-xs" />
+          </label>
         ))}
       </div>
-      <pre className="mt-4 whitespace-pre-wrap font-mono text-xs">{log.join("\n")}</pre>
+      <pre className="mt-4 whitespace-pre-wrap rounded-2xl bg-[#F5F5F5] p-3 font-mono text-xs">{log.join("\n")}</pre>
     </div>
   );
 }
