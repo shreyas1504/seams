@@ -1,0 +1,6 @@
+SKU,Credit Memo,Units Back,Reason,RMA #,Customer Name,RMA Date,Credit $,Orig Order
+TOWEL-C,,3,"damaged on delivery, never billed",RET-0401,Chelsea Dental Offices,10/11/2026,0.00,SO1060
+TOWEL-C,CM-301,2,wrong size,RET-0405,Lenox Hill Hospital,10/15/2026,90.74,SO-1003
+LID-12,CM-305,8,lids cracked,RET-0412,Hudson Yards Cowork,10/20/2026,231.20,SO-1075
+LID-12,cm305,8,lids cracked,RET-0412,Hudson Yards Cowork,10/20/2026,231.20,SO-1075
+NAP-2PLY,,5,"wrong ply, credit pending",RET-0418,Greenpoint Bistro,10/27/2026,0.00,SO1076

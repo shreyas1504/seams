@@ -1,0 +1,6 @@
+return_id,order_ref,customer,sku,qty_returned,return_date,credit_memo_no,credit_amount,note
+RET-0401,SO1060,Chelsea Dental Offices,TOWEL-C,3,2026-10-11,,0.00,"damaged on delivery, never billed"
+RET-0405,SO-1003,Lenox Hill Hospital,TOWEL-C,2,2026-10-15,CM-301,90.74,wrong size
+RET-0412,SO-1075,Hudson Yards Cowork,LID-12,8,2026-10-20,CM-305,231.20,lids cracked
+RET-0412,SO-1075,Hudson Yards Cowork,LID-12,8,2026-10-20,cm305,231.20,lids cracked
+RET-0418,SO1076,Greenpoint Bistro,NAP-2PLY,5,2026-10-27,,0.00,"wrong ply, credit pending"

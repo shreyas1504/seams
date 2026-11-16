@@ -1,0 +1,70 @@
+{
+  "name": "Invoice",
+  "type": "object",
+  "description": "Billing invoice lines",
+  "properties": {
+    "invoice_no": {
+      "type": "string"
+    },
+    "order_ref": {
+      "type": "string"
+    },
+    "customer": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "string"
+    },
+    "unit_price": {
+      "type": "string"
+    },
+    "freight_billed": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "string"
+    },
+    "invoice_date": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "paid_date": {
+      "type": "string"
+    },
+    "import_batch_id": {
+      "type": "string"
+    },
+    "source_row": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "invoice_no"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+node_modules/
+dist/
+transfer/
+tools/data/real/
+.DS_Store

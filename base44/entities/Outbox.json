@@ -1,0 +1,29 @@
+{
+  "name": "Outbox",
+  "type": "object",
+  "description": "LOCAL ONLY: stands in for SendEmail; do not create in Base44",
+  "properties": {
+    "to": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "from_name": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": false,
+    "read": true,
+    "update": false,
+    "delete": false
+  }
+}

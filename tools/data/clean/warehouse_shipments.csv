@@ -1,0 +1,88 @@
+shipment_id,order_no,ship_to,sku,qty,ship_date,ship_type,freight_cost
+SH-3053,SO-1053,Flatiron Law Partners,CTN-TOGO,24,2026-08-03,standard,0.00
+SH-3017,SO-1017,Astoria Medical Grp,CUP-12OZ,20,2026-08-10,standard,39.18
+SH-3012,SO-1012,Hudson Yards Cowork,BAG-T,10,2026-08-12,standard,74.70
+SH-3044,SO-1044,Chelsea Dental Offices,BAG-T,30,2026-08-13,standard,0.00
+SH-3039,SO-1039,Bed-Stuy Bagel Co,SAN-QUAT,15,2026-08-13,standard,0.00
+SH-3047,SO-1047,Chelsea Dental Offices,NAP-2PLY,40,2026-08-16,standard,0.00
+SH-3054,SO-1054,Flatiron Law Partners,TRAY-9,24,2026-08-18,standard,0.00
+SH-3074,SO-1074,Greenpoint Bistro,TRAY-9,60,2026-08-18,standard,0.00
+SH-3005,SO-1005,Lenox Hill Hosp.,LID-12,40,2026-08-20,standard,43.82
+SH-3031,SO-1031,TRIBECA GRILL LLC,FOIL-18,10,2026-08-21,standard,0.00
+SH-3033,SO-1033,TRIBECA GRILL LLC,LID-12,15,2026-08-21,standard,0.00
+SH-3022,SO-1022,Greenpoint Bistro,FOIL-18,10,2026-08-21,standard,0.00
+SH-3045,SO-1045,Chelsea Dental Offices,CTN-TOGO,10,2026-08-22,standard,0.00
+SH-3020,SO-1020,Astoria Medical Grp,BAG-T,12,2026-08-22,standard,30.39
+SH-3026,SO-1026,Greenpoint Bistro,TOWEL-C,20,2026-08-23,standard,0.00
+SH-3032,SO-1032,TRIBECA GRILL LLC,TRAY-9,40,2026-08-23,standard,0.00
+SH-3071,SO-1071,Hudson Yards Cowork,CUP-12OZ,98,2026-08-26,standard,18.50
+SH-3006,SO-1006,Lenox Hill Hosp.,LID-12,40,2026-08-26,standard,31.70
+SH-3048,SO-1048,Chelsea Dental Offices,TOWEL-C,40,2026-08-30,standard,0.00
+SH-3002,SO-1002,Lenox Hill Hosp.,NAP-2PLY,24,2026-08-30,standard,27.44
+SH-3072,SO-1072,Astoria Medical Grp,SAN-QUAT,105,2026-08-31,standard,24.25
+SH-3036,SO-1036,Bed-Stuy Bagel Co,TOWEL-C,40,2026-09-02,standard,0.00
+SH-3070,SO-1070,Lenox Hill Hosp.,FOIL-18,100,2026-09-03,standard,20.00
+SH-3009,SO-1009,Hudson Yards Cowork,SAN-QUAT,15,2026-09-03,standard,76.63
+SH-3029,SO-1029,TRIBECA GRILL LLC,BAG-T,12,2026-09-04,standard,0.00
+SH-3038,SO-1038,Bed-Stuy Bagel Co,FOIL-18,20,2026-09-05,standard,0.00
+SH-3034,SO-1034,TRIBECA GRILL LLC,CUP-12OZ,30,2026-09-05,standard,0.00
+SH-3073,SO-1073,Hudson Yards Cowork,FOIL-18,55,2026-09-08,standard,7.74
+SH-3083,SO-1083,Lenox Hill Hosp.,GLV-NIT-100,100,2026-09-08,standard,48.00
+SH-3079,SO-1079,Astoria Medical Grp,GLV-NIT-100,30,2026-09-14,standard,35.00
+SH-3043,SO-1043,Chelsea Dental Offices,CTN-TOGO,20,2026-09-14,standard,0.00
+SH-3075,SO-1075,Hudson Yards Cowork,LID-12,40,2026-09-14,standard,30.00
+SH-3040,SO-1040,Bed-Stuy Bagel Co,TRAY-9,12,2026-09-15,standard,0.00
+SH-3046,SO-1046,Chelsea Dental Offices,TRAY-9,30,2026-09-16,standard,0.00
+SH-3016,SO-1016,Astoria Medical Grp,BAG-T,30,2026-09-16,standard,26.47
+SH-3041,SO-1041,Bed-Stuy Bagel Co,TRAY-9,30,2026-09-16,standard,0.00
+SH-3077,SO-1077,TRIBECA GRILL LLC,TOWEL-C,40,2026-09-16,standard,0.00
+SH-3037,SO-1037,Bed-Stuy Bagel Co,LID-12,20,2026-09-17,standard,0.00
+SH-3062,SO-1062,Lenox Hill Hosp.,GLV-NIT-100,200,2026-09-22,standard,60.00
+SH-3076,SO-1076,Greenpoint Bistro,NAP-2PLY,30,2026-09-22,standard,0.00
+SH-3001,SO-1001,Lenox Hill Hosp.,SAN-QUAT,12,2026-09-22,standard,67.31
+SH-3024,SO-1024,Greenpoint Bistro,LID-12,20,2026-09-22,standard,0.00
+SH-3025,SO-1025,Greenpoint Bistro,TRAY-9,30,2026-09-23,standard,0.00
+SH-3050,SO-1050,Flatiron Law Partners,FOIL-18,24,2026-09-25,standard,0.00
+SH-3021,SO-1021,Astoria Medical Grp,GLV-NIT-100,20,2026-09-25,standard,40.00
+SH-3063,SO-1063,Astoria Medical Grp,GLV-NIT-100,160,2026-09-25,standard,55.00
+SH-3019,SO-1019,Astoria Medical Grp,CTN-TOGO,40,2026-09-27,standard,81.16
+SH-3007,SO-1007,Lenox Hill Hosp.,GLV-NIT-100,20,2026-09-28,standard,40.00
+SH-3067,SO-1067,Lenox Hill Hosp.,SAN-QUAT,30,2026-09-29,standard,142.50
+SH-3064,SO-1064,Chelsea Dental Offices,GLV-NIT-100,120,2026-10-01,standard,0.00
+SH-3056,SO-1056,Flatiron Law Partners,GLV-NIT-100,20,2026-10-02,standard,0.00
+SH-3068,SO-1068,Astoria Medical Grp,BAG-T,40,2026-10-02,standard,168.40
+SH-3082,SO-1082,TRIBECA GRILL LLC,BAG-T,40,2026-10-02,standard,0.00
+SH-3014,SO-1014,Hudson Yards Cowork,GLV-NIT-100,20,2026-10-03,standard,40.00
+SH-3049,SO-1049,Chelsea Dental Offices,GLV-NIT-100,20,2026-10-04,standard,0.00
+SH-3030,SO-1030,TRIBECA GRILL LLC,CUP-12OZ,10,2026-10-04,standard,0.00
+SH-3013,SO-1013,Hudson Yards Cowork,SAN-QUAT,24,2026-10-05,standard,62.69
+SH-3018,SO-1018,Astoria Medical Grp,BAG-T,20,2026-10-05,standard,30.24
+SH-3010,SO-1010,Hudson Yards Cowork,FOIL-18,24,2026-10-05,standard,81.88
+SH-3060,SO-1060,Chelsea Dental Offices,TOWEL-C,20,2026-10-06,standard,0.00
+SH-3086,SO-1086,Flatiron Law Partners,NAP-2PLY,20,2026-10-06,standard,0.00
+SH-3035,SO-1035,TRIBECA GRILL LLC,GLV-NIT-100,20,2026-10-06,standard,0.00
+SH-3065,SO-1065,Flatiron Law Partners,GLV-NIT-100,96,2026-10-07,standard,0.00
+SH-3023,SO-1023,Greenpoint Bistro,CTN-TOGO,30,2026-10-07,standard,0.00
+SH-3042,SO-1042,Bed-Stuy Bagel Co,GLV-NIT-100,20,2026-10-07,standard,0.00
+SH-3011,SO-1011,Hudson Yards Cowork,CUP-12OZ,10,2026-10-07,standard,52.18
+SH-3084,SO-1084,TRIBECA GRILL LLC,CTN-TOGO,60,2026-10-08,standard,0.00
+SH-3061,SO-1061,Bed-Stuy Bagel Co,FOIL-18,24,2026-10-09,standard,0.00
+SH-3008,SO-1008,Hudson Yards Cowork,TOWEL-C,20,2026-10-10,standard,52.79
+SH-3052,SO-1052,Flatiron Law Partners,LID-12,12,2026-10-10,standard,0.00
+SH-3085,SO-1085,Greenpoint Bistro,CUP-12OZ,30,2026-10-12,standard,64.00
+SH-3003,SO-1003,Lenox Hill Hosp.,TOWEL-C,10,2026-10-12,standard,52.59
+SH-3066,SO-1066,Bed-Stuy Bagel Co,CTN-TOGO,50,2026-10-13,standard,0.00
+SH-3055,SO-1055,Flatiron Law Partners,LID-12,24,2026-10-13,standard,0.00
+SH-3028,SO-1028,Greenpoint Bistro,GLV-NIT-100,20,2026-10-14,standard,0.00
+SH-3027,SO-1027,Greenpoint Bistro,CUP-12OZ,10,2026-10-14,standard,0.00
+SH-3078,SO-1078,Chelsea Dental Offices,BAG-T,30,2026-10-14,standard,0.00
+SH-3080,SO-1080,TRIBECA GRILL LLC,NAP-2PLY,2,2026-10-14,sample,0.00
+SH-3069,SO-1069,Hudson Yards Cowork,LID-12,30,2026-10-15,standard,133.21
+SH-3015,SO-1015,Astoria Medical Grp,FOIL-18,30,2026-10-15,standard,89.55
+SH-3004,SO-1004,Lenox Hill Hosp.,NAP-2PLY,24,2026-10-16,standard,50.78
+SH-3051,SO-1051,Flatiron Law Partners,TRAY-9,30,2026-10-16,standard,0.00
+SH-3081,SO-1081,Astoria Medical Grp,GLV-NIT-100,10,2026-10-16,replacement,0.00
+SH-3087,SO-1990,Bed-Stuy Bagel Co,SAN-QUAT,25,2026-10-19,standard,0.00
+SH-3057,SO-1057,Greenpoint Bistro,NAP-2PLY,40,2026-10-21,standard,0.00
+SH-3058,SO-1058,Lenox Hill Hosp.,GLV-NIT-100,80,2026-10-24,standard,85.40
+SH-3059,SO-1059,Hudson Yards Cowork,CUP-12OZ,25,2026-10-28,standard,57.32

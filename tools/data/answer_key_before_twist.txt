@@ -1,0 +1,60 @@
+== clean  as of 2026-11-13
+  Duplicate vendor payment             Hudson Paper Co             6240.00  B-9014/B-9015  [invoice HP-7781 / hp7781 paid twice]
+  Overdue receivable                   Lenox Hill Hospital         4210.00  INV-5067  [open, 39 days past due]
+  Duplicate vendor payment             Atlas Packaging             3368.40  B-9016/B-9017  [invoice AP/2210 / AP-2210 paid twice]
+  Overdue receivable                   Hudson Yards Cowork         3105.50  INV-5068  [open, 47 days past due]
+  Overdue receivable                   Astoria Medical Group       2880.25  INV-5069  [open, 42 days past due]
+  Overdue receivable                   Hudson Yards Cowork         2312.24  INV-5070  [open, 34 days past due]
+  Shipped, not invoiced                Lenox Hill Hospital         1765.40  SH-3058  [80 x 21.00 + freight 85.40]
+  Overdue receivable                   Greenpoint Bistro           1470.00  INV-5071  [open, 55 days past due]
+  Shipped, not invoiced                Greenpoint Bistro           1360.00  SH-3057  [40 x 34.00]
+  Vendor over PO                       Empire Glove Supply          950.00  B-9018/PO-6203  [12450.00 - PO 11500.00]
+  Shipped, not invoiced                Hudson Yards Cowork          844.82  SH-3059  [25 x 31.50 + freight 57.32]
+  Vendor over PO                       CleanCo Chemical             802.00  B-9019/PO-6204  [5802.00 - PO 5000.00]
+  Below contract price                 Bed-Stuy Bagel Co            593.00  INV-5063/CT-058  [(42.86 - 31.00) x 50]
+  Below contract price                 Lenox Hill Hospital          500.00  INV-5059/CT-011  [(21.00 - 18.50) x 200]
+  Below contract price                 Astoria Medical Group        400.00  INV-5060/CT-033  [(21.00 - 18.50) x 160]
+  Short-billed                         Bed-Stuy Bagel Co            377.10  SH-3061/INV-5058  [shipped 24, returned 0, invoiced 15: 9 x 41.90]
+  Below contract price                 Chelsea Dental Offices       300.00  INV-5061/CT-077  [(21.00 - 18.50) x 120]
+  Below contract price                 Flatiron Law Partners        240.00  INV-5062/CT-088  [(21.00 - 18.50) x 96]
+  Freight not rebilled                 Lenox Hill Hospital          142.50  SH-3067/INV-5064  [freight cost 142.50 - billed 0.00]
+  Short-billed                         Chelsea Dental Offices       136.11  SH-3060/INV-5057  [shipped 20, returned 0, invoiced 17: 3 x 45.37]
+  Freight not rebilled                 Hudson Yards Cowork          133.21  SH-3069/INV-5066  [freight cost 133.21 - billed 0.00]
+  Freight not rebilled                 Astoria Medical Group        128.40  SH-3068/INV-5065  [freight cost 168.40 - billed 40.00]
+  Billed above contract (credit we owe) Tribeca Grill                120.00  INV-5074/CT-048  [(48.37 - 45.37) x 40]
+  Billed above contract (credit we owe) Chelsea Dental Offices        60.00  INV-5075/CT-073  [(18.85 - 16.85) x 30]
+
+By rule:
+  Freight not rebilled                  3      404.11
+  Short-billed                          2      513.21
+  Shipped, not invoiced                 3     3970.22
+  Overdue receivable                    5    13977.99
+  Billed above contract (credit we owe)  2      180.00
+  Below contract price                  5     2033.00
+  Duplicate vendor payment              2     9608.40
+  Vendor over PO                        2     1752.00
+
+Recoverable: 17 issues, 18,280.94
+Overdue:     5 issues, 13,977.99
+Credits we owe customers: 2 issues, 180.00
+
+Patterns (4):
+  Glove price not updated after 9/15: 4 invoices, 4 customers, 1,440.00
+  Lenox Hill Hospital: 3 recoverable issues across 3 rules, 2,407.90
+  Freight not passed on to rebill customers: 3 shipments, 3 customers, 404.11
+  Duplicate payments differ only by invoice-number formatting: 2 vendors, 9,608.40
+
+Checked, not a leak (13):
+  [Shipped, not invoiced] INV-5077 has a blank order ref but matches SH-3082 on customer, SKU, qty and date
+  [Join] INV-5083 order ref 'so 1990' matches SO-1990 (digits-only match)
+  [Join] Warehouse names Astoria Medical Grp, Lenox Hill Hosp., TRIBECA GRILL LLC resolve to CRM customers (normalized full name)
+  [Short-billed] SO-1084 invoiced in 2 parts (35+25) = 60
+  [Freight not rebilled] SH-3085 freight 64.00 not billed, but Greenpoint Bistro contract does not rebill freight
+  [Shipped, not invoiced] SH-3080 is a sample shipment, not billable
+  [Shipped, not invoiced] SH-3081 is a replacement shipment, not billable
+  [Below contract price] INV-5078 billed 18.50 on 2026-09-10, before the 9/15 increase: correct
+  [Billed above contract] INV-5076 billed 21.00 on 2026-09-15 for goods shipped earlier: invoice-date price applies, not overbilled
+  [Overdue receivable] INV-5082 only 6 days late
+  [Duplicate vendor payment] Bronx Realty LLC: 3 bills of 8500.00, different invoice numbers (recurring)
+  [Duplicate vendor payment] Metro Freight Lines: 4 bills of 1150.00, different invoice numbers (recurring)
+  [Vendor over PO] B-9020 is 2.40 over PO, under the max(25, 1%) tolerance

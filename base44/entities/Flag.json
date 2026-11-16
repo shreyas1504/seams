@@ -1,0 +1,108 @@
+{
+  "name": "Flag",
+  "type": "object",
+  "description": "A disagreement between systems, with evidence",
+  "properties": {
+    "stable_key": {
+      "type": "string"
+    },
+    "rule_id": {
+      "type": "string"
+    },
+    "rule": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "why": {
+      "type": "string"
+    },
+    "seam": {
+      "type": "string"
+    },
+    "bucket": {
+      "type": "string",
+      "enum": [
+        "recoverable",
+        "overdue",
+        "credit_owed"
+      ]
+    },
+    "lane": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "vendor"
+      ]
+    },
+    "party": {
+      "type": "string"
+    },
+    "amount_cents": {
+      "type": "integer"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "High",
+        "Medium"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "diff_field": {
+      "type": "string"
+    },
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "sent",
+        "disputed",
+        "recovered",
+        "credited",
+        "dismissed",
+        "cleared",
+        "needs_review"
+      ]
+    },
+    "cleared_by": {
+      "type": "string"
+    },
+    "review_reason": {
+      "type": "string"
+    },
+    "dismiss_reason": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "is_new": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "stable_key",
+    "rule_id",
+    "amount_cents",
+    "status"
+  ],
+  "rls": {
+    "create": false,
+    "read": true,
+    "update": false,
+    "delete": false
+  }
+}

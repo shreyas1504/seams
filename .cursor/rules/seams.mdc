@@ -1,0 +1,17 @@
+---
+description: Seams project rules (always apply)
+alwaysApply: true
+---
+- CURSOR_BUILD_PLAN.md is THE spec and step list (Parts 3.6 coding rules are mandatory so the Base44 transfer stays mechanical). If tools/PLAN.md disagrees, CURSOR_BUILD_PLAN.md wins. Never skip a milestone gate.
+- Tonight this is a local Base44-shaped React + Vite app (PLAN.md §0.1): engine in plain JS, Base44-style db/fn adapters over localStorage, AI stubbed with templates, Send goes to an outbox. Everything must paste into Base44 tomorrow without rewrites.
+- If the repo is ever connected to Base44 sync: branch main only; never run `base44 dev --remote` or any deploy/push CLI command.
+- Detection first: every rule compares two systems and stores side-by-side evidence with the disagreeing field and a "how we caught it" sentence.
+- Code computes every dollar in integer cents. The LLM only writes greetings/closings, suggests column mappings, and returns Ask Seams intent JSON. Never sum, display or act on an LLM-produced number.
+- The AI never changes data. It may only create a SuggestedAction; executeAction runs only after the user approves; every change writes an AuditEvent; undoAction reverses reversible events.
+- Every backend function checks auth and role first (service role skips RLS). AuditEvent is append-only.
+- Flags are upserted by stable_key and never deleted. A sent flag is never cleared; it goes to needs_review.
+- Rank every list by money at stake. Buckets recoverable / overdue / credit_owed never mix.
+- Patterns need 3+ flags sharing a cause computed from data. Never invent route/driver patterns without those fields.
+- Dataset numbers only. Every number on screen opens its records. No outside statistics.
+- tools/data/reference_checks.py and the answer keys are the source of truth; fix the code, never the expected numbers.
+- Every top-level name (const/function/class) must be unique across all src files; `npm run transfer` bundles them into one file.

@@ -1,0 +1,58 @@
+{
+  "name": "Shipment",
+  "type": "object",
+  "description": "Warehouse shipments",
+  "properties": {
+    "shipment_id": {
+      "type": "string"
+    },
+    "order_no": {
+      "type": "string"
+    },
+    "ship_to": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "string"
+    },
+    "ship_date": {
+      "type": "string"
+    },
+    "ship_type": {
+      "type": "string"
+    },
+    "freight_cost": {
+      "type": "string"
+    },
+    "import_batch_id": {
+      "type": "string"
+    },
+    "source_row": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "shipment_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

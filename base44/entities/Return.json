@@ -1,0 +1,61 @@
+{
+  "name": "Return",
+  "type": "object",
+  "description": "Returns log (twist file)",
+  "properties": {
+    "return_id": {
+      "type": "string"
+    },
+    "order_ref": {
+      "type": "string"
+    },
+    "customer": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "qty_returned": {
+      "type": "string"
+    },
+    "return_date": {
+      "type": "string"
+    },
+    "credit_memo_no": {
+      "type": "string"
+    },
+    "credit_amount": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "import_batch_id": {
+      "type": "string"
+    },
+    "source_row": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "return_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

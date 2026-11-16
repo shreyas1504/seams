@@ -1,0 +1,51 @@
+{
+  "name": "SuggestedAction",
+  "type": "object",
+  "description": "AI- or rule-suggested actions awaiting approval",
+  "properties": {
+    "source": {
+      "type": "string",
+      "enum": [
+        "ask",
+        "pattern",
+        "flag"
+      ]
+    },
+    "action_type": {
+      "type": "string"
+    },
+    "params": {
+      "type": "object"
+    },
+    "label": {
+      "type": "string"
+    },
+    "amount_cents": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "pending_second",
+        "approved",
+        "rejected",
+        "done",
+        "undone"
+      ]
+    },
+    "audit_event_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "action_type",
+    "status"
+  ],
+  "rls": {
+    "create": false,
+    "read": true,
+    "update": false,
+    "delete": false
+  }
+}

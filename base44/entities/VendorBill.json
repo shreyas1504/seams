@@ -1,0 +1,61 @@
+{
+  "name": "VendorBill",
+  "type": "object",
+  "description": "AP vendor bills and payments",
+  "properties": {
+    "bill_id": {
+      "type": "string"
+    },
+    "vendor": {
+      "type": "string"
+    },
+    "vendor_invoice_no": {
+      "type": "string"
+    },
+    "bill_date": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "string"
+    },
+    "po_no": {
+      "type": "string"
+    },
+    "po_amount": {
+      "type": "string"
+    },
+    "payment_id": {
+      "type": "string"
+    },
+    "paid_date": {
+      "type": "string"
+    },
+    "import_batch_id": {
+      "type": "string"
+    },
+    "source_row": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "bill_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

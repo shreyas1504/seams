@@ -1,0 +1,47 @@
+{
+  "name": "Setting",
+  "type": "object",
+  "description": "App settings (Controller only)",
+  "properties": {
+    "as_of_date": {
+      "type": "string"
+    },
+    "overdue_days": {
+      "type": "integer"
+    },
+    "po_abs_cents": {
+      "type": "integer"
+    },
+    "po_pct": {
+      "type": "number"
+    },
+    "match_window_days": {
+      "type": "integer"
+    },
+    "rule_enabled": {
+      "type": "object"
+    },
+    "four_eyes_threshold_cents": {
+      "type": "integer"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

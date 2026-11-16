@@ -1,0 +1,28 @@
+{
+  "name": "RuledOut",
+  "type": "object",
+  "description": "Look-alikes checked and not flagged",
+  "properties": {
+    "rule": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "reason"
+  ],
+  "rls": {
+    "create": false,
+    "read": true,
+    "update": false,
+    "delete": false
+  }
+}

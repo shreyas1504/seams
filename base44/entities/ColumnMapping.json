@@ -1,0 +1,43 @@
+{
+  "name": "ColumnMapping",
+  "type": "object",
+  "description": "Saved CSV header mappings",
+  "properties": {
+    "header_hash": {
+      "type": "string"
+    },
+    "target_entity": {
+      "type": "string"
+    },
+    "column_map": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "date_format": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "header_hash"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

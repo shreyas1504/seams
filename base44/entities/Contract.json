@@ -1,0 +1,65 @@
+{
+  "name": "Contract",
+  "type": "object",
+  "description": "CRM contract price lines",
+  "properties": {
+    "contract_id": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "contract_price": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string"
+    },
+    "end_date": {
+      "type": "string"
+    },
+    "rebill_freight": {
+      "type": "string",
+      "enum": [
+        "Y",
+        "N"
+      ]
+    },
+    "payment_terms_days": {
+      "type": "string"
+    },
+    "billing_email": {
+      "type": "string"
+    },
+    "import_batch_id": {
+      "type": "string"
+    },
+    "source_row": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "contract_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

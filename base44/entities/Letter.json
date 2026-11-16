@@ -1,0 +1,61 @@
+{
+  "name": "Letter",
+  "type": "object",
+  "description": "Sent letters, frozen with a hash",
+  "properties": {
+    "party": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "vendor",
+        "correction"
+      ]
+    },
+    "tone": {
+      "type": "string"
+    },
+    "recipient": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "frozen_body": {
+      "type": "string"
+    },
+    "frozen_total_cents": {
+      "type": "integer"
+    },
+    "flag_keys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sha256": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string"
+    },
+    "approver_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "party",
+    "kind"
+  ],
+  "rls": {
+    "create": false,
+    "read": true,
+    "update": false,
+    "delete": false
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "name": "AuditEvent",
+  "type": "object",
+  "description": "Append-only ledger",
+  "properties": {
+    "actor_email": {
+      "type": "string"
+    },
+    "actor_role": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "before": {
+      "type": "object"
+    },
+    "after": {
+      "type": "object"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "import_batch_id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "reversible": {
+      "type": "boolean"
+    },
+    "undone": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "action"
+  ],
+  "rls": {
+    "create": false,
+    "read": true,
+    "update": false,
+    "delete": false
+  }
+}

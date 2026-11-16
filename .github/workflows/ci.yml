@@ -1,0 +1,15 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: node --test
+      - run: cd tools/data && python3 -I reference_checks.py clean | diff - answer_key_before_twist.txt
+      - run: node tools/make-transfer.mjs
+      - run: test -z "$(git ls-files tools/data/real)" || (echo "real data must not be committed" && exit 1)

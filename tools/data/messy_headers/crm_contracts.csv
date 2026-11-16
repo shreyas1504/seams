@@ -1,0 +1,89 @@
+AP Contact Email,Effective From,Effective To,Item Code,Net Terms,Pass-through Freight?,Contract #,Account Name,Agreed Price ($)
+ap@lenoxhill.example,01/01/2026,12/31/2026,NAP-2PLY,30,Y,CT-001,Lenox Hill Hospital,34.00
+ap@lenoxhill.example,01/01/2026,12/31/2026,CUP-12OZ,30,Y,CT-002,Lenox Hill Hospital,31.50
+ap@lenoxhill.example,01/01/2026,12/31/2026,CTN-TOGO,30,Y,CT-003,Lenox Hill Hospital,42.86
+ap@lenoxhill.example,01/01/2026,12/31/2026,TOWEL-C,30,Y,CT-004,Lenox Hill Hospital,45.37
+ap@lenoxhill.example,01/01/2026,12/31/2026,FOIL-18,30,Y,CT-005,Lenox Hill Hospital,41.90
+ap@lenoxhill.example,01/01/2026,12/31/2026,SAN-QUAT,30,Y,CT-006,Lenox Hill Hospital,27.20
+ap@lenoxhill.example,01/01/2026,12/31/2026,BAG-T,30,Y,CT-007,Lenox Hill Hospital,16.85
+ap@lenoxhill.example,01/01/2026,12/31/2026,TRAY-9,30,Y,CT-008,Lenox Hill Hospital,24.50
+ap@lenoxhill.example,01/01/2026,12/31/2026,LID-12,30,Y,CT-009,Lenox Hill Hospital,28.90
+ap@lenoxhill.example,01/01/2026,09/14/2026,GLV-NIT-100,30,Y,CT-010,Lenox Hill Hospital,18.50
+ap@lenoxhill.example,09/15/2026,12/31/2026,GLV-NIT-100,30,Y,CT-011,Lenox Hill Hospital,21.00
+billing@hycowork.example,01/01/2026,12/31/2026,NAP-2PLY,30,Y,CT-012,Hudson Yards Cowork,34.00
+billing@hycowork.example,01/01/2026,12/31/2026,CUP-12OZ,30,Y,CT-013,Hudson Yards Cowork,31.50
+billing@hycowork.example,01/01/2026,12/31/2026,CTN-TOGO,30,Y,CT-014,Hudson Yards Cowork,42.86
+billing@hycowork.example,01/01/2026,12/31/2026,TOWEL-C,30,Y,CT-015,Hudson Yards Cowork,45.37
+billing@hycowork.example,01/01/2026,12/31/2026,FOIL-18,30,Y,CT-016,Hudson Yards Cowork,41.90
+billing@hycowork.example,01/01/2026,12/31/2026,SAN-QUAT,30,Y,CT-017,Hudson Yards Cowork,27.20
+billing@hycowork.example,01/01/2026,12/31/2026,BAG-T,30,Y,CT-018,Hudson Yards Cowork,16.85
+billing@hycowork.example,01/01/2026,12/31/2026,TRAY-9,30,Y,CT-019,Hudson Yards Cowork,24.50
+billing@hycowork.example,01/01/2026,12/31/2026,LID-12,30,Y,CT-020,Hudson Yards Cowork,28.90
+billing@hycowork.example,01/01/2026,09/14/2026,GLV-NIT-100,30,Y,CT-021,Hudson Yards Cowork,18.50
+billing@hycowork.example,09/15/2026,12/31/2026,GLV-NIT-100,30,Y,CT-022,Hudson Yards Cowork,21.00
+accounts@astoriamed.example,01/01/2026,12/31/2026,NAP-2PLY,30,Y,CT-023,Astoria Medical Group,34.00
+accounts@astoriamed.example,01/01/2026,12/31/2026,CUP-12OZ,30,Y,CT-024,Astoria Medical Group,31.50
+accounts@astoriamed.example,01/01/2026,12/31/2026,CTN-TOGO,30,Y,CT-025,Astoria Medical Group,42.86
+accounts@astoriamed.example,01/01/2026,12/31/2026,TOWEL-C,30,Y,CT-026,Astoria Medical Group,45.37
+accounts@astoriamed.example,01/01/2026,12/31/2026,FOIL-18,30,Y,CT-027,Astoria Medical Group,41.90
+accounts@astoriamed.example,01/01/2026,12/31/2026,SAN-QUAT,30,Y,CT-028,Astoria Medical Group,27.20
+accounts@astoriamed.example,01/01/2026,12/31/2026,BAG-T,30,Y,CT-029,Astoria Medical Group,16.85
+accounts@astoriamed.example,01/01/2026,12/31/2026,TRAY-9,30,Y,CT-030,Astoria Medical Group,24.50
+accounts@astoriamed.example,01/01/2026,12/31/2026,LID-12,30,Y,CT-031,Astoria Medical Group,28.90
+accounts@astoriamed.example,01/01/2026,09/14/2026,GLV-NIT-100,30,Y,CT-032,Astoria Medical Group,18.50
+accounts@astoriamed.example,09/15/2026,12/31/2026,GLV-NIT-100,30,Y,CT-033,Astoria Medical Group,21.00
+owner@greenpointbistro.example,01/01/2026,12/31/2026,NAP-2PLY,30,N,CT-034,Greenpoint Bistro,34.00
+owner@greenpointbistro.example,01/01/2026,12/31/2026,CUP-12OZ,30,N,CT-035,Greenpoint Bistro,31.50
+owner@greenpointbistro.example,01/01/2026,12/31/2026,CTN-TOGO,30,N,CT-036,Greenpoint Bistro,42.86
+owner@greenpointbistro.example,01/01/2026,12/31/2026,TOWEL-C,30,N,CT-037,Greenpoint Bistro,45.37
+owner@greenpointbistro.example,01/01/2026,12/31/2026,FOIL-18,30,N,CT-038,Greenpoint Bistro,41.90
+owner@greenpointbistro.example,01/01/2026,12/31/2026,SAN-QUAT,30,N,CT-039,Greenpoint Bistro,27.20
+owner@greenpointbistro.example,01/01/2026,12/31/2026,BAG-T,30,N,CT-040,Greenpoint Bistro,16.85
+owner@greenpointbistro.example,01/01/2026,12/31/2026,TRAY-9,30,N,CT-041,Greenpoint Bistro,24.50
+owner@greenpointbistro.example,01/01/2026,12/31/2026,LID-12,30,N,CT-042,Greenpoint Bistro,28.90
+owner@greenpointbistro.example,01/01/2026,09/14/2026,GLV-NIT-100,30,N,CT-043,Greenpoint Bistro,18.50
+owner@greenpointbistro.example,09/15/2026,12/31/2026,GLV-NIT-100,30,N,CT-044,Greenpoint Bistro,21.00
+office@tribecagrill.example,01/01/2026,12/31/2026,NAP-2PLY,30,N,CT-045,Tribeca Grill,34.00
+office@tribecagrill.example,01/01/2026,12/31/2026,CUP-12OZ,30,N,CT-046,Tribeca Grill,31.50
+office@tribecagrill.example,01/01/2026,12/31/2026,CTN-TOGO,30,N,CT-047,Tribeca Grill,42.86
+office@tribecagrill.example,01/01/2026,12/31/2026,TOWEL-C,30,N,CT-048,Tribeca Grill,45.37
+office@tribecagrill.example,01/01/2026,12/31/2026,FOIL-18,30,N,CT-049,Tribeca Grill,41.90
+office@tribecagrill.example,01/01/2026,12/31/2026,SAN-QUAT,30,N,CT-050,Tribeca Grill,27.20
+office@tribecagrill.example,01/01/2026,12/31/2026,BAG-T,30,N,CT-051,Tribeca Grill,16.85
+office@tribecagrill.example,01/01/2026,12/31/2026,TRAY-9,30,N,CT-052,Tribeca Grill,24.50
+office@tribecagrill.example,01/01/2026,12/31/2026,LID-12,30,N,CT-053,Tribeca Grill,28.90
+office@tribecagrill.example,01/01/2026,09/14/2026,GLV-NIT-100,30,N,CT-054,Tribeca Grill,18.50
+office@tribecagrill.example,09/15/2026,12/31/2026,GLV-NIT-100,30,N,CT-055,Tribeca Grill,21.00
+hello@bedstuybagel.example,01/01/2026,12/31/2026,NAP-2PLY,30,N,CT-056,Bed-Stuy Bagel Co,34.00
+hello@bedstuybagel.example,01/01/2026,12/31/2026,CUP-12OZ,30,N,CT-057,Bed-Stuy Bagel Co,31.50
+hello@bedstuybagel.example,01/01/2026,12/31/2026,CTN-TOGO,30,N,CT-058,Bed-Stuy Bagel Co,42.86
+hello@bedstuybagel.example,01/01/2026,12/31/2026,TOWEL-C,30,N,CT-059,Bed-Stuy Bagel Co,45.37
+hello@bedstuybagel.example,01/01/2026,12/31/2026,FOIL-18,30,N,CT-060,Bed-Stuy Bagel Co,41.90
+hello@bedstuybagel.example,01/01/2026,12/31/2026,SAN-QUAT,30,N,CT-061,Bed-Stuy Bagel Co,27.20
+hello@bedstuybagel.example,01/01/2026,12/31/2026,BAG-T,30,N,CT-062,Bed-Stuy Bagel Co,16.85
+hello@bedstuybagel.example,01/01/2026,12/31/2026,TRAY-9,30,N,CT-063,Bed-Stuy Bagel Co,24.50
+hello@bedstuybagel.example,01/01/2026,12/31/2026,LID-12,30,N,CT-064,Bed-Stuy Bagel Co,28.90
+hello@bedstuybagel.example,01/01/2026,09/14/2026,GLV-NIT-100,30,N,CT-065,Bed-Stuy Bagel Co,18.50
+hello@bedstuybagel.example,09/15/2026,12/31/2026,GLV-NIT-100,30,N,CT-066,Bed-Stuy Bagel Co,21.00
+admin@chelseadental.example,01/01/2026,12/31/2026,NAP-2PLY,30,N,CT-067,Chelsea Dental Offices,34.00
+admin@chelseadental.example,01/01/2026,12/31/2026,CUP-12OZ,30,N,CT-068,Chelsea Dental Offices,31.50
+admin@chelseadental.example,01/01/2026,12/31/2026,CTN-TOGO,30,N,CT-069,Chelsea Dental Offices,42.86
+admin@chelseadental.example,01/01/2026,12/31/2026,TOWEL-C,30,N,CT-070,Chelsea Dental Offices,45.37
+admin@chelseadental.example,01/01/2026,12/31/2026,FOIL-18,30,N,CT-071,Chelsea Dental Offices,41.90
+admin@chelseadental.example,01/01/2026,12/31/2026,SAN-QUAT,30,N,CT-072,Chelsea Dental Offices,27.20
+admin@chelseadental.example,01/01/2026,12/31/2026,BAG-T,30,N,CT-073,Chelsea Dental Offices,16.85
+admin@chelseadental.example,01/01/2026,12/31/2026,TRAY-9,30,N,CT-074,Chelsea Dental Offices,24.50
+admin@chelseadental.example,01/01/2026,12/31/2026,LID-12,30,N,CT-075,Chelsea Dental Offices,28.90
+admin@chelseadental.example,01/01/2026,09/14/2026,GLV-NIT-100,30,N,CT-076,Chelsea Dental Offices,18.50
+admin@chelseadental.example,09/15/2026,12/31/2026,GLV-NIT-100,30,N,CT-077,Chelsea Dental Offices,21.00
+ops@flatironlaw.example,01/01/2026,12/31/2026,NAP-2PLY,30,N,CT-078,Flatiron Law Partners,34.00
+ops@flatironlaw.example,01/01/2026,12/31/2026,CUP-12OZ,30,N,CT-079,Flatiron Law Partners,31.50
+ops@flatironlaw.example,01/01/2026,12/31/2026,CTN-TOGO,30,N,CT-080,Flatiron Law Partners,42.86
+ops@flatironlaw.example,01/01/2026,12/31/2026,TOWEL-C,30,N,CT-081,Flatiron Law Partners,45.37
+ops@flatironlaw.example,01/01/2026,12/31/2026,FOIL-18,30,N,CT-082,Flatiron Law Partners,41.90
+ops@flatironlaw.example,01/01/2026,12/31/2026,SAN-QUAT,30,N,CT-083,Flatiron Law Partners,27.20
+ops@flatironlaw.example,01/01/2026,12/31/2026,BAG-T,30,N,CT-084,Flatiron Law Partners,16.85
+ops@flatironlaw.example,01/01/2026,12/31/2026,TRAY-9,30,N,CT-085,Flatiron Law Partners,24.50
+ops@flatironlaw.example,01/01/2026,12/31/2026,LID-12,30,N,CT-086,Flatiron Law Partners,28.90
+ops@flatironlaw.example,01/01/2026,09/14/2026,GLV-NIT-100,30,N,CT-087,Flatiron Law Partners,18.50
+ops@flatironlaw.example,09/15/2026,12/31/2026,GLV-NIT-100,30,N,CT-088,Flatiron Law Partners,21.00
