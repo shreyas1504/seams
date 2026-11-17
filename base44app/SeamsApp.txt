@@ -1,0 +1,1264 @@
+import React from "react";
+import k,{useCallback as Ps,useEffect as Be,useRef as Gt,useState as te}from"react";import{base44 as ze}from"@/api/base44Client";import{useEffect as Xt,useState as Nt,useCallback as Zt,useRef as Rt}from"react";import{base44 as St}from"@/api/base44Client";var Ze="seams:data-changed";function re(){typeof window<"u"&&window.dispatchEvent(new CustomEvent(Ze))}function Te(e){return typeof window>"u"?()=>{}:(window.addEventListener(Ze,e),()=>window.removeEventListener(Ze,e))}var Re="seams:lookup";function wt(e,t={}){typeof window<"u"&&window.dispatchEvent(new CustomEvent(Re,{detail:{query:e,ask:!!t.ask}}))}function kt(e){if(typeof window>"u")return()=>{};let t=s=>e(s.detail?.query||"",!!s.detail?.ask);return window.addEventListener(Re,t),()=>window.removeEventListener(Re,t)}function ae(e){let[t,s]=Nt([]),[o,n]=Nt({loaded:!1,error:null}),r=Rt(0),c=Zt(()=>{let a=++r.current;return St.entities[e].list(void 0,5e3).then(l=>{a===r.current&&(s(l||[]),n({loaded:!0,error:null}))}).catch(l=>{a===r.current&&n({loaded:!0,error:l?.message||"Could not load "+e})})},[e]);return Xt(()=>{c();let a=St.entities[e].subscribe?.(()=>c()),l=Te(()=>c());return()=>{typeof a=="function"&&a(),l()}},[e,c]),[t,c,o]}var $t={as_of_date:"2026-11-13",overdue_days:30,po_abs_cents:2500,po_pct:.01,match_window_days:10,four_eyes_threshold_cents:5e5,rule_enabled:{unbilled:!0,short_billed:!0,below_contract:!0,freight:!0,dup_payment:!0,over_po:!0,overdue:!0,above_contract:!0,return_offset:!1,dup_credit_memo:!1,missing_credit:!1}};function ke(e){let t=String(e??"").trim();if(!t)return 0;let s=t.startsWith("-"),[o,n=""]=t.replace(/^-/,"").replace(/[$,]/g,"").split("."),r=parseInt(o||"0",10)*100+parseInt((n+"00").slice(0,2),10);return s?-r:r}var _=e=>(e<0?"-":"")+"$"+(Math.abs(e)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});import es,{createContext as ts,useContext as ss,useMemo as ns,useState as Ct}from"react";var Ft=ts({selectedSeam:null,setSelectedSeam:()=>{},selectedFlagKey:null,setSelectedFlagKey:()=>{}});function Et({children:e}){let[t,s]=Ct(null),[o,n]=Ct(null),r=ns(()=>({selectedSeam:t,setSelectedSeam:s,selectedFlagKey:o,setSelectedFlagKey:n}),[t,o]);return es.createElement(Ft.Provider,{value:r},e)}function pe(){return ss(Ft)}import{base44 as et}from"@/api/base44Client";function Ne(e){let t=[],s=[],o="",n=!1;for(let a=0;a<e.length;a++){let l=e[a];n?l==='"'&&e[a+1]==='"'?(o+='"',a++):l==='"'?n=!1:o+=l:l==='"'?n=!0:l===","?(s.push(o),o=""):l===`
+`||l==="\r"?(l==="\r"&&e[a+1]===`
+`&&a++,s.push(o),o="",s.some(u=>u!=="")&&t.push(s),s=[]):o+=l}(o!==""||s.length)&&(s.push(o),s.some(a=>a!=="")&&t.push(s));let[r,...c]=t;return{header:r,rows:c.map(a=>Object.fromEntries(r.map((l,u)=>[l.trim(),(a[u]??"").trim()])))}}function At(e){let t=e.map(o=>o.trim().toLowerCase()).join("|"),s=2166136261;for(let o=0;o<t.length;o++)s^=t.charCodeAt(o),s=Math.imul(s,16777619);return(s>>>0).toString(16)}var Mt={Contract:"crm_contracts",Shipment:"warehouse_shipments",Invoice:"billing_invoices",VendorBill:"ap_bills"},tt="Couldn't load demo data. Nothing was changed.";async function os(e){let t=await fetch(`/seed/${e}.csv`),s=t.headers?.get?.("content-type")||"",o=await t.text();if(!t.ok||/html/i.test(s)||/^\s*</.test(o))throw new Error(`${e}.csv not found`);let n=Ne(o);if(!n.header?.length||!n.rows?.length)throw new Error(`${e}.csv is empty`);return n}async function st(e=()=>{}){let t={};try{for(let[o,n]of Object.entries(Mt))t[o]=await os(n)}catch(o){throw e(`${tt} (${o.message})`),new Error(tt)}await et.functions.invoke("resetDemo");for(let[o,n]of Object.entries(Mt)){let{header:r,rows:c}=t[o],a=await et.functions.invoke("importRows",{entity:o,rows:c,header_hash:At(r),file_name:n});e(`${o}: ${a.data.imported} rows`)}let s=await et.functions.invoke("runChecks");return e(`Checks: ${s.data.counts.new} new flags \xB7 recoverable ${s.data.totals.recoverable.n} \xB7 ruled out ${s.data.totals.ruled_out}`),re(),s.data}var Q={CRM:{bg:"#EAF1FD",ink:"#1E3A8A"},Warehouse:{bg:"#E3F4F6",ink:"#155E75"},Billing:{bg:"#ECF3E1",ink:"#3F6212"},AP:{bg:"#F3EDFB",ink:"#6B21A8"},Returns:{bg:"#FFF4E5",ink:"#9A4A00"}};function se(e){return String(e||"").split("\u2192").map(t=>t.trim()).join(" \u2192 ")}var is=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];function Dt(e){let t=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(e||""));return t?`${is[Number(t[2])-1]} ${Number(t[3])}`:String(e||"")}import P,{useEffect as Oe,useRef as ot,useState as nt}from"react";import{base44 as it}from"@/api/base44Client";function be(e){window.dispatchEvent(new CustomEvent("seams:feedback",{detail:e}))}async function Lt(e){let t=await it.entities.Letter.get(e.letter_id),s=await it.entities.AuditEvent.filter({entity_type:"Letter",entity_id:e.letter_id});be({message:`Sent to ${t.party} \xB7 ${_(t.frozen_total_cents)}.`,auditId:s.find(o=>o.action==="send_letter")?.id})}function Ie(e){let t=ot(e);t.current=e,Oe(()=>{let s=document.activeElement,o=setTimeout(()=>document.querySelector("[role=dialog] button")?.focus(),0),n=r=>{if(r.key==="Escape"&&(r.preventDefault(),t.current?.()),r.key==="Tab"){let c=[...document.querySelector("[role=dialog]")?.querySelectorAll('button:not(:disabled),input,select,textarea,[tabindex="0"]')||[]];if(!c.length)return;r.shiftKey&&document.activeElement===c[0]?(r.preventDefault(),c.at(-1).focus()):!r.shiftKey&&document.activeElement===c.at(-1)&&(r.preventDefault(),c[0].focus())}};return window.addEventListener("keydown",n),()=>{clearTimeout(o),window.removeEventListener("keydown",n),s?.focus?.()}},[])}function Bt(){return P.createElement("div",{className:"seams-skeleton-grid",role:"status","aria-label":"Loading findings","aria-busy":"true"},P.createElement("div",{className:"seams-skeleton",style:{height:260}}),P.createElement("div",{className:"seams-skeleton",style:{height:330}}),P.createElement("div",null,[0,1,2,3].map(e=>P.createElement("div",{key:e,className:"seams-skeleton",style:{height:78,marginBottom:10}}))),P.createElement("div",{className:"seams-skeleton",style:{height:360}}),P.createElement("span",{className:"sr-only"},"Loading findings\u2026"))}function rt(){let[e,t]=nt(null),[s,o]=nt(!1),n=ot(8e3),[r,c]=nt(!1),a=ot(null);Oe(()=>{let u=m=>{t(m.detail),o(!1)},f=m=>{m.key==="Escape"&&(c(!1),a.current?.focus?.()),!m.target.closest?.("input,textarea,select,[contenteditable=true]")&&m.key==="?"&&!document.querySelector("[role=dialog]")&&(a.current=document.activeElement,c(!0))};return window.addEventListener("seams:feedback",u),window.addEventListener("keydown",f),()=>{window.removeEventListener("seams:feedback",u),window.removeEventListener("keydown",f)}},[]),Oe(()=>{n.current=8e3},[e]),Oe(()=>{if(!e||e.error||s)return;let u=Date.now(),f=setTimeout(()=>t(null),n.current);return()=>{clearTimeout(f),n.current=Math.max(0,n.current-(Date.now()-u))}},[e,s]);let l=async()=>{o(!0);try{await it.functions.invoke("undoAction",{audit_event_id:e.auditId}),re(),t(null)}catch(u){t({error:!0,message:u?.response?.data?.error||u.message})}};return P.createElement(P.Fragment,null,P.createElement("div",{className:"seams-toast-region","aria-live":"polite","aria-atomic":"true"},e?P.createElement("div",{className:`seams-toast${e.error?" is-error":""}`,onMouseEnter:()=>o(!0),onMouseLeave:()=>o(!1),onFocus:()=>o(!0),onBlur:()=>o(!1)},P.createElement("span",null,e.message),e.auditId?P.createElement("button",{type:"button",onClick:l},"Undo"):null,P.createElement("button",{type:"button","aria-label":"Dismiss notification",onClick:()=>t(null)},"\xD7")):null),r?P.createElement("div",{className:"seams-shortcuts",role:"dialog","aria-modal":"true","aria-label":"Keyboard shortcuts"},P.createElement("h2",{className:"font-display text-[22px]"},"Keyboard shortcuts"),P.createElement("p",null,"J / K \u2014 Next / previous finding"),P.createElement("p",null,"Enter \u2014 Open selected fix"),P.createElement("p",null,"Esc \u2014 Close"),P.createElement("p",null,"\u2318K / Ctrl+K \u2014 Search"),P.createElement("p",null,"? \u2014 Shortcuts"),P.createElement("button",{autoFocus:!0,className:"fix-pill mt-4",onClick:()=>{c(!1),a.current?.focus?.()}},"Close shortcuts")):null)}import w,{useEffect as Se,useRef as qe,useState as le}from"react";import{base44 as me}from"@/api/base44Client";function zt(e,t){return e?.action_type==="send_correction"&&!t.some(s=>s.party===e.params?.party&&s.status==="needs_review")?"Nothing left to send. No sent line needs a correction; a cleared gap must not be billed again.":""}var Tt=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];function ee(e){return String(e??"").replace(/\$\s?(-?\d[\d,]*\.\d{2})(?!\d)/g,(t,s)=>_(ke(s.replace(/,/g,"")))).replace(/(?<![\w$.,/-])(\d{1,3}(?:,\d{3})+|\d+)\.\d{2}(?![\d%])/g,t=>_(ke(t.replace(/,/g,"")))).replace(/(?<![\w-])(20\d{2})-(\d{2})-(\d{2})(?![\w-])/g,(t,s,o,n)=>Tt[Number(o)-1]?`${Tt[Number(o)-1]} ${Number(n)}`:t)}import{useMemo as rs}from"react";var as={"delivery_log.csv":"Warehouse","invoices.csv":"Billing","products.csv":"Price list","contract_prices.csv":"CRM","customers.csv":"CRM","purchase_orders.csv":"Purchasing","supplier_bills.csv":"AP","suppliers.csv":"AP","inbox.csv":"Inbox"},Ot=["delivery_id","invoice_no","sku","po_no","bill_id","supplier","message_id"];function ls(e){return String(e||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")}function ds(e,t,s){let o=Number(e.amount)||0,n=ke(String(Math.abs(o))),r=!!(e.bill_id||e.po_no||e.supplier)||/AP|Vendor/.test(e.category||""),c=s?.status==="approved"?"sent":s?.status==="dismissed"?"dismissed":"open";return{id:e.id,kit:!0,stable_key:e.finding_id,finding_id:e.finding_id,rule_id:ls(e.problem),rule:e.problem,title:e.party?`${e.party}: ${e.problem.charAt(0).toLowerCase()}${e.problem.slice(1)}`:e.problem,why:e.explanation||e.cause||"",cause:e.cause||e.problem,month:e.month||"",date:e.date||"",seam:e.category||"Other",bucket:o>0?"recoverable":o<0?"credit_owed":"attention",lane:r?"vendor":"customer",party:e.party||e.supplier||"",amount_cents:n,signed_cents:o<0?-n:n,action_type:e.action_type||"",status:c,decision:s||null,ids:Ot.map(a=>e[a]).filter(Boolean),idFields:Object.fromEntries(Ot.filter(a=>e[a]).map(a=>[a,e[a]])),evidence:(t||[]).map(a=>({system:as[a.file]||a.file,id:a.record,file:a.file,fields:{shows:a.shows,...a.expected?{expected:a.expected}:{}}})),created_date:e.created_date}}function ye(){let[e,t,s]=ae("Finding"),[o]=ae("Evidence"),[n]=ae("Decision");return[rs(()=>{let c=new Map;for(let l of o)c.has(l.finding_id)||c.set(l.finding_id,[]),c.get(l.finding_id).push(l);let a=new Map;for(let l of[...n].sort((u,f)=>String(u.decided_at||"").localeCompare(String(f.decided_at||""))))a.set(l.finding_id,l);return e.map(l=>ds(l,c.get(l.finding_id),a.get(l.finding_id)))},[e,o,n]),t,s,{findings:e,decisions:n}]}function It(e){let t=new Map;for(let s of e){let o=s.month||"unknown",n=t.get(o)||{month:o,rows:0,cents:0};n.rows+=1,n.cents+=s.signed_cents,t.set(o,n)}return[...t.values()]}function Pt(e){let t=new Map;for(let o of e)t.has(o.cause)||t.set(o.cause,new Set),t.get(o.cause).add(o.month);let s={new:[],open:[],fixed:[],hasOctober:!1};for(let[o,n]of t)n.has("october")&&(s.hasOctober=!0),n.has("october")&&!n.has("september")?s.new.push(o):n.has("october")&&n.has("september")?s.open.push(o):n.has("september")&&s.fixed.push(o);return s}function Pe(e,t){let s=String(e||"").toLowerCase(),o=t.filter(p=>p.status==="open"),n=p=>`$${(p/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`,r=p=>p.reduce((d,y)=>d+y.signed_cents,0),c=p=>[...new Set(p.flatMap(d=>d.ids))].slice(0,12);if(!s.trim())return null;if(/forecast|predict|next (quarter|year)/.test(s))return{answer:"I only answer from the findings our code produced.",ids:[],refused:!0};let a=new Map;for(let p of o)a.set(p.cause,[...a.get(p.cause)||[],p]);let u=[...new Set(o.map(p=>p.party).filter(Boolean))].find(p=>p.toLowerCase().split(/\s+/).filter(d=>d.length>3).some(d=>s.includes(d))),f=(s.match(/\b(d-\d{6}-\d{4}|\d{7}|b-\d{5}|po-?\d{5}|m-\d{6}|nl-\d{5}|sup-\d{3})\b/i)||[])[1];if(f){let p=t.filter(d=>d.ids.some(y=>y.toLowerCase()===f.toLowerCase()));return p.length?{answer:p.slice(0,4).map(d=>`${d.rule}: ${n(d.signed_cents)} (${d.cause})`).join("; "),ids:c(p),flag:p[0]}:{answer:`${f.toUpperCase()} is not in any finding: it checked out.`,ids:[]}}if(u){let p=o.filter(y=>y.party===u),d=[...new Set(p.map(y=>y.cause))];return{answer:`${u}: ${p.length} open finding${p.length===1?"":"s"}, ${n(r(p))} net. Causes: ${d.slice(0,3).join("; ")}.`,ids:c(p)}}if(/email|reply|answer|inbox/.test(s)){let p=o.filter(d=>/email/i.test(d.rule));return{answer:`${p.length} customer emails still need a reply.`,ids:c(p)}}if(/bank|fraud|phish|fake/.test(s)){let p=o.filter(d=>/bank/i.test(d.rule));return{answer:p.length?`${p.length} bank-detail problems: ${p.map(d=>d.ids.join(" ")).join("; ")}. Hold payment and call the number on file.`:"No bank-detail problems open.",ids:c(p)}}if(/owe (them|customers?)|credit|refund|overbill/.test(s)){let p=o.filter(d=>d.signed_cents<0);return{answer:`We owe customers ${n(-r(p))} across ${p.length} lines.`,ids:c(p)}}if(/supplier|vendor|po\b|bill/.test(s)){let p=o.filter(d=>d.lane==="vendor");return{answer:`Suppliers: ${p.length} open lines, ${n(r(p))} to recover or hold.`,ids:c(p)}}if(/top|biggest|largest|first|priority|chase|worst/.test(s)||/cause|why/.test(s)){let p=[...a.entries()].sort((d,y)=>Math.abs(r(y[1]))-Math.abs(r(d[1]))).slice(0,3);return{answer:p.map(([d,y],g)=>`${g+1}. ${d}: ${y.length} lines, ${n(r(y))}`).join("; "),ids:c(p.flatMap(d=>d[1]))}}let m=[...new Set(o.map(p=>p.rule))].find(p=>p.toLowerCase().split(/\s+/).filter(d=>d.length>3).some(d=>s.includes(d)));if(m){let p=o.filter(d=>d.rule===m);return{answer:`${m}: ${p.length} open lines, ${n(r(p))}.`,ids:c(p)}}if(/lose|lost|leak|total|how much|summary|today|month/.test(s)){let p=o.filter(d=>d.signed_cents>0);return{answer:`${n(r(p))} to recover across ${p.length} lines; we owe customers ${n(-r(o.filter(d=>d.signed_cents<0)))}; ${a.size} causes open.`,ids:[]}}return{answer:"I can answer from the findings: try a customer name, a record ID, 'biggest causes', 'what do we owe customers' or 'emails needing a reply'.",ids:[],refused:!0}}var cs=["What did we lose this month?","Which customer owes the most?","Which customers do we owe money to?","What changed after the returns file?"];function at({role:e,onClose:t,onNavigate:s,onUpload:o,initialQuery:n="",autoAsk:r=!1,showRuled:c=!1}){Ie(t);let{setSelectedSeam:a,setSelectedFlagKey:l}=pe(),[u,f]=le(n),[m,p]=le(null),[d,y]=le(null),[g,b]=le(null),[E,S]=le(!1),[C,L]=le(!1),[N,A]=le(""),[O,Y]=le(-1),[j,ne]=le(""),[ge,W]=le(!1);Se(()=>{me.entities.Finding.list(void 0,1).then(x=>W((x||[]).length>0)).catch(()=>{})},[]);let[Z]=ye(),oe=qe(null),ie=qe(null),v=qe(0),B=qe(!1);Se(()=>{let x=setTimeout(()=>ie.current?.focus(),20);return()=>clearTimeout(x)},[]),Se(()=>{c&&me.entities.RuledOut.list(void 0,5e3).then(b)},[c]),Se(()=>{let x=++v.current;if(Y(-1),A(""),p(null),y(null),ne(""),!u.trim()){S(!1);return}S(!0);let M=setTimeout(async()=>{try{let T=Pe(u.trim(),Z);x===v.current&&(p(null),y(T?{...T,routed_by:"rules"}:null),ne(""))}catch(T){x===v.current&&A(T?.response?.data?.error||T.message)}finally{x===v.current&&S(!1)}},350);return()=>clearTimeout(M)},[u,Z.length]);let h=async()=>{let x=u.trim();if(!x||B.current)return;let M=++v.current;S(!0),A("");try{let T=Pe(x,Z),ce="rules";if(!T||T.refused)try{let Qe=await me.integrations.Core.InvokeLLM({prompt:`Rewrite this question as a short search query for a list of billing findings. Use one of: a customer or supplier name, a record ID, "biggest causes", "what do we owe customers", "emails needing a reply", "supplier bills", "bank details", "total this month", or a problem type like "old price" or "delivery fee". Reply with the query only.
+
+Question: ${x}`}),_t=String(typeof Qe=="string"?Qe:Qe?.text||"").trim(),Xe=_t?Pe(_t,Z):null;Xe&&!Xe.refused&&(T=Xe,ce="base44-ai")}catch{}M===v.current&&y(T?{...T,routed_by:ce,asked_full:!0}:null)}finally{M===v.current&&S(!1)}},I=async()=>{let x=u.trim();if(!(!x||B.current)){B.current=!0,L(!0),A("");try{let{data:M}=await me.functions.invoke("askSeams",{question:x}),T="";if(M.suggested_action_id){let ce=await me.entities.SuggestedAction.get(M.suggested_action_id);ce?.action_type==="send_correction"&&(T=zt(ce,await me.entities.Flag.filter({party:ce.params?.party})))}y({...M,asked_full:!0}),ne(T)}catch(M){A(M?.response?.data?.error||M.message)}finally{B.current=!1,L(!1)}}};Se(()=>{if(!r||!n||!Z.length)return;let x=setTimeout(()=>h(),50);return()=>clearTimeout(x)},[Z.length]);let F=x=>{a(x.seam),l(x.stable_key),s("Today"),t()},V=async x=>{let M=Z.find(T=>T.ids.some(ce=>String(ce).toLowerCase()===String(x).toLowerCase()));M?F({...M,seam:"__all"}):f(x)},fe=async x=>{if(!(B.current||!d?.suggested_action_id)&&!(x&&j)){B.current=!0,L(!0),A("");try{let{data:M}=await me.functions.invoke(x?"executeAction":"rejectAction",{action_id:d.suggested_action_id});x&&(re(),M.result?.letter_id?Lt(M.result):be({message:M.result?.pending_second?"Waiting for a second Controller":"Action approved."})),y(T=>({...T,suggested_action_id:null})),A(x?"Approved. See Activity for the audit trail.":"Suggestion rejected.")}catch(M){let T=M?.response?.data?.error||M.message;A(T),be({error:!0,message:T})}finally{B.current=!1,L(!1)}}},H=async()=>{if(!B.current){B.current=!0,L(!0);try{await st(),s("Today"),t()}catch(x){A(x?.response?.data?.error||x.message)}finally{B.current=!1,L(!1)}}};return w.createElement("div",{className:"palette-overlay",onMouseDown:x=>{x.target===x.currentTarget&&t()}},w.createElement("section",{ref:oe,role:"dialog","aria-modal":"true","aria-label":"Look up, ask, act",className:"command-palette card",onKeyDown:x=>{if(!["ArrowDown","ArrowUp"].includes(x.key))return;x.preventDefault();let M=[...oe.current.querySelectorAll("[data-command]:not(:disabled)")],T=Math.max(0,Math.min(M.length-1,O+(x.key==="ArrowDown"?1:-1)));Y(T),M[T]?.focus()}},w.createElement("div",{className:"palette-search"},w.createElement("input",{ref:ie,value:u,onChange:x=>f(x.target.value),onKeyDown:x=>{x.key==="Enter"&&(x.preventDefault(),h())},"aria-label":"Look up a record or ask Seams",placeholder:"Ask about the money, look up a record, or say \u201Cfix Greenpoint\u201D\u2026"}),w.createElement("button",{"aria-label":"Close command palette",className:"chip chip-neutral",onClick:t},"esc")),w.createElement("div",{className:"palette-results"},w.createElement("h2",{className:"brief-label mb-2"},"Records"),E?w.createElement("p",{className:"text-xs text-[#6B635A]",role:"status"},"Looking through checked records\u2026"):m?.kind==="flagged"?m.flags.map(x=>w.createElement("button",{"data-command":!0,key:x.stable_key,className:"palette-record",onClick:()=>F(x)},"Flagged: ",ee(x.title)," \xB7 ",w.createElement("span",{className:"money"},_(x.amount_cents)))):m?.kind==="ruled_out"?m.ruled.map((x,M)=>w.createElement("p",{className:"palette-record",key:M},"Ruled out: ",ee(x.reason))):u.trim()&&m&&/\d/.test(u)&&!/\s/.test(u.trim())?w.createElement("p",{className:"palette-record"},"Not in any finding"):u.trim()&&m?w.createElement("p",{className:"text-xs text-[#6B635A]"},"No record ID in this question."):w.createElement("p",{className:"text-xs text-[#6B635A]"},"Search a business ID such as INV-5078 or SH-3058."),w.createElement("h2",{className:"brief-label mt-5 mb-2"},"Ask Seams"),u.trim()?d?w.createElement("div",{className:"card p-3 text-[13px]"},w.createElement("p",null,ee(d.answer)),d.refused&&!d.asked_full?w.createElement("p",{className:"text-xs text-[#6B635A] mt-2"},"Press Enter to ask Seams in full."):null,d.routed_by==="base44-ai"?w.createElement("p",{className:"text-[11px] text-[#0F766E] mt-2"},"Question understood by Base44 AI \xB7 numbers from findings.csv"):w.createElement("p",{className:"text-[11px] text-[#6B635A] mt-2"},"Numbers from findings.csv"),d.would_propose?w.createElement("div",{className:"flex gap-2 mt-3"},w.createElement("button",{"data-command":!0,className:"fix-pill",disabled:C||e!=="admin",onClick:I},C?"Drafting\u2026":"Draft this fix"),w.createElement("span",{className:"text-xs text-[#6B635A] self-center"},"Nothing is sent until a Controller approves.")):null,w.createElement("div",{className:"flex flex-wrap gap-1 mt-2"},[...new Set(d.ids||[])].map(x=>w.createElement("button",{"data-command":!0,className:"record-chip",key:x,onClick:()=>V(x)},x))),d.suggested_action_id?w.createElement("div",{className:"flex gap-2 mt-3"},w.createElement("button",{"data-command":!0,className:"fix-pill",disabled:C||e!=="admin"||!!j,onClick:()=>fe(!0)},C?"Sending\u2026":"Approve"),w.createElement("button",{"data-command":!0,className:"seam-chip",disabled:C,onClick:()=>fe(!1)},"Reject")):null,d.suggested_action_id&&j?w.createElement("p",{className:"text-xs text-[#6B635A] mt-2"},j):null,d.suggested_action_id&&e!=="admin"?w.createElement("p",{className:"text-xs text-[#6B635A] mt-2"},"Controller approval needed"):null):null:w.createElement("div",{className:"grid gap-1"},cs.map(x=>w.createElement("button",{"data-command":!0,className:"palette-action",key:x,onClick:()=>f(x)},x))),N?w.createElement("p",{role:"status",className:"text-[12px] text-[#9F1239] mt-2"},N):null,w.createElement("h2",{className:"brief-label mt-5 mb-2"},"Actions"),w.createElement("button",{"data-command":!0,className:"palette-action",onClick:()=>{t(),o()}},"Upload new data ",w.createElement("kbd",null,"U")),ge?w.createElement("button",{"data-command":!0,className:"palette-action",disabled:e!=="admin",onClick:()=>{s("Data"),t()}},"Reset demo data (on the Data page) ",w.createElement("kbd",null,"D")):w.createElement("button",{"data-command":!0,className:"palette-action",disabled:C||e!=="admin",onClick:H},C?"Working\u2026":"Load demo data"," ",w.createElement("kbd",null,"D")),e!=="admin"?w.createElement("p",{className:"text-xs text-[#6B635A]"},"Controller approval needed to load demo data"):null,w.createElement("button",{"data-command":!0,className:"palette-action",onClick:async()=>b(await me.entities.RuledOut.list(void 0,5e3))},"Show look-alikes ruled out ",w.createElement("kbd",null,"R")),g?w.createElement("div",{className:"mt-2"},w.createElement("p",{className:"font-display text-lg"},g.length," look-alikes ruled out"),g.map((x,M)=>w.createElement("p",{className:"text-xs text-[#6B635A] border-t border-[#ECE4D8] py-2",key:x.id||M},ee(x.reason)))):null),w.createElement("footer",{className:"palette-footer"},"Numbers come from records. AI only routes your question.")))}import de from"react";function lt({title:e,eyebrow:t,onClose:s,children:o,wide:n=!1}){return Ie(s),de.createElement("div",{className:"seams-sheet-overlay"},de.createElement("button",{className:"seams-sheet-backdrop","aria-label":"Close sheet",onClick:s}),de.createElement("section",{className:`seams-sheet${n?" is-wide":""}`,role:"dialog","aria-modal":"true","aria-label":e},de.createElement("header",{className:"seams-sheet-header"},de.createElement("div",null,de.createElement("p",{className:"brief-label"},t),de.createElement("h2",{className:"font-display text-[24px] font-semibold"},e)),de.createElement("button",{className:"sheet-close","aria-label":"Close",onClick:s},"\xD7")),de.createElement("div",{className:"seams-sheet-content"},o)))}import ps from"react";var ms=String.raw`@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+/* ---- from src/index.css ---- */
+
+
+:root {
+  color-scheme: light;
+  /* Seams warm-map tokens */
+  --s-paper: #faf7f2;
+  --s-card: #ffffff;
+  --s-line: #ece4d8;
+  --s-ink: #1c1917;
+  --s-muted: #6b635a;
+  --s-forest: #1f4d3a;
+  --s-owed: #c2410c;
+  --s-owed-fill: #e8a585;
+  --s-overdue: #9f1239;
+  --s-overdue-bg: #fbe8ec;
+  --s-credit: #0f766e;
+  --s-credit-bg: #e2f3ef;
+  --s-chip: #f1ece4;
+  --s-sys-crm-bg: #eaf1fd;
+  --s-sys-crm-ink: #1e3a8a;
+  --s-sys-wh-bg: #e3f4f6;
+  --s-sys-wh-ink: #155e75;
+  --s-sys-bill-bg: #ecf3e1;
+  --s-sys-bill-ink: #3f6212;
+  --s-sys-ap-bg: #f3edfb;
+  --s-sys-ap-ink: #6b21a8;
+  --s-sys-ret-bg: #fff4e5;
+  --s-sys-ret-ink: #9a4a00;
+  --s-radius-card: 16px;
+  --s-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --s-font-display: "Figtree", system-ui, -apple-system, sans-serif;
+  --s-font-ui: "Figtree", system-ui, -apple-system, sans-serif;
+  --s-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--s-paper);
+  color: var(--s-ink);
+  font-family: var(--s-font-ui);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.45;
+}
+
+.font-display {
+  font-family: var(--s-font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.font-mono,
+.font-mono *,
+.money {
+  font-family: var(--s-font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  padding: 0.75rem 1rem;
+  background: var(--s-forest);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+}
+.skip-link:focus {
+  left: 0.75rem;
+  top: 0.75rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--s-forest);
+  outline-offset: 2px;
+}
+
+/* ---------- warm-map components ---------- */
+.card,
+.crm-card {
+  background: var(--s-card);
+  border-radius: var(--s-radius-card);
+  border: 1px solid var(--s-line);
+}
+
+.card-lift {
+  transition: transform 180ms var(--s-ease), box-shadow 180ms var(--s-ease);
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px -12px rgba(28, 25, 23, 0.18);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise-in 280ms var(--s-ease) both;
+}
+
+.progress-fill {
+  transition: width 600ms var(--s-ease);
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--s-forest);
+  color: #ffffff;
+  font-family: var(--s-font-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nav-link {
+  min-height: 34px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--s-muted);
+  white-space: nowrap;
+  transition: background 180ms var(--s-ease), color 180ms var(--s-ease);
+}
+.nav-link:hover {
+  color: var(--s-ink);
+  background: var(--s-chip);
+}
+.nav-link[aria-current="page"] {
+  color: var(--s-ink);
+  background: var(--s-card);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  font-weight: 600;
+}
+
+.search-input {
+  min-height: 36px;
+  width: 250px;
+  transition: width 200ms var(--s-ease), box-shadow 200ms var(--s-ease);
+  border-radius: 999px;
+  border: 1px solid var(--s-line);
+  background: var(--s-card);
+  padding: 0 2.6rem 0 2.1rem;
+  font-size: 12px;
+  color: var(--s-ink);
+}
+.search-input::placeholder {
+  color: var(--s-muted);
+}
+.search-input:focus {
+  width: 300px;
+  outline: none;
+  border-color: var(--s-forest);
+  box-shadow: 0 0 0 3px rgba(31, 77, 58, 0.12);
+}
+
+.btn-forest {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  background: var(--s-forest);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 180ms var(--s-ease), box-shadow 180ms var(--s-ease), background 180ms var(--s-ease);
+}
+.btn-forest:hover {
+  background: #173d2e;
+  transform: translateY(-1px);
+}
+.btn-forest:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--s-chip);
+  border: 1px solid var(--s-line);
+  color: var(--s-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.brief-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--s-muted);
+}
+
+.seam-pill {
+  display: inline;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: box-shadow 180ms var(--s-ease), filter 180ms var(--s-ease);
+}
+.seam-pill:hover {
+  filter: brightness(0.97);
+}
+
+/* ---------- Where it slipped ---------- */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #f4efe7;
+}
+.segmented-option {
+  min-height: 30px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--s-muted);
+  transition: background 180ms var(--s-ease), color 180ms var(--s-ease), box-shadow 180ms var(--s-ease);
+}
+.segmented-option:hover {
+  color: var(--s-ink);
+}
+.segmented-option[aria-pressed="true"] {
+  background: #ffffff;
+  color: var(--s-ink);
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.08);
+}
+
+.seam-conn {
+  transition: opacity 220ms var(--s-ease);
+}
+
+@keyframes seam-drip-flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+.seam-drip { animation: none; }
+.seam-drip--on, .seam-conn:hover .seam-drip, .seam-conn:focus-visible .seam-drip { animation: seam-drip-flow 1.2s linear infinite; }
+.seam-conn:focus-visible { outline: none; }
+.seam-conn:focus-visible .seam-label-pill { stroke: #1F4D3A; stroke-width: 3; stroke-opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .seam-drip--on, .seam-conn:hover .seam-drip { animation: none; } }
+
+.seam-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 32px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #e0d8cb;
+  background: #ffffff;
+  color: var(--s-ink);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background 180ms var(--s-ease), color 180ms var(--s-ease), border-color 180ms var(--s-ease);
+}
+.seam-chip:hover {
+  border-color: var(--s-ink);
+}
+.seam-chip[aria-pressed="true"] {
+  background: var(--s-ink);
+  border-color: var(--s-ink);
+  color: var(--s-paper);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 24px;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  font-size: 11.5px;
+}
+.chip-overdue {
+  background: var(--s-overdue-bg);
+  color: var(--s-overdue);
+}
+.chip-credit {
+  background: var(--s-credit-bg);
+  color: var(--s-credit);
+}
+.chip-neutral {
+  background: var(--s-chip);
+  color: var(--s-muted);
+}
+
+.crm-btn-black {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.crm-btn-black:hover {
+  background: #000;
+}
+.crm-btn-black:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.crm-btn-lime {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  background: #c6f135;
+  color: #2a3a00;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.crm-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.crm-tag-ok {
+  background: #e8f6d8;
+  color: #3d5c12;
+}
+.crm-tag-warn {
+  background: #ffe8d6;
+  color: #8a4b12;
+}
+.crm-tag-leak {
+  background: #fde8e6;
+  color: #9b1c1c;
+}
+.crm-tag-credit {
+  background: #e6f4ec;
+  color: #17734b;
+}
+
+.crm-input {
+  min-height: 44px;
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid #e4e4e8;
+  background: #ffffff;
+  padding: 0 1rem 0 2.5rem;
+  font-size: 0.875rem;
+  color: #111;
+}
+.crm-input::placeholder {
+  color: #6b6b76;
+}
+
+.crm-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+  width: 100%;
+  border-radius: 999px;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b6b76;
+  text-align: left;
+}
+.crm-nav-item:hover {
+  background: #f0f0f2;
+  color: #111;
+}
+.crm-nav-item[aria-current="page"] {
+  background: #111111;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.gauge-ring {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+}
+
+/* ---------- Today's fixes ---------- */
+.fix-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 220ms var(--s-ease), opacity 220ms var(--s-ease);
+}
+.fix-collapse.is-collapsing {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.fix-collapse-inner {
+  min-height: 0;
+  padding-bottom: 10px;
+}
+.fix-collapse.is-collapsing .fix-collapse-inner {
+  overflow: hidden;
+}
+.fix-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--s-line);
+  background: var(--s-card);
+  cursor: pointer;
+  transition: background 180ms var(--s-ease), border-color 180ms var(--s-ease);
+}
+.fix-card:hover {
+  border-color: #d6c9b6;
+}
+.fix-card.is-selected {
+  background: #fffaf3;
+  border-color: #cbb89c;
+}
+.fix-why {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.fix-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  background: var(--s-ink);
+  color: var(--s-paper);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: opacity 160ms var(--s-ease);
+}
+.fix-pill:hover {
+  opacity: 0.88;
+}
+.fix-pill:disabled {
+  opacity: 0.4;
+}
+.fix-quiet {
+  font-size: 11.5px;
+  color: #57534e;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: color 160ms var(--s-ease), text-decoration-color 160ms var(--s-ease);
+}
+.fix-quiet:hover {
+  color: var(--s-ink);
+  text-decoration-color: currentColor;
+}
+.fix-new {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--s-owed);
+  color: var(--s-owed);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.fix-popover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 230px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--s-line);
+  background: var(--s-card);
+  box-shadow: 0 10px 28px -12px rgba(28, 25, 23, 0.25);
+  cursor: default;
+}
+@keyframes fix-stamp-pop {
+  0% {
+    opacity: 0;
+    transform: rotate(-6deg) scale(1.6);
+  }
+  70% {
+    opacity: 1;
+    transform: rotate(-6deg) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1);
+  }
+}
+.fix-stamp {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  transform: rotate(-6deg);
+  animation: fix-stamp-pop 240ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.fix-stamp-sent {
+  color: #0f766e;
+}
+.fix-stamp-approval {
+  color: #4338ca;
+}
+
+/* ---------- Proof · Trace ---------- */
+.proof-dot {
+  position: absolute;
+  left: 2px;
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+}
+.proof-line {
+  position: absolute;
+  left: 6px;
+  top: 14px;
+  bottom: -18px;
+  width: 1px;
+  background: #ece4d8;
+}
+.proof-record {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--s-line);
+  background: #fcfaf6;
+  min-width: 0;
+}
+.proof-record .proof-value {
+  color: var(--s-ink);
+  overflow-wrap: anywhere;
+}
+.proof-record.is-diff {
+  background: #fdf1eb;
+  border-color: #f0cdbd;
+}
+.proof-record.is-diff .proof-value {
+  color: #9a3412;
+}
+
+.fade-on-clear {
+  transition: opacity 200ms ease;
+}
+.fade-on-clear.is-cleared {
+  opacity: 0;
+}
+
+/* Shared interaction states, including SVG keyboard targets. */
+:where(button,a,input,select,textarea,[tabindex],[role="button"]):focus-visible {
+  outline: 2px solid #1F4D3A;
+  outline-offset: 2px;
+}
+button[class], .fix-card { transition: transform 90ms ease-out, background-color 90ms ease-out, border-color 90ms ease-out, opacity 90ms ease-out; }
+button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
+.avatar { width: auto; min-width: 38px; padding: 0 10px; }
+.fix-card { flex-wrap: wrap; }
+.fix-card > .min-w-0 { min-width: 140px; }
+.fix-card .fix-pill { white-space: normal; text-align: left; max-width: 100%; padding-top: 6px; padding-bottom: 6px; }
+.seam-tooltip { transition: opacity 150ms ease; }
+.seams-toast-region { position: fixed; left: 20px; bottom: 20px; z-index: 70; max-width: calc(100vw - 40px); }
+.seams-toast { display: flex; align-items: center; gap: 16px; background: #0F766E; color: white; border-radius: 12px; padding: 14px 18px; box-shadow: 0 6px 24px #0002; font-size: 13px; }
+.seams-toast button { text-decoration: underline; font-weight: 600; }
+.seams-toast.is-error { background: #9F1239; }
+.seams-shortcuts { position: fixed; z-index: 80; inset: 25% auto auto 50%; transform: translateX(-50%); width: min(360px,90vw); background: white; border: 1px solid #ECE4D8; padding: 24px; border-radius: 16px; box-shadow: 0 0 0 100vmax #1c191755; }
+.seams-shortcuts p { margin-top: 10px; font-size: 13px; }
+@keyframes seams-shimmer { to { background-position: -200% 0; } }
+.seams-skeleton { border-radius: 14px; background: linear-gradient(90deg,#ECE4D8 25%,#F9F5EE 50%,#ECE4D8 75%); background-size: 200% 100%; animation: seams-shimmer 1.2s linear infinite; }
+.seams-skeleton-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; }
+@keyframes seams-spin { to { transform: rotate(360deg); } }
+.seams-spinner { display: inline-block; height: 13px; width: 13px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; margin-right: 6px; animation: seams-spin .8s linear infinite; vertical-align: middle; }
+@media (max-width: 640px) { .seams-skeleton-grid { grid-template-columns: 1fr; } .fix-card > div { max-width: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .card-lift:hover,
+  .btn-forest:hover {
+    transform: none;
+  }
+}
+
+/* ---- from src/components/settleSheets.css ---- */
+.seams-settle-sheet {
+  --s-settle-line: #e9e1d5;
+  --s-settle-muted: #756d63;
+  --s-settle-wash: #f5f0e8;
+  --s-settle-green: #245b43;
+  --s-settle-rust: #a94c2b;
+  position: relative;
+  isolation: isolate;
+  background: var(--s-paper);
+  color: var(--s-ink);
+  animation: settle-sheet-in 240ms var(--s-ease) both;
+}
+
+.seams-settle-sheet::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.17;
+  background-image: radial-gradient(#8f7d65 0.42px, transparent 0.42px);
+  background-size: 6px 6px;
+}
+
+.seams-settle-sheet__header {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 22px 15px;
+  border-bottom: 1px solid var(--s-settle-line);
+  background: rgba(250, 247, 242, 0.96);
+  backdrop-filter: blur(12px);
+}
+
+.seams-settle-sheet__eyebrow,
+.seams-settle-sheet__label {
+  color: var(--s-settle-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.seams-settle-sheet__title {
+  margin: 2px 0 0;
+  font-family: var(--s-font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.seams-settle-sheet__close {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--s-settle-line);
+  border-radius: 12px;
+  background: #fffdf9;
+  color: var(--s-ink);
+  font-size: 19px;
+  transition: transform 160ms var(--s-ease), background 160ms var(--s-ease);
+}
+
+.seams-settle-sheet__close:hover {
+  transform: rotate(4deg);
+  background: var(--s-settle-wash);
+}
+
+.seams-settle-sheet__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 17px 22px 24px;
+}
+
+.seams-settle-sheet__controls {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 10px;
+  margin-bottom: 15px;
+}
+
+.seams-settle-sheet__control-label {
+  color: var(--s-settle-muted);
+  font-size: 12px;
+}
+
+.seams-settle-sheet__control-value,
+.seams-settle-sheet__input {
+  min-width: 0;
+  min-height: 34px;
+  width: 100%;
+  border: 1px solid var(--s-settle-line);
+  border-radius: 9px;
+  background: #fffdf9;
+  padding: 6px 10px;
+  color: var(--s-ink);
+  font-size: 12px;
+}
+
+.seams-settle-sheet__control-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-color: transparent;
+  background: transparent;
+  padding-left: 0;
+}
+
+.seams-settle-sheet__locked {
+  flex: none;
+  color: var(--s-settle-muted);
+  font-size: 10px;
+  font-style: italic;
+}
+
+.seams-settle-sheet__input[readonly] {
+  background: #f0ebe3;
+  font-family: var(--s-font-mono);
+  font-size: 11px;
+}
+
+.seams-settle-sheet__preview {
+  padding: 17px 16px 14px;
+  border: 1px solid var(--s-settle-line);
+  border-radius: 13px;
+  background: #fffdf9;
+  box-shadow: 0 5px 18px rgba(63, 47, 29, 0.035);
+}
+
+.seams-settle-sheet__greeting,
+.seams-settle-sheet__closing {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.seams-settle-sheet__section {
+  margin-top: 12px;
+}
+
+.seams-settle-sheet__section-title {
+  margin: 0 0 5px;
+  color: var(--s-settle-green);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.seams-settle-sheet__lines {
+  display: grid;
+  gap: 4px;
+}
+
+.seams-settle-sheet__line {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 7px;
+  padding: 3px 0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.seams-settle-sheet__line input {
+  width: 14px;
+  height: 14px;
+  margin: 1px 0 0;
+  accent-color: var(--s-settle-green);
+}
+
+.seams-settle-sheet__line-copy {
+  min-width: 0;
+}
+
+.seams-settle-sheet__line-amount {
+  white-space: nowrap;
+  color: var(--s-ink);
+  font-family: var(--s-font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.seams-settle-sheet__closing {
+  margin-top: 11px;
+}
+
+.seams-settle-sheet__fineprint {
+  margin: 7px 0 0;
+  color: var(--s-settle-muted);
+  font-size: 10px;
+}
+
+.seams-settle-sheet__receipt-section {
+  margin-top: 16px;
+}
+
+.seams-settle-sheet__receipt-title {
+  margin: 0 0 6px;
+  color: var(--s-settle-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.seams-settle-sheet__receipt-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--s-settle-line);
+  border-radius: 10px;
+  background: rgba(255, 253, 249, 0.8);
+}
+
+.seams-settle-sheet__receipt {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 10px;
+}
+
+.seams-settle-sheet__receipt th {
+  padding: 7px 9px;
+  background: #f1ece4;
+  color: var(--s-settle-muted);
+  font-weight: 500;
+}
+
+.seams-settle-sheet__receipt td {
+  padding: 7px 9px;
+  border-top: 1px solid var(--s-settle-line);
+  vertical-align: top;
+}
+
+.seams-settle-sheet__receipt td:nth-child(2) {
+  white-space: nowrap;
+  font-family: var(--s-font-mono);
+}
+
+.seams-settle-sheet__receipt td:last-child {
+  min-width: 120px;
+  overflow-wrap: anywhere;
+}
+
+.seams-settle-sheet__footer {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  padding: 12px 22px 17px;
+  border-top: 1px solid var(--s-settle-line);
+  background: rgba(250, 247, 242, 0.97);
+  box-shadow: 0 -8px 22px rgba(63, 47, 29, 0.035);
+  backdrop-filter: blur(12px);
+}
+
+.seams-settle-sheet__total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 9px;
+}
+
+.seams-settle-sheet__total {
+  font-family: var(--s-font-mono);
+  font-size: 21px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+.seams-settle-sheet__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.seams-settle-sheet__send {
+  min-height: 42px;
+  flex: 1;
+  border-radius: 9px;
+  background: var(--s-forest);
+  color: #fffdf9;
+  font-size: 12px;
+  font-weight: 600;
+  transition: transform 160ms var(--s-ease), background 160ms var(--s-ease);
+}
+
+.seams-settle-sheet__send:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #193f30;
+}
+
+.seams-settle-sheet__cancel,
+.seams-settle-sheet__quiet {
+  min-height: 42px;
+  border: 1px solid var(--s-settle-line);
+  border-radius: 9px;
+  background: #fffdf9;
+  padding: 0 13px;
+  color: var(--s-ink);
+  font-size: 11px;
+}
+
+.seams-settle-sheet__quiet {
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--s-settle-muted);
+}
+
+.seams-settle-sheet__cancel:hover,
+.seams-settle-sheet__quiet:hover {
+  background: var(--s-settle-wash);
+}
+
+.seams-settle-sheet__send:disabled,
+.seams-settle-sheet__cancel:disabled,
+.seams-settle-sheet__quiet:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.seams-settle-sheet__footer-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.seams-settle-sheet__status {
+  min-height: 15px;
+  margin: 7px 0 0;
+  color: var(--s-settle-muted);
+  font-size: 10px;
+}
+
+.seams-settle-sheet__error {
+  margin: 0 0 7px;
+  color: var(--s-settle-rust);
+  font-size: 11px;
+}
+
+.seams-settle-sheet__approval {
+  margin-bottom: 9px;
+  padding: 9px 11px;
+  border: 1px solid #dfd9ca;
+  border-radius: 10px;
+  background: #f3efe5;
+  color: var(--s-ink);
+  font-size: 11px;
+}
+
+.seams-settle-sheet__approval button {
+  margin-top: 6px;
+  border-bottom: 1px solid currentColor;
+  font-weight: 600;
+}
+
+.seams-settle-sheet__loading {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  padding: 22px;
+}
+
+@keyframes settle-sheet-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 520px) {
+  .seams-settle-sheet__header { padding: 14px 16px 12px; }
+  .seams-settle-sheet__body { padding: 14px 16px 20px; }
+  .seams-settle-sheet__footer { padding: 10px 16px 13px; }
+  .seams-settle-sheet__line { grid-template-columns: 16px minmax(0, 1fr); }
+  .seams-settle-sheet__line-amount { grid-column: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seams-settle-sheet { animation: none; }
+}
+
+/* ---- from src/workspaceViews.css ---- */
+/* Accounts, audit timeline, command palette and upload: existing warm tokens. */
+.account-row { display:flex; align-items:center; gap:16px; text-align:left; width:100%; padding:18px 20px; }
+.account-row:hover,.account-row:focus-visible { background:#F8F4ED; }
+.account-initials { display:grid; place-items:center; flex-shrink:0; width:42px; height:42px; border-radius:50%; font-weight:600; font-size:14px; }
+.account-name { flex:1; min-width:0; }
+.account-name strong { display:block; font-size:14px; }
+.account-name small { display:block; font-size:11px; color:var(--s-muted); margin-top:3px; }
+.account-seam { display:inline-block; border-radius:5px; padding:2px 5px; font-size:10px; font-weight:500; }
+.account-total { min-width:125px; text-align:right; font-size:17px; font-weight:500; }
+.account-pending { color:#4338CA; background:#EEF0FD; }
+.account-breakdown { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:15px; }
+.account-breakdown p { color:var(--s-muted); font-size:11px; margin-bottom:3px; }
+.account-breakdown strong { font-size:13px; }
+.record-chip { display:inline-flex; align-items:center; border-radius:5px; padding:3px 6px; font-family:var(--s-font-mono); font-size:11px; color:#1F4D3A; background:#E9F0EC; }
+.seams-sheet-overlay { position:fixed; inset:0; z-index:42; display:flex; justify-content:flex-end; background:#1c191744; }
+.seams-sheet-backdrop { flex:1; min-width:0; }
+.seams-sheet { display:flex; flex-direction:column; width:min(600px,100vw); height:100%; background:var(--s-paper); box-shadow:-10px 0 50px #1c191715; animation:seams-sheet-enter 220ms var(--s-ease); }
+.seams-sheet.is-wide { width:min(700px,100vw); }
+.seams-sheet-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px 24px; background:white; border-bottom:1px solid var(--s-line); flex-shrink:0; }
+.sheet-close { display:grid; place-items:center; height:32px; width:32px; font-size:24px; line-height:1; border:1px solid var(--s-line); border-radius:8px; }
+.seams-sheet-content { flex:1; overflow-y:auto; }
+@keyframes seams-sheet-enter { from {transform:translateX(30px);opacity:0;} to {transform:none;opacity:1;} }
+.mini-timeline li { position:relative; padding:0 0 18px 18px; border-left:1px solid var(--s-line); font-size:12px; }
+.mini-timeline li:before { content:""; position:absolute; width:7px; height:7px; left:-4px; top:5px; border-radius:50%; background:var(--s-forest); }
+.mini-timeline time { display:block; margin-top:4px; color:var(--s-muted); font-size:10px; }
+.activity-timeline { margin-left:9px; border-left:1px solid var(--s-line); padding-left:25px; }
+.activity-event { position:relative; margin-bottom:12px; }
+.activity-event:before { content:""; position:absolute; top:24px; left:-30px; width:9px; height:9px; border-radius:50%; background:var(--s-forest); border:2px solid var(--s-paper); }
+.activity-event .text-right { flex-shrink:0; }
+.palette-overlay { position:fixed; inset:0; z-index:60; background:#1c191744; display:flex; justify-content:center; align-items:flex-start; padding:7vh 20px; backdrop-filter:blur(3px); }
+.command-palette { display:flex; flex-direction:column; width:min(650px,100%); max-height:86vh; box-shadow:0 24px 90px #1c191733; overflow:hidden; animation:rise-in 180ms var(--s-ease); }
+.palette-search { display:flex; align-items:center; gap:12px; padding:16px; border-bottom:1px solid var(--s-line); }
+.palette-search input { flex:1; min-width:0; padding:6px; font-size:16px; background:transparent; border:0; }
+.palette-results { padding:18px; overflow-y:auto; flex:1; }
+.palette-record { display:block; width:100%; text-align:left; border-radius:8px; background:#F5F2EB; padding:10px; margin-top:5px; font-size:13px; }
+.palette-action { display:flex; justify-content:space-between; width:100%; text-align:left; border-radius:7px; padding:9px 10px; font-size:13px; gap:12px; }
+.palette-action:hover,.palette-action:focus-visible { background:#F4EFE7; }
+.palette-action kbd { font-size:10px; color:var(--s-muted); }
+.palette-footer { border-top:1px solid var(--s-line); padding:12px 18px; font-size:11px; color:var(--s-muted); }
+.upload-workspace { padding:22px; }
+.upload-file-heading { display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+.upload-steps { display:flex; gap:6px; flex-wrap:wrap; margin:20px 0; font-size:11px; }
+.upload-steps li { border-radius:999px; background:#F1ECE4; padding:6px 10px; color:var(--s-muted); }
+.upload-steps .is-complete { background:#E2F3EF; color:#0F766E; }
+.upload-mappings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.upload-mappings label { display:flex; gap:5px; align-items:center; font-size:11px; padding:8px; border:1px solid var(--s-line); background:white; border-radius:8px; min-width:0; }
+.upload-mappings label span { max-width:45%; overflow-wrap:anywhere; }
+.upload-workspace select { border:1px solid var(--s-line); background:white; padding:5px; border-radius:5px; max-width:100%; color:var(--s-ink); font-size:12px; }
+.upload-mappings select { flex:1; min-width:0; font-size:11px; }
+.upload-table-wrap { border:1px solid var(--s-line); border-radius:10px; overflow-x:auto; background:white; }
+.upload-table { border-collapse:collapse; width:100%; text-align:left; font-size:11px; }
+.upload-table th { background:#F4EFE7; color:var(--s-muted); font-weight:500; white-space:nowrap; padding:9px; }
+.upload-table td { padding:9px; white-space:nowrap; border-top:1px solid var(--s-line); font-family:var(--s-font-mono); }
+.upload-error { margin-top:12px; border:1px solid #EBC6CF; border-radius:8px; padding:10px; background:#FBE8EC; color:#9F1239; font-size:12px; }
+.upload-log { font-size:10px; line-height:1.8; color:var(--s-muted); margin-top:18px; }
+.twist-preview { margin-top:24px; padding-top:20px; border-top:1px solid var(--s-line); }
+.twist-preview ul li { background:white; border:1px solid var(--s-line); border-radius:9px; padding:10px; }
+.twist-preview ul li p { color:var(--s-muted); }
+.twist-preview button { border-radius:999px; min-height:36px; font-size:12px; }
+.twist-preview button:first-child { background:var(--s-ink); }
+.twist-preview button:nth-child(2) { background:var(--s-forest); }
+.twist-numbers { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:15px; margin-top:16px; border:1px solid #D6DDD3; background:#F3F6F0; border-radius:10px; }
+.twist-numbers strong { display:block; font-size:16px; font-weight:500; }
+.twist-numbers small { display:block; color:var(--s-muted); font-size:10px; margin-top:5px; }
+.twist-banner { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 16px; background:#E9F0EC; border:1px solid #C6DACF; border-radius:10px; font-size:13px; color:var(--s-forest); }
+.twist-banner button { font-size:22px; }
+@media(max-width:640px) {
+  .account-row { gap:9px; padding:14px 12px; flex-wrap:wrap; }
+  .account-name { min-width:160px; }
+  .account-total { min-width:auto; margin-left:auto; font-size:15px; }
+  .upload-workspace { padding:16px; }
+  .upload-mappings { grid-template-columns:1fr; }
+  .twist-numbers { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .seams-sheet-header { padding:16px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .seams-sheet,.command-palette { animation:none; }
+}
+
+/* ---- Run 7 additions ---- */
+.seams-root { font-family: var(--s-font-ui); font-size: 13px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+.brief-headline { font-size: clamp(28px, 8vw, 36px); line-height: 1.12; letter-spacing: -0.01em; }
+.fixes-heading { border-radius: 8px; transition: background-color 600ms var(--s-ease); }
+.fixes-heading.flash { animation: seams-flash 900ms var(--s-ease); }
+@keyframes seams-flash { 0% { background: #fde7d9; box-shadow: 0 0 0 6px #fde7d9; } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
+.fix-cause { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 999px; background: var(--s-chip); color: #57534e; font-size: 10.5px; font-weight: 500; padding: 2px 8px; }
+.fix-sub { font-size: 11px; color: var(--s-muted); text-align: right; }
+.fix-approval-tag { color: var(--s-overdue); font-weight: 600; }
+.chip-button { cursor: pointer; border: 0; }
+.chip-button:hover { filter: brightness(0.97); }
+.slip-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11.5px; color: #57534e; }
+.slip-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend-dot { display: inline-block; width: 9px; height: 9px; border-radius: 999px; }
+.legend-owed { background: #c2410c; }
+.legend-late { background: #9f1239; }
+.legend-credit { background: #0f766e; }
+.record-link { color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; background: none; border: 0; padding: 0; }
+.record-link:hover { color: var(--s-ink); text-decoration-style: solid; }
+.ruled-reason { display: flex; gap: 8px; align-items: flex-start; }
+.ruled-check { color: var(--s-credit); font-weight: 700; }
+.seam-chip-chevron { display: none; }
+.mobile-search { display: none; }
+@media (max-width: 639px) {
+  .slip-visual, .slip-legend { display: none; }
+  .slip-rows { flex-direction: column; flex-wrap: nowrap; }
+  .slip-rows .seam-chip { display: flex; width: 100%; min-height: 48px; border-radius: 12px; justify-content: flex-start; padding: 0 14px; font-size: 13px; }
+  .slip-rows .seam-chip-name { font-weight: 600; flex: 1; text-align: left; }
+  .slip-rows .seam-chip-sep { display: none; }
+  .slip-rows .seam-chip-count { color: inherit; opacity: 0.7; margin-left: 10px; font-size: 12px; }
+  .slip-rows .seam-chip-chevron { display: inline; margin-left: 8px; font-size: 18px; }
+  .mobile-search { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--s-line); background: #fff; color: var(--s-ink); }
+  .fix-card { flex-direction: column; }
+}
+.brief-progress { font-size: 12.5px; color: #57534e; }
+.brief-progress .money { color: var(--s-ink); font-weight: 600; }
+.settings-input { width: 100%; min-height: 42px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; padding: 0 12px; font: inherit; font-weight: 400; color: var(--s-ink); }
+.settings-input:focus { outline: 2px solid var(--s-forest); outline-offset: 1px; }
+.settings-input:disabled { background: var(--s-paper); color: var(--s-muted); }
+.settings-check { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--s-line); background: #fff; cursor: pointer; }
+.finding-chart { margin-top: 12px; border: 1px solid var(--s-line); border-radius: 12px; background: #fff; padding: 10px 12px 8px; }
+.finding-chart__title { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--s-muted); margin-bottom: 4px; }
+.finding-chart__caption { margin-top: 4px; font-size: 12px; color: #44403c; }
+.cause-group { padding: 14px 16px; }
+.kit-tile { list-style: none; border: 1px solid var(--s-line); border-radius: 14px; background: #fff; transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease; }
+.kit-tile:hover { border-color: #DCCFBE; box-shadow: 0 6px 18px -12px rgba(28,25,23,.35); transform: translateY(-1px); }
+.kit-tile.is-active { border-color: #1C1917; box-shadow: 0 10px 26px -16px rgba(28,25,23,.45); }
+.kit-tile__head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; text-align: left; cursor: pointer; background: none; border: 0; }
+.kit-tile__title { display: block; font-size: 14.5px; font-weight: 600; color: #1C1917; line-height: 1.3; }
+.kit-tile__meta { display: block; margin-top: 2px; font-size: 12px; color: var(--s-muted); }
+.kit-tile__bar { display: block; margin-top: 8px; height: 5px; width: 100%; max-width: 260px; border-radius: 99px; background: #F1ECE4; overflow: hidden; }
+.kit-tile__bar > span { display: block; height: 100%; border-radius: 99px; opacity: .85; }
+.kit-tile__amt { flex-shrink: 0; font-size: 15px; font-weight: 600; }
+.kit-tile__body { border-top: 1px solid var(--s-line); padding: 8px 10px 12px; }
+.kit-tile__body ul { display: grid; gap: 2px; }
+.kit-line { width: 100%; display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 7px 8px; border-radius: 9px; text-align: left; background: none; border: 0; cursor: pointer; font-size: 12.5px; }
+.kit-line:hover { background: #FAF7F2; }
+.kit-line[aria-pressed="true"] { background: #F4EFE7; box-shadow: inset 3px 0 0 #C2410C; }
+.kit-line__ids { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; color: #44403C; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kit-line__party { color: #44403C; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kit-line__amt { font-weight: 600; text-align: right; }
+.kit-changed { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: #44403C; }
+.kit-changed b { font-size: 16px; margin-right: 3px; }
+.kit-drop { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1.5px dashed #D9CCBB; border-radius: 14px; background: #FCFAF7; cursor: pointer; transition: border-color .15s ease, background .15s ease; min-width: 0; }
+.kit-drop:hover { border-color: #1F4D3A; background: #F6FAF7; }
+.kit-drop.is-set { border-style: solid; border-color: #1F4D3A; background: #F3F8F5; }
+.kit-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.kit-drop__name { font-size: 14px; font-weight: 600; color: #1C1917; }
+.kit-drop__file { font-size: 12px; color: var(--s-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.cause-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.cause-title { font-size: 14px; font-weight: 600; color: var(--s-ink); }
+.cause-meta { font-size: 12px; color: var(--s-muted); margin-top: 2px; }
+.cause-rows { margin-top: 8px; border-top: 1px solid var(--s-line); }
+.cause-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 10px; width: 100%; text-align: left; padding: 7px 4px; border-bottom: 1px solid #f3eee6; font-size: 12.5px; background: none; border-left: 0; border-right: 0; border-top: 0; cursor: pointer; }
+.cause-row:hover { background: #fbf8f3; }
+.cause-row[aria-pressed="true"] { background: #f6efe6; box-shadow: inset 3px 0 0 var(--s-owed); }
+.cause-row-ids { font-family: var(--s-font-mono); font-size: 11.5px; color: #44403c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cause-row-party { color: var(--s-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cause-row-amt { font-weight: 600; }
+.record-chip { border: 1px solid var(--s-line); background: #fff; border-radius: 8px; padding: 2px 8px; font-family: var(--s-font-mono); font-size: 11px; color: #44403c; cursor: pointer; }
+.record-chip:hover { border-color: var(--s-ink); }
+.evidence-list { display: grid; gap: 8px; list-style: none; padding: 0; }
+.evidence-row { border: 1px solid var(--s-line); border-radius: 10px; padding: 8px 10px; background: #fff; }
+.evidence-src { font-size: 11px; color: var(--s-muted); }
+.evidence-file { font-family: var(--s-font-mono); color: #44403c; }
+.evidence-shows { font-size: 13px; color: var(--s-ink); margin-top: 2px; }
+.evidence-expected { font-size: 12px; color: var(--s-owed); margin-top: 2px; font-weight: 500; }
+.fix-draft { width: 100%; border: 1px solid var(--s-line); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 12.5px; line-height: 1.5; color: var(--s-ink); background: #fff; }
+.ask-chip[aria-pressed="true"] { background: var(--s-ink); color: #fff; border-color: var(--s-ink); }
+.ask-chip { border-radius: 999px; border: 1px solid var(--s-line); background: #fff; padding: 3px 10px; font-size: 11.5px; color: #44403c; cursor: pointer; }
+`;function dt(){return ps.createElement("style",{"data-seams-theme":""},ms)}import i,{useEffect as Cs,useMemo as G,useState as He}from"react";import z,{useEffect as ks,useMemo as ut,useState as Kt}from"react";var $e="Billing\u2192Cash",ve={owed:{soft:"#E8A585",drip:"#C2410C",label:"#7C2D12"},credit:{soft:"#9FD4C8",drip:"#0F766E",label:"#115E59"},overdue:{soft:"#E9A3B4",drip:"#9F1239",label:"#881337"}};function qt(e){let t=new Map,s=new Map;for(let n of e||[]){if((n.status||"open")!=="open"||!n.seam)continue;let r=n.seam===$e;if(n.bucket==="credit_owed"){let a=s.get(n.seam)||{cents:0,n:0};a.cents+=n.amount_cents||0,a.n+=1,s.set(n.seam,a);continue}if(n.bucket!==(r?"overdue":"recoverable"))continue;if(!t.has(n.seam)){let[a,l]=n.seam.split("\u2192").map(u=>u.trim());t.set(n.seam,{seam:n.seam,from:a,to:l,cents:0,n:0,overdue:r,creditOnly:!1})}let c=t.get(n.seam);c.cents+=n.amount_cents||0,c.n+=1}for(let[n,r]of s){if(t.has(n))continue;let[c,a]=n.split("\u2192").map(l=>l.trim());t.set(n,{seam:n,from:c,to:a,cents:r.cents,n:r.n,overdue:!1,creditOnly:!0})}let o=n=>n.creditOnly?2:n.overdue?1:0;return[...t.values()].sort((n,r)=>o(n)-o(r)||r.cents-n.cents)}function jt(e){return(e.filter(s=>!s.overdue&&!s.creditOnly)[0]||e[0]||null)?.seam||null}function je(e,t){return 4+16*e/(t||1)}function We(e,t=13){return String(e).length*t*.6}import U from"react";import Ce,{useEffect as us,useRef as ct,useState as fs}from"react";function Fe({row:e,dim:t,onHover:s,onSelect:o,x:n,y:r,children:c}){let[a,l]=fs(!1),u=ct(null),f=ct(!1),m=ct(!1);us(()=>()=>clearTimeout(u.current),[]);let p=()=>{clearTimeout(u.current),s(e.seam),u.current=setTimeout(()=>l(!0),window.matchMedia("(prefers-reduced-motion: reduce)").matches?0:120)},d=()=>{f.current||m.current||(clearTimeout(u.current),l(!1),s(null))},y=`${e.from} to ${e.to}, ${_(e.cents)}, ${e.n} findings`;return Ce.createElement("g",{className:"seam-conn",tabIndex:0,role:"button","aria-label":y,"aria-pressed":!t,style:{opacity:t?.45:1,cursor:"pointer"},onMouseEnter:()=>{m.current=!0,p()},onMouseLeave:()=>{m.current=!1,d()},onFocus:()=>{f.current=!0,p()},onBlur:()=>{f.current=!1,d()},onClick:()=>o(e.seam),onKeyDown:g=>{(g.key==="Enter"||g.key===" ")&&(g.preventDefault(),o(e.seam)),g.key==="Escape"&&(clearTimeout(u.current),l(!1))}},c,Ce.createElement("g",{role:"tooltip","aria-hidden":!a,className:"seam-tooltip",style:{opacity:a?1:0,pointerEvents:"none"}},Ce.createElement("rect",{x:n-122,y:r-70,width:244,height:57,rx:9,fill:"#1C1917"}),Ce.createElement("text",{x:n,y:r-51,textAnchor:"middle",fill:"#FAF7F2",fontSize:12},se(e.seam)," \xB7 ",_(e.cents)),Ce.createElement("text",{x:n,y:r-32,textAnchor:"middle",fill:"#FAF7F2",fontSize:11},e.n," findings \xB7 Click to see fixes")))}var Ke={bg:"#F1ECE4",ink:"#1C1917"},hs={CRM:{x:40,y:40,label:"CRM",sub:"contract prices",tint:Q.CRM},Warehouse:{x:40,y:200,label:"Warehouse",sub:"shipments",tint:Q.Warehouse},Billing:{x:320,y:120,label:"Billing",sub:"invoices",tint:Q.Billing},Cash:{x:600,y:120,label:"Cash in",sub:"customers pay",tint:Ke},AP:{x:320,y:260,label:"AP",sub:"vendor bills",tint:Q.AP},Vendors:{x:600,y:260,label:"Vendors",sub:"we pay",tint:Ke},Inbox:{x:40,y:300,label:"Inbox",sub:"customer email",tint:Q.Inbox||Ke}},Wt=[{x:40,y:300},{x:600,y:20},{x:320,y:0}],Ue=130,Ve=50,gs={"CRM\u2192Billing":{d:"M178 65 C 250 65, 248 133, 308 133",mid:[243,99],lift:0},"Warehouse\u2192Billing":{d:"M178 225 C 250 225, 248 157, 308 157",mid:[243,191],lift:0},"Billing\u2192Cash":{d:"M458 145 L588 145",mid:[523,145],lift:26},"AP\u2192Vendors":{d:"M458 285 L588 285",mid:[523,285],lift:26},"Inbox\u2192Billing":{d:"M178 325 C 262 325, 262 167, 308 167",mid:[222,300],lift:0}};function xs(e){let t=new Set(e.flatMap(r=>[r.from,r.to])),s=Object.fromEntries(Object.entries(hs).filter(([r])=>t.has(r))),o=0;for(let r of e)for(let c of[r.from,r.to]){if(s[c]||o>=Wt.length)continue;let a=Wt[o++];s[c]={...a,label:c,sub:"",tint:Q[c]||Ke,spare:!0}}let n=Math.max(...Object.values(s).map(r=>r.y+Ve));return{nodes:s,height:Math.max(330,n+20)}}function bs(e,t){let s=[e.x+Ue+8,e.y+Ve/2],o=[t.x-12,t.y+Ve/2],n=[s[0]+60,s[1]],r=[o[0]-60,o[1]],c=[(s[0]+3*n[0]+3*r[0]+o[0])/8,(s[1]+3*n[1]+3*r[1]+o[1])/8];return{d:`M${s[0]} ${s[1]} C ${n[0]} ${n[1]}, ${r[0]} ${r[1]}, ${o[0]} ${o[1]}`,mid:c,lift:0}}function ys(e){return`System map of where money slipped: ${e.map(t=>`${se(t.seam).replace("\u2192","to")} ${_(t.cents)}${t.overdue?" late":t.creditOnly?" we owe":""}, ${t.n} findings`).join("; ")}.`}function pt({rows:e,maxCents:t,activeSeam:s,onHover:o,onSelect:n}){let{nodes:r,height:c}=xs(e);return U.createElement("svg",{viewBox:`0 0 760 ${c}`,width:"100%",role:"group","aria-label":ys(e),className:"block",onMouseLeave:()=>o(null)},U.createElement("defs",null,Object.entries(ve).map(([a,l])=>U.createElement("marker",{key:a,id:`seam-arrow-${a}`,viewBox:"0 0 10 10",refX:"1",refY:"5",markerWidth:"10",markerHeight:"10",markerUnits:"userSpaceOnUse",orient:"auto"},U.createElement("path",{d:"M0 0 L10 5 L0 10 z",fill:l.drip})))),e.map(a=>{let l=r[a.from],u=r[a.to];if(!l||!u)return null;let f=gs[a.seam],m=f||bs(l,u),p=a.seam===$e?"overdue":a.creditOnly?"credit":"owed",d=ve[p],y=s===a.seam,g=`${_(a.cents)}${a.overdue?" late":a.creditOnly?" we owe":""}`,b=We(g)+20,E=m.mid[0],S=m.mid[1]-m.lift,C=s&&s!==a.seam;return U.createElement(Fe,{key:a.seam,row:a,dim:C,onHover:o,onSelect:n,x:Math.max(125,Math.min(635,E)),y:Math.max(78,S)},U.createElement("path",{d:m.d,fill:"none",stroke:d.soft,strokeWidth:je(a.cents,t)+(y?2:0),strokeLinecap:"butt"}),U.createElement("path",{className:y?"seam-drip seam-drip--on":"seam-drip",d:m.d,fill:"none",stroke:d.drip,strokeWidth:2,strokeLinecap:"round",strokeDasharray:"3 15",markerEnd:`url(#seam-arrow-${p})`}),U.createElement("path",{d:m.d,fill:"none",stroke:"transparent",strokeWidth:28,pointerEvents:"stroke"}),U.createElement("rect",{className:"seam-label-pill",x:E-b/2,y:S-13,width:b,height:26,rx:13,fill:y?"#1C1917":"#FFFFFF",stroke:y?"#1C1917":d.drip,strokeOpacity:y?1:.45,strokeWidth:1.5}),U.createElement("text",{x:E,y:S+4.5,textAnchor:"middle",fontFamily:"Figtree, system-ui, sans-serif",fontSize:"14",fontWeight:"600",fill:y?"#FFFFFF":d.label},g),f?null:U.createElement("g",null,U.createElement("rect",{x:E+b/2+4,y:S-9,width:34,height:18,rx:9,fill:"#1C1917"}),U.createElement("text",{x:E+b/2+21,y:S+3.5,textAnchor:"middle",fontFamily:"Figtree, system-ui, sans-serif",fontSize:"10",fontWeight:"600",fill:"#FAF7F2"},"New")))}),Object.entries(r).map(([a,l])=>U.createElement("g",{key:a},U.createElement("rect",{x:l.x,y:l.y,width:Ue,height:Ve,rx:14,fill:l.tint.bg,stroke:l.tint.ink,strokeOpacity:.18}),U.createElement("text",{x:l.x+Ue/2,y:l.sub?l.y+22:l.y+30,textAnchor:"middle",fontFamily:"Figtree, system-ui, sans-serif",fontSize:"14",fontWeight:"600",fill:l.tint.ink},l.label),l.sub?U.createElement("text",{x:l.x+Ue/2,y:l.y+38,textAnchor:"middle",fontFamily:"Figtree, system-ui, sans-serif",fontSize:"11",fill:l.tint.ink,fillOpacity:.8},l.sub):null)))}import K from"react";var J={x:40,y:58,w:1220,h:34},ue={x:40,y:294,w:1220,h:14},he={band:19,gate:23,cardLabel:19,cardAmount:23},vs=[{key:"contracted",label:"Contracted",x:180,color:Q.CRM.ink},{key:"shipped",label:"Shipped",x:500,color:Q.Warehouse.ink},{key:"invoiced",label:"Invoiced",x:880,color:Q.Billing.ink},{key:"collected",label:"Collected",x:1200,color:"#1C1917"}],Ee={"Warehouse\u2192Billing":{label:"Shipped, not billed",x0:620,y0:J.y+J.h,x1:655,y1:150},"CRM\u2192Billing":{label:"Billed below contract",x0:870,y0:J.y+J.h,x1:915,y1:236},"Billing\u2192Cash":{label:"Stuck: overdue",x0:1095,y0:J.y+J.h,x1:1100,y1:150},"AP\u2192Vendors":{label:"Paid twice or over PO",x0:440,y0:ue.y+ue.h,x1:490,y1:345}};function _s(e){let t=e.y1-e.y0;return`M${e.x0} ${e.y0-6} C ${e.x0} ${e.y0+t*.6}, ${e.x0+(e.x1-e.x0)*.2} ${e.y1}, ${e.x1} ${e.y1}`}function ws(e){return`Money journey from contract to cash: ${e.filter(s=>Ee[s.seam]).map(s=>`${Ee[s.seam].label} ${_(s.cents)}, ${s.n} findings`).join("; ")}.`}function mt({rows:e,maxCents:t,stages:s,activeSeam:o,onHover:n,onSelect:r,labels:c={}}){let a=e.filter(m=>Ee[m.seam]),l=a.find(m=>m.seam==="AP\u2192Vendors"),u=vs.filter(m=>s[m.key]),f=u.length>0||a.some(m=>m.seam!=="AP\u2192Vendors");return K.createElement("svg",{viewBox:"0 0 1300 380",width:"100%",role:"group","aria-label":ws(e),className:"block",onMouseLeave:()=>n(null)},f?K.createElement("g",null,K.createElement("text",{x:J.x,y:22,fontFamily:"Figtree, system-ui, sans-serif",fontSize:he.band,letterSpacing:"1.5",fill:"#6B635A"},"SELLING TO CUSTOMERS"),K.createElement("rect",{x:J.x,y:J.y,width:J.w,height:J.h,rx:17,fill:"#E9F0EC"}),u.map(m=>K.createElement("g",{key:m.key},K.createElement("line",{x1:m.x,x2:m.x,y1:J.y-8,y2:J.y+J.h+8,stroke:m.color,strokeWidth:2}),K.createElement("text",{x:m.x,y:J.y-14,textAnchor:"middle",fontFamily:"Figtree, system-ui, sans-serif",fontSize:he.gate,fontWeight:"600",fill:"#1C1917"},m.label)))):null,l?K.createElement("g",null,K.createElement("text",{x:ue.x,y:ue.y-12,fontFamily:"Figtree, system-ui, sans-serif",fontSize:he.band,letterSpacing:"1.5",fill:"#6B635A"},"PAYING VENDORS"),K.createElement("rect",{x:ue.x,y:ue.y,width:ue.w,height:ue.h,rx:7,fill:Q.AP.bg})):null,a.map(m=>{let p={...Ee[m.seam],label:c[m.seam]||Ee[m.seam].label},d=_s(p),y=m.seam===$e?ve.overdue:ve.owed,g=`${_(m.cents)} \xB7 ${m.n}`,b=Math.max(We(g,he.cardAmount),p.label.length*he.cardLabel*.52)+24,E=58,S=je(m.cents,t),C=p.x1+S/2+6,L=p.y1-E/2,N=o&&o!==m.seam;return K.createElement(Fe,{key:m.seam,row:m,dim:N,onHover:n,onSelect:r,x:Math.min(1160,C+b/2),y:L},K.createElement("title",null,`${se(m.seam)}: ${p.label}`),K.createElement("path",{d,fill:"none",stroke:y.soft,strokeWidth:S,strokeLinecap:"round",opacity:.8}),K.createElement("path",{className:"seam-drip",d,fill:"none",stroke:y.drip,strokeWidth:2,strokeLinecap:"round",strokeDasharray:"3 15"}),K.createElement("path",{d,fill:"none",stroke:"transparent",strokeWidth:28,pointerEvents:"stroke"}),K.createElement("rect",{x:C,y:L,width:b,height:E,rx:12,fill:"#FFFFFF",stroke:"#E0D8CB"}),K.createElement("text",{x:C+12,y:L+22,fontFamily:"Figtree, system-ui, sans-serif",fontSize:he.cardLabel,fill:"#6B635A"},p.label),K.createElement("text",{x:C+12,y:L+46,fontFamily:"Figtree, system-ui, sans-serif",fontWeight:"600",fontSize:he.cardAmount,fontWeight:"500",fill:y.label},g))}))}var Ns=[{id:"map",label:"System map"},{id:"journey",label:"Money journey"}];function ft({flags:e,ruledCount:t,stages:s,onPicked:o}){let{selectedSeam:n,setSelectedSeam:r}=pe(),[c,a]=Kt("map"),[l,u]=Kt(null),f=ut(()=>qt(e),[e]),m=ut(()=>Math.max(1,...f.map(g=>g.cents)),[f]),p=ut(()=>{let g=new Map;for(let b of e){if(!b.kit||(b.signed_cents||0)<=0)continue;let E=g.get(b.seam)||new Map;E.set(b.rule,(E.get(b.rule)||0)+b.signed_cents),g.set(b.seam,E)}return Object.fromEntries([...g.entries()].map(([b,E])=>[b,[...E.entries()].sort((S,C)=>C[1]-S[1])[0][0]]))},[e]);ks(()=>{f.length&&n!=="__all"&&(!n||!f.some(g=>g.seam===n))&&r(jt(f))},[f,n,r]);let d=l||n,y=g=>{r(g),o?.()};return z.createElement("section",{className:"card rise flex flex-col p-5 lg:col-span-8","aria-label":"Where it slipped"},z.createElement("div",{className:"flex flex-wrap items-center justify-between gap-3"},z.createElement("h2",{className:"font-display text-[18px] font-semibold text-[#1C1917]"},"Where it slipped"),f.length?z.createElement("div",{className:"segmented",role:"group","aria-label":"Choose view"},Ns.map(g=>z.createElement("button",{key:g.id,type:"button",className:"segmented-option","aria-pressed":c===g.id,onClick:()=>a(g.id)},g.label))):null),f.length?z.createElement(z.Fragment,null,z.createElement("div",{key:c,className:"slip-visual rise mt-3"},c==="map"?z.createElement(pt,{rows:f,maxCents:m,activeSeam:d,onHover:u,onSelect:y}):z.createElement(mt,{rows:f,maxCents:m,stages:s,labels:p,activeSeam:d,onHover:u,onSelect:y})),z.createElement("p",{className:"slip-legend mt-2","aria-hidden":"true"},f.some(g=>!g.overdue&&!g.creditOnly)?z.createElement("span",null,z.createElement("i",{className:"legend-dot legend-owed"})," Owed to us"):null,f.some(g=>g.overdue)?z.createElement("span",null,z.createElement("i",{className:"legend-dot legend-late"})," Late, not lost"):null,f.some(g=>g.creditOnly)?z.createElement("span",null,z.createElement("i",{className:"legend-dot legend-credit"})," We owe customers"):null,z.createElement("span",null,"Click an amount to see its fixes")),z.createElement("div",{className:"slip-rows mt-3 flex flex-wrap gap-2",role:"group","aria-label":"Seams"},f.map(g=>z.createElement("button",{key:g.seam,type:"button",className:"seam-chip","aria-pressed":n===g.seam,onClick:()=>y(g.seam),onMouseEnter:()=>u(g.seam),onMouseLeave:()=>u(null),onFocus:()=>u(g.seam),onBlur:()=>u(null)},z.createElement("span",{className:"seam-chip-name"},se(g.seam)),z.createElement("span",{className:"seam-chip-sep"}," \xB7 "),z.createElement("span",{className:"money"},_(g.cents),g.overdue?" late":g.creditOnly?" we owe":""),z.createElement("span",{className:"seam-chip-sep"}," \xB7 "),z.createElement("span",{className:"seam-chip-count"},g.n," finding",g.n===1?"":"s"),z.createElement("span",{className:"seam-chip-chevron","aria-hidden":"true"},"\u203A"))))):z.createElement("p",{className:"flex min-h-[260px] items-center justify-center text-center font-display text-[20px] text-[#1C1917]"},"Nothing slipped through. ",t," look-alikes checked."))}import $,{useMemo as Ss,useRef as $s,useState as _e}from"react";import{base44 as ht}from"@/api/base44Client";var Ae={catch_up_invoice:"Catch-up invoice",credit_memo:"Credit memo",customer_reply:"Customer reply",supplier_dispute:"Supplier dispute",payment_hold:"Payment hold"},Vt=e=>e.reduce((t,s)=>t+s.signed_cents,0);function Ut(e,t){let s=t[0].party||"the account",o=Vt(t),n=t.slice(0,25).map(a=>`- ${a.ids.join(" / ")}: ${a.rule}${a.signed_cents?`, ${_(Math.abs(a.signed_cents))}`:""}`),r=t.length>25?[`- \u2026and ${t.length-25} more lines`]:[],c=[...n,...r].join(`
+`);switch(e){case"catch_up_invoice":return`To: ${s}
+Subject: Catch-up invoice, ${_(o)}
+
+Hi ${s} team,
+
+While reconciling our records we found items that were delivered but not billed correctly:
+${c}
+
+Total due: ${_(o)} (before sales tax where it applies). A detailed invoice is attached.
+
+Thank you,
+Northline Supply billing`;case"credit_memo":return`To: ${s}
+Subject: Credit memo, ${_(Math.abs(o))}
+
+Hi ${s} team,
+
+We found that you were overbilled and are issuing a credit:
+${c}
+
+Credit: ${_(Math.abs(o))}. It will appear on your next statement.
+
+Sorry for the trouble,
+Northline Supply billing`;case"customer_reply":return`To: ${s}
+Subject: Re: your message
+
+Hi,
+
+Sorry for the slow reply. [Answer the question here.]
+
+References:
+${c}
+
+Best,
+Northline Supply`;case"supplier_dispute":return`To: ${s} accounts receivable
+Subject: Billing dispute, ${_(o)}
+
+Hello,
+
+These bill lines do not match our purchase orders and receiving records:
+${c}
+
+Please send a credit for ${_(o)}, or a corrected invoice. We are holding these lines until then.
+
+Thanks,
+Northline Supply accounts payable`;case"payment_hold":return`INTERNAL \xB7 Payment hold
+
+Hold payment on:
+${c}
+
+Reason: bank details changed by email and not verified by phone, or the bill is a duplicate. Call the supplier at the number on file before releasing.
+Amount held: ${_(o)}`;default:return c}}function gt({rows:e,role:t,onClose:s}){let o=e[0],[n,r]=_e(o.action_type in Ae?o.action_type:o.signed_cents<0?"credit_memo":"catch_up_invoice"),[c,a]=_e(()=>Ut(n,e)),[l,u]=_e(!1),[f,m]=_e("Not a problem under the rules"),[p,d]=_e(!1),[y,g]=_e(""),b=$s(!1),E=Ss(()=>Vt(e),[e]),S=N=>{r(N),a(Ut(N,e))},C=async()=>{d(!0),g("");try{let N=await ht.integrations.Core.InvokeLLM({prompt:`Rewrite this ${Ae[n]} to be clear, polite and short. Keep every record ID and every dollar amount exactly as written; do not add or change numbers.
+
+${c}`}),A=typeof N=="string"?N:N?.text||N?.output||"",O=Y=>(Y.match(/\$[\d,]+\.\d{2}/g)||[]).sort().join("|");A&&O(A)===O(c)?a(A):g("AI changed an amount, so the original wording was kept.")}catch{g("AI is offline here; the draft is unchanged.")}finally{d(!1)}},L=async N=>{if(!b.current){b.current=!0,d(!0),g("");try{let A=await ht.auth.me().catch(()=>null),O=new Date().toISOString(),Y=A?.full_name||A?.email||"Dana";await ht.entities.Decision.bulkCreate(e.map(j=>({finding_id:j.finding_id,status:N,reason:N==="dismissed"?f:"",draft:N==="approved"?c:"",action_type:n,decided_by:Y,decided_at:O}))),be({message:N==="approved"?`Approved ${Ae[n].toLowerCase()} \xB7 ${e.length} line${e.length===1?"":"s"} \xB7 saved to Decisions. Nothing was sent.`:`Dismissed ${e.length} line${e.length===1?"":"s"}: ${f}`}),re(),s()}catch(A){g(A?.message||"Could not save the decision")}finally{b.current=!1,d(!1)}}};return $.createElement("div",{className:"fixed inset-0 z-40 flex justify-end bg-[#1C1917]/30",role:"presentation",onClick:s},$.createElement("aside",{className:"seams-settle-sheet flex h-full w-full max-w-lg flex-col",role:"dialog","aria-modal":"true","aria-label":`Draft fix for ${o.cause}`,onClick:N=>N.stopPropagation()},$.createElement("header",{className:"seams-settle-sheet__header"},$.createElement("div",null,$.createElement("p",{className:"seams-settle-sheet__eyebrow"},"Draft fix \xB7 ",e.length," line",e.length===1?"":"s"),$.createElement("h2",{className:"seams-settle-sheet__title"},o.cause)),$.createElement("button",{type:"button",className:"seams-settle-sheet__close","aria-label":"Close",onClick:s},"\xD7")),$.createElement("div",{className:"seams-settle-sheet__body flex-1 overflow-y-auto"},$.createElement("div",{className:"flex flex-wrap gap-1.5"},Object.entries(Ae).map(([N,A])=>$.createElement("button",{key:N,type:"button",className:"ask-chip","aria-pressed":n===N,onClick:()=>S(N)},A))),$.createElement("label",{className:"mt-3 block text-[12px] font-medium text-[#1C1917]"},"Draft (edit freely; nothing is sent from this app)",$.createElement("textarea",{className:"fix-draft mt-1",value:c,onChange:N=>a(N.target.value),rows:16})),$.createElement("div",{className:"mt-2 flex items-center gap-2"},$.createElement("button",{type:"button",className:"fix-quiet",disabled:p,onClick:C},"Polish wording with Base44 AI"),$.createElement("span",{className:"text-[11px] text-[#6B635A]"},"Amounts are locked to findings.csv.")),y?$.createElement("p",{className:"mt-2 text-[12px] text-[#9F1239]",role:"alert"},y):null),$.createElement("footer",{className:"seams-settle-sheet__footer"},$.createElement("div",{className:"flex items-baseline justify-between"},$.createElement("span",{className:"text-[12px] text-[#6B635A]"},"Total from findings.csv"),$.createElement("span",{className:"money text-[20px] font-semibold"},E<0?`${_(-E)} credit`:_(E))),l?$.createElement("div",{className:"mt-3 grid gap-2"},$.createElement("select",{className:"settings-input",value:f,onChange:N=>m(N.target.value)},$.createElement("option",null,"Not a problem under the rules"),$.createElement("option",null,"Exception approved by Dana"),$.createElement("option",null,"Already fixed in QuickBooks"),$.createElement("option",null,"Duplicate of another finding"),$.createElement("option",null,"Too small to pursue")),$.createElement("div",{className:"flex gap-2"},$.createElement("button",{type:"button",className:"seams-settle-sheet__send",disabled:p||t!=="admin",onClick:()=>L("dismissed")},"Dismiss with this reason"),$.createElement("button",{type:"button",className:"fix-quiet",onClick:()=>u(!1)},"Back"))):$.createElement("div",{className:"mt-3 flex gap-2"},$.createElement("button",{type:"button",className:"seams-settle-sheet__send",disabled:p||t!=="admin",onClick:()=>L("approved")},"Approve ",Ae[n].toLowerCase()),$.createElement("button",{type:"button",className:"seams-settle-sheet__cancel",disabled:p,onClick:()=>u(!0)},"Dismiss\u2026")),t!=="admin"?$.createElement("p",{className:"mt-2 text-[11px] text-[#6B635A]"},"Only a Controller can approve or dismiss."):null)))}var Fs={september:"Sep",october:"Oct"},X=e=>e.reduce((t,s)=>t+s.signed_cents,0),xt=e=>e<0?`${_(-e)} we owe`:e===0?"No $":_(e),Je=e=>e<0?"#0F766E":e===0?"#57534E":"#C2410C",q={ink:"#1C1917",muted:"#6B635A",line:"#ECE4D8",owed:"#C2410C",owedSoft:"#F6D9C8",ok:"#1F4D3A",okSoft:"#D8E6DE",teal:"#0F766E"};function Ye(e){let t=String(e||"").replace(/,/g,"").match(/-?\d+(\.\d+)?/);return t?Number(t[0]):null}function Es(e){let t=e.evidence||[],s=e.rule||"";if(/never invoiced/i.test(s))return{a:["Delivered",Math.abs(e.signed_cents)/100],b:["Invoiced",0],money:!0,caption:"Goods arrived; no invoice exists for them."};if(/invoiced twice|entered twice/i.test(s))return{a:["First",Math.abs(e.signed_cents)/100],b:["Second copy",Math.abs(e.signed_cents)/100],money:!0,caption:"Same goods billed twice; only one should stand.",dup:!0};if(/no reply|bank/i.test(s))return null;let o=t.find(r=>r.fields.expected&&Ye(r.fields.shows)!=null&&Ye(r.fields.expected)!=null);if(!o)return null;let n=/\$/.test(o.fields.shows+o.fields.expected);return{a:["Records show",Ye(o.fields.shows)],b:["Rule says",Ye(o.fields.expected)],money:n,caption:`${ee(o.fields.shows)} \xB7 rule: ${ee(o.fields.expected)}`}}function As({flag:e}){let t=(e.evidence||[]).map(n=>String(n.fields.shows||"").match(/\.{3}(\d{4})/)?.[1]).filter(Boolean);if(t.length<2)return null;let[s,o]=t;return i.createElement("figure",{className:"finding-chart","aria-label":`Bill pays into account ending ${s}; account on file ends ${o}`},i.createElement("figcaption",{className:"finding-chart__title"},"Where the money would go"),i.createElement("div",{className:"grid grid-cols-2 gap-3 py-1"},i.createElement("div",null,i.createElement("p",{className:"text-[11px] text-[#6B635A]"},"Bill pays into"),i.createElement("p",{className:"money text-[22px] font-semibold text-[#C2410C]"},"\u2022\u2022\u2022\u2022 ",s)),i.createElement("div",null,i.createElement("p",{className:"text-[11px] text-[#6B635A]"},"Account on file"),i.createElement("p",{className:"money text-[22px] font-semibold text-[#1F4D3A]"},"\u2022\u2022\u2022\u2022 ",o))),i.createElement("p",{className:"finding-chart__caption"},"Hold payment and call the supplier at the number on file before paying."))}function Ms({flag:e}){if(/bank/i.test(e.rule||""))return i.createElement(As,{flag:e});let t=Es(e);if(!t)return null;let s=520,o=Math.max(Math.abs(t.a[1]),Math.abs(t.b[1]),.01),n=a=>Math.max(2,Math.abs(a)/o*(s-200)),r=a=>t.money?_(Math.round(a*100)):`${a} cases`,c=t.a[1]!==t.b[1];return i.createElement("figure",{className:"finding-chart","aria-label":`${t.a[0]} ${r(t.a[1])}, ${t.b[0]} ${r(t.b[1])}`},i.createElement("figcaption",{className:"finding-chart__title"},t.dup?"Billed twice":"Records vs the rule"),i.createElement("svg",{viewBox:`0 0 ${s} 84`,width:"100%",role:"img",style:{fontFamily:"Figtree, system-ui, sans-serif"}},[t.a,t.b].map(([a,l],u)=>i.createElement("g",{key:a,transform:`translate(0 ${10+u*36})`},i.createElement("text",{x:"0",y:"17",fontSize:"12",fill:q.muted},a),i.createElement("rect",{x:"96",y:"4",width:n(l),height:"18",rx:"4",fill:u===0?c||t.dup?q.owed:q.ok:q.okSoft,stroke:u===1&&l===0?q.muted:"none",strokeDasharray:u===1&&l===0?"4 3":void 0}),i.createElement("text",{x:96+n(l)+8,y:"18",fontSize:"12.5",fontWeight:"600",fill:q.ink},l===0&&!t.money?"0 cases":r(l))))),i.createElement("p",{className:"finding-chart__caption"},t.caption))}function Ds({flag:e,rows:t}){if(!t||t.length<2)return null;let s=t.slice(0,40),o=520,n=70,r=Math.max(...s.map(a=>Math.abs(a.signed_cents)),1),c=Math.min(22,(o-20)/s.length-2);return i.createElement("figure",{className:"finding-chart","aria-label":`${t.length} lines share this cause`},i.createElement("figcaption",{className:"finding-chart__title"},"Same cause \xB7 ",t.length," lines \xB7 ",xt(X(t))),i.createElement("svg",{viewBox:`0 0 ${o} ${n}`,width:"100%",role:"img",style:{fontFamily:"Figtree, system-ui, sans-serif"}},i.createElement("line",{x1:"0",x2:o,y1:n-4,y2:n-4,stroke:q.line}),s.map((a,l)=>{let u=Math.max(3,Math.abs(a.signed_cents)/r*(n-14)),f=a.stable_key===e.stable_key;return i.createElement("rect",{key:a.stable_key,x:10+l*(c+2),y:n-4-u,width:c,height:u,rx:"2",fill:f?q.ink:a.signed_cents<0?"#B9DAD3":q.owedSoft})})),i.createElement("p",{className:"finding-chart__caption"},"This line is the dark bar. Fixing the cause clears all ",t.length,"."))}function Ls({flag:e,rows:t}){let s=t.filter(d=>/^\d{4}-\d{2}-\d{2}/.test(d.date||""));if(!s.length)return null;let o=d=>Date.parse(`${d.slice(0,10)}T00:00:00Z`)/864e5,n=s.map(d=>o(d.date)),r=Math.min(...n)-1,c=Math.max(...n)+1,a=Math.max(c-r,7),l=520,u=d=>16+(d-r)/a*(l-32),f=s.reduce((d,y)=>y.date<d.date?y:d,s[0]),m=d=>new Date(`${d.slice(0,10)}T00:00:00Z`).toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"}),p=new Map;return i.createElement("figure",{className:"finding-chart","aria-label":`${s.length} lines between ${m(f.date)} and ${m(s.reduce((d,y)=>y.date>d?y.date:d,f.date))}`},i.createElement("figcaption",{className:"finding-chart__title"},"When it happened \xB7 first seen ",m(f.date)),i.createElement("svg",{viewBox:`0 0 ${l} 86`,width:"100%",role:"img",style:{fontFamily:"Figtree, system-ui, sans-serif"}},i.createElement("line",{x1:"10",x2:l-10,y1:"62",y2:"62",stroke:q.line,strokeWidth:"2"}),i.createElement("line",{x1:u(o(f.date)),x2:u(o(f.date)),y1:"14",y2:"66",stroke:q.owed,strokeDasharray:"3 3"}),s.map(d=>{let y=Math.round(u(o(d.date))),g=p.get(y)||0;p.set(y,g+1);let b=d.stable_key===e.stable_key;return i.createElement("circle",{key:d.stable_key,cx:y,cy:54-Math.min(g,5)*9,r:b?5.5:4,fill:b?q.ink:d.signed_cents<0?"#7FBFB3":"#E9A985"})}),i.createElement("text",{x:"10",y:"80",fontSize:"11",fill:q.muted},m(new Date(r*864e5+864e5).toISOString())),i.createElement("text",{x:l-10,y:"80",fontSize:"11",textAnchor:"end",fill:q.muted},m(new Date(c*864e5-864e5).toISOString())),i.createElement("text",{x:Math.min(l-60,u(o(f.date))+6),y:"12",fontSize:"11",fill:q.owed},"started")),i.createElement("p",{className:"finding-chart__caption"},s.length," ",s.length===1?"line":"lines","; the open one is dark. Everything after the dashed line repeats the same cause."))}function Bs({rows:e}){let t=new Map;for(let n of e)t.set(n.party||"Unknown",(t.get(n.party||"Unknown")||0)+n.signed_cents);let s=[...t.entries()].sort((n,r)=>Math.abs(r[1])-Math.abs(n[1])).slice(0,5);if(s.length<2)return null;let o=Math.max(...s.map(([,n])=>Math.abs(n)),1);return i.createElement("figure",{className:"finding-chart","aria-label":`Top ${s.length} affected`},i.createElement("figcaption",{className:"finding-chart__title"},"Who it hits \xB7 ",t.size," ",t.size===1?"account":"accounts"),i.createElement("ul",{className:"mt-1 grid gap-1.5"},s.map(([n,r])=>i.createElement("li",{key:n,className:"grid items-center gap-2 text-[12.5px]",style:{gridTemplateColumns:"minmax(0,150px) 1fr auto"}},i.createElement("span",{className:"truncate text-[#44403C]"},n),i.createElement("span",{className:"h-[7px] rounded-full bg-[#F1ECE4]"},i.createElement("span",{className:"block h-full rounded-full",style:{width:`${Math.max(4,Math.abs(r)/o*100)}%`,background:Je(r),opacity:.8}})),i.createElement("span",{className:"money font-semibold",style:{color:Je(r)}},r===0?"$0":_(r))))))}function Me({dot:e,label:t,last:s,children:o}){return i.createElement("li",{className:"relative pl-6"},s?null:i.createElement("span",{className:"proof-line","aria-hidden":!0}),i.createElement("span",{className:"proof-dot",style:{background:e},"aria-hidden":!0}),i.createElement("p",{className:"text-[10.5px] font-medium uppercase tracking-[0.08em] text-[#6B635A]"},t),i.createElement("div",{className:"mt-1"},o))}function zs({flag:e,causeRows:t,onDraft:s}){if(!e)return i.createElement("section",{className:"card rise flex min-h-[220px] items-center justify-center p-5 lg:col-span-6","aria-label":"Proof trace"},i.createElement("p",{className:"text-[13px] text-[#6B635A]"},"Pick a finding to see its proof."));let o=e.status==="sent"?"APPROVED":e.status==="dismissed"?"DISMISSED":"OPEN";return i.createElement("section",{className:"card rise self-start p-5 lg:sticky lg:top-20 lg:col-span-6","aria-label":"Proof trace"},i.createElement("div",{className:"flex items-center justify-between gap-3"},i.createElement("p",{className:"text-[11px] font-medium uppercase tracking-[0.1em] text-[#6B635A]"},"Proof \xB7 Trace"),i.createElement("span",{className:`fix-stamp ${e.status==="sent"?"fix-stamp-sent":""}`},o)),i.createElement("ol",{className:"mt-4 space-y-4"},i.createElement(Me,{dot:"#C2410C",label:"Finding"},i.createElement("div",{className:"flex items-baseline justify-between gap-3"},i.createElement("h3",{className:"font-display text-[17px] font-semibold leading-snug text-[#1C1917]"},e.title),i.createElement("span",{className:"money text-[16px] font-semibold",style:{color:e.signed_cents<0?q.teal:q.ink}},e.signed_cents===0?"$0.00":_(e.signed_cents))),i.createElement("p",{className:"mt-1 text-[13px] text-[#44403C]"},ee(e.why)),i.createElement("div",{className:"mt-2 flex flex-wrap gap-1.5"},Object.entries(e.idFields).map(([n,r])=>i.createElement("button",{key:n,type:"button",className:"record-chip",onClick:()=>wt(r)},n.replace("_"," ")," ",r)))),i.createElement(Me,{dot:"#1F4D3A",label:"Root cause"},i.createElement("p",{className:"text-[13px] text-[#1C1917]"},e.cause,t.length>1?` \xB7 ${t.length} lines, ${xt(X(t))}`:"")),i.createElement(Me,{dot:"#1C1917",label:"Records side by side"},i.createElement("div",{className:"grid gap-2",style:{gridTemplateColumns:`repeat(${Math.min(Math.max(e.evidence.length,1),2)}, minmax(0, 1fr))`}},e.evidence.map((n,r)=>i.createElement("div",{key:r,className:`proof-record${n.fields.expected?" is-diff":""}`},i.createElement("p",{className:"flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.06em] text-[#6B635A]"},i.createElement("span",{className:"inline-block h-1.5 w-1.5 rounded-full",style:{background:Q[n.system]?.ink||q.muted},"aria-hidden":!0}),n.system," \xB7 ",n.file),i.createElement("p",{className:"mt-1 text-[11.5px] text-[#6B635A]"},ee(n.id)),i.createElement("p",{className:"proof-value text-[13.5px] font-medium text-[#1C1917]"},ee(n.fields.shows)),n.fields.expected?i.createElement("p",{className:"mt-1 text-[12px] font-medium text-[#C2410C]"},"Rule says: ",ee(n.fields.expected)):null)))),i.createElement(Me,{dot:"#A8A29E",label:"Picture"},i.createElement(Ms,{flag:e}),i.createElement(Ds,{flag:e,rows:t})),i.createElement(Me,{dot:"#C2410C",label:"Pattern",last:!0},i.createElement(Ls,{flag:e,rows:t}),i.createElement(Bs,{rows:t}))),e.decision?i.createElement("p",{className:"mt-4 text-[12px] text-[#6B635A]"},e.decision.status==="approved"?"Approved":"Dismissed"," by ",e.decision.decided_by," \xB7 ",String(e.decision.decided_at||"").slice(0,16).replace("T"," "),e.decision.reason?` \xB7 ${e.decision.reason}`:""):null,i.createElement("div",{className:"mt-4 flex flex-wrap items-center gap-2"},e.status==="open"?i.createElement("button",{type:"button",className:"fix-pill",onClick:()=>s([e])},"Draft fix for this line"):null,i.createElement("span",{className:"chip chip-neutral"},"Amount from our code, not AI"),i.createElement("span",{className:"chip chip-neutral"},"Same row as findings.csv")))}function Ts({cause:e,rows:t,seamMax:s,active:o,selectedKey:n,onPick:r,onSelect:c,onDraft:a}){let l=X(t),u=Math.max(4,Math.round(Math.abs(l)/Math.max(s,1)*100)),f=new Set(t.map(m=>m.month));return i.createElement("li",{className:`kit-tile${o?" is-active":""}`},i.createElement("button",{type:"button",className:"kit-tile__head","aria-expanded":o,onClick:()=>r(e,t)},i.createElement("span",{className:"min-w-0"},i.createElement("span",{className:"kit-tile__title"},e),i.createElement("span",{className:"kit-tile__meta"},t[0].rule," \xB7 ",t.length," ",t.length===1?"line":"lines",f.has("october")?f.has("september")?" \xB7 still open in Oct":" \xB7 new in Oct":""),i.createElement("span",{className:"kit-tile__bar","aria-hidden":!0},i.createElement("span",{style:{width:`${u}%`,background:Je(l)}}))),i.createElement("span",{className:"money kit-tile__amt",style:{color:Je(l)}},l===0?`${t.length} to act on`:xt(l))),o?i.createElement("div",{className:"kit-tile__body"},i.createElement("ul",null,t.slice(0,12).map(m=>i.createElement("li",{key:m.stable_key},i.createElement("button",{type:"button",className:"kit-line","aria-pressed":n===m.stable_key,onClick:()=>c(m)},i.createElement("span",{className:"kit-line__ids"},m.ids.join(" \xB7 ")),i.createElement("span",{className:"kit-line__party"},m.party),i.createElement("span",{className:"money kit-line__amt",style:{color:m.signed_cents<0?q.teal:q.ink}},m.signed_cents===0?"$0.00":_(m.signed_cents)))))),t.length>12?i.createElement("p",{className:"mt-1 text-[11.5px] text-[#6B635A]"},"+",t.length-12," more lines in the draft"):null,t.some(m=>m.status==="open")?i.createElement("button",{type:"button",className:"fix-pill mt-2",onClick:()=>a(t.filter(m=>m.status==="open"))},"Draft fix \xB7 ",t.filter(m=>m.status==="open").length," ",t.length===1?"line":"lines"):null):null)}function bt({role:e,onGoData:t}){let[s,,o,{decisions:n}]=ye(),{selectedSeam:r,selectedFlagKey:c,setSelectedFlagKey:a}=pe(),[l,u]=He(null),[f,m]=He("open"),[p,d]=He(null),[y,g]=He(!1),b=G(()=>s.filter(h=>h.status==="open"),[s]),E=G(()=>It(s),[s]),S=G(()=>Pt(s),[s]),C=G(()=>s.filter(h=>h.status==="sent"),[s]),L=G(()=>s.filter(h=>h.status==="dismissed"),[s]),N=G(()=>s.filter(h=>h.signed_cents>0&&h.status!=="dismissed"),[s]),A=G(()=>b.filter(h=>h.signed_cents>0),[b]),O=G(()=>b.filter(h=>h.signed_cents<0),[b]),Y=G(()=>b.filter(h=>h.signed_cents===0),[b]),j=G(()=>{let h=X(N),I=X(N.filter(V=>V.status==="sent")),F=new Set(n.filter(V=>V.draft).map(V=>V.finding_id));return{all:h,done:I,pct:h?Math.min(100,I/h*100):0,drafted:F.size}},[N,n]),ne=f==="open"?b:f==="approved"?C:L,ge=G(()=>r&&r!=="__all"?ne.filter(h=>h.seam===r):ne,[ne,r]),W=G(()=>{let h=new Map;for(let F of ge)h.has(F.cause)||h.set(F.cause,[]),h.get(F.cause).push(F);return[...h.entries()].map(([F,V])=>[F,V.sort((fe,H)=>Math.abs(H.signed_cents)-Math.abs(fe.signed_cents))]).sort((F,V)=>Math.abs(X(V[1]))-Math.abs(X(F[1]))||V[1].length-F[1].length)},[ge]),Z=G(()=>Math.max(1,...W.map(([,h])=>Math.abs(X(h)))),[W]);Cs(()=>{W.length&&(!p||!W.some(([h])=>h===p))&&(d(W[0][0]),a(W[0][1][0].stable_key))},[W,p,a]);let oe=s.find(h=>h.stable_key===c)||W[0]?.[1][0]||null,ie=G(()=>oe?s.filter(h=>h.cause===oe.cause).sort((h,I)=>Math.abs(I.signed_cents)-Math.abs(h.signed_cents)):[],[s,oe]),v=G(()=>{let h=new Map;for(let H of A)h.set(H.seam,(h.get(H.seam)||0)+H.signed_cents);let I=[...h.entries()].sort((H,xe)=>xe[1]-H[1])[0];if(!I)return null;let F=new Map;for(let H of A.filter(xe=>xe.seam===I[0]))F.has(H.cause)||F.set(H.cause,[]),F.get(H.cause).push(H);let[V,fe]=[...F.entries()].sort((H,xe)=>X(xe[1])-X(H[1]))[0];return{seam:I[0],cents:I[1],cause:V,n:fe.length,causeCents:X(fe)}},[A]),B=()=>requestAnimationFrame(()=>document.getElementById("todays-fixes")?.scrollIntoView({behavior:"smooth",block:"start"}));return o.loaded?s.length?i.createElement("div",{className:"grid gap-5 lg:grid-cols-12"},i.createElement("section",{className:"rise lg:col-span-4","aria-label":"Morning brief"},i.createElement("p",{className:"brief-label"},"Morning brief \xB7 ",s.length," findings from our code"),i.createElement("h1",{className:"brief-headline mt-3 font-display font-medium text-[#1C1917]"},"Northline leaked ",i.createElement("span",{className:"text-[#C2410C]"},_(X(N))),S.hasOctober?" since Sep 1":" in September","."),j.done?i.createElement("p",{className:"brief-progress mt-2",role:"status"},i.createElement("span",{className:"money"},_(X(A)))," still open \xB7 ",i.createElement("span",{className:"money"},_(j.done))," approved"):null,i.createElement("p",{className:"mt-4 text-[14px] leading-[1.7] text-[#1C1917]"},v?i.createElement(i.Fragment,null,"The biggest leak is"," ",i.createElement("button",{type:"button",className:"seam-pill",style:{background:"#FBEDE4",color:"#9A3412"},onClick:()=>{d(v.cause),B()}},se(v.seam))," ","(",i.createElement("span",{className:"money font-semibold"},_(v.cents)),"), led by ",v.cause.toLowerCase()," (",v.n," ",v.n===1?"line":"lines",", ",i.createElement("span",{className:"money font-semibold"},_(v.causeCents)),")."):"Nothing left to collect. Every finding is decided."),i.createElement("div",{className:"mt-4 flex flex-wrap gap-2"},O.length?i.createElement("span",{className:"chip chip-credit"},"We owe customers ",i.createElement("span",{className:"money font-semibold"},_(-X(O)))):null,Y.length?i.createElement("span",{className:"chip chip-overdue"},Y.length," need a reply or a hold"):null,E.map(h=>i.createElement("span",{key:h.month,className:"chip chip-neutral"},Fs[h.month]||h.month," \xB7 ",h.rows," rows \xB7 ",i.createElement("span",{className:"money"},_(h.cents))))),S.hasOctober?i.createElement("div",{className:"kit-changed mt-3","aria-label":"What changed after October"},i.createElement("span",null,i.createElement("b",{style:{color:q.owed}},S.new.length)," new causes"),i.createElement("span",null,i.createElement("b",null,S.open.length)," still open"),i.createElement("span",null,i.createElement("b",{style:{color:q.teal}},S.fixed.length)," fixed")):null,i.createElement("article",{className:"card card-lift mt-4 px-4 py-3.5","aria-label":"Fix tracker"},i.createElement("div",{className:"flex items-baseline justify-between gap-3"},i.createElement("p",{className:"text-[12px] font-medium text-[#1C1917]"},"Fixes approved"),i.createElement("p",{className:"money text-[13px] font-semibold text-[#1C1917]"},_(j.done),i.createElement("span",{className:"ml-2 text-[11px] font-normal text-[#6B635A]"},"of ",_(j.all)))),i.createElement("div",{className:"mt-2.5 h-[6px] overflow-hidden rounded-full bg-[#F1ECE4]",role:"progressbar","aria-valuemin":0,"aria-valuemax":100,"aria-valuenow":Math.round(j.pct),"aria-label":"Share of money to collect that Dana approved"},i.createElement("div",{className:"progress-fill h-full rounded-full bg-[#1F4D3A]",style:{width:`${j.pct}%`}})),i.createElement("p",{className:"mt-2.5 flex flex-wrap gap-x-3 text-[11px] text-[#6B635A]"},i.createElement("span",null,"Found ",s.length),i.createElement("span",{"aria-hidden":!0},"\xB7"),i.createElement("span",null,"Drafted ",j.drafted),i.createElement("span",{"aria-hidden":!0},"\xB7"),i.createElement("span",null,"Approved ",C.length),i.createElement("span",{"aria-hidden":!0},"\xB7"),i.createElement("span",null,"Dismissed ",L.length)))),i.createElement(ft,{flags:b,ruledCount:L.length,stages:{contracted:!0,shipped:!0,invoiced:!0,collected:!1},onPicked:B}),i.createElement("section",{className:"rise lg:col-span-6 scroll-mt-24","aria-label":"Today's fixes"},i.createElement("div",{className:"flex flex-wrap items-end justify-between gap-2"},i.createElement("div",null,i.createElement("h2",{id:"todays-fixes",className:"fixes-heading font-display text-[22px] font-semibold leading-tight text-[#1C1917]"},"Today's fixes",r&&r!=="__all"?` \xB7 ${se(r)}`:""),i.createElement("p",{className:"mt-1 text-[12.5px] text-[#6B635A]"},W.length," ",W.length===1?"cause":"causes"," \xB7 ",ge.length," lines \xB7 biggest dollars first")),i.createElement("div",{className:"segmented",role:"group","aria-label":"Status"},[["open",`New ${b.length}`],["approved",`Approved ${C.length}`],["dismissed",`Dismissed ${L.length}`]].map(([h,I])=>i.createElement("button",{key:h,type:"button",className:"segmented-option","aria-pressed":f===h,onClick:()=>m(h)},I)))),W.length?i.createElement("ul",{className:"mt-4 grid gap-2.5","aria-label":"Causes"},(y?W:W.slice(0,8)).map(([h,I])=>i.createElement(Ts,{key:h,cause:h,rows:I,seamMax:Z,active:h===p,selectedKey:oe?.stable_key,onPick:(F,V)=>{d(F===p?null:F),a(V[0].stable_key)},onSelect:F=>a(F.stable_key),onDraft:F=>u(F)}))):null,W.length>8?i.createElement("button",{type:"button",className:"fix-quiet mt-3",onClick:()=>g(h=>!h)},y?"Show the top 8 causes":`Show all ${W.length} causes`):null,W.length?null:i.createElement("p",{className:"card mt-4 px-4 py-6 text-center text-[14px] text-[#6B635A]"},"Nothing ",f==="open"?"open":f," on this seam.")),i.createElement(zs,{flag:oe,causeRows:ie,onDraft:h=>u(h)}),l?i.createElement(gt,{rows:l,role:e,onClose:()=>u(null)}):null):i.createElement("div",{className:"card px-6 py-10 text-center"},i.createElement("p",{className:"font-display text-[22px] text-[#1C1917]"},"No findings loaded yet."),i.createElement("p",{className:"mt-1 text-[13px] text-[#6B635A]"},"Load findings.csv and evidence.csv from our detection code. Decisions are kept across reloads."),i.createElement("button",{type:"button",className:"btn-forest mt-4",onClick:t},"Load findings")):i.createElement(Bt,null)}import D,{useRef as Ht,useState as yt}from"react";import{base44 as De}from"@/api/base44Client";var Os=["finding_id","problem","delivery_id","invoice_no","sku","po_no","bill_id","supplier","message_id","amount","month","cause","party","category","explanation","action_type","date"];async function Yt(e,t,s){let o=await De.entities[e].list(void 0,2e4);s(`${e}: removing ${o.length} old rows\u2026`);let n=!1;if(o.length&&De.entities[e].deleteMany)try{await De.entities[e].deleteMany({}),n=!0}catch{}if(!n)for(let r=0;r<o.length;r+=50)await Promise.all(o.slice(r,r+50).map(c=>De.entities[e].delete(c.id)));for(let r=0;r<t.length;r+=200)await De.entities[e].bulkCreate(t.slice(r,r+200)),s(`${e}: ${Math.min(t.length,r+200)} of ${t.length} loaded`)}function Le({role:e}){let[t,s]=yt([]),[o,n]=yt(!1),[r,c]=yt({findings:null,evidence:null}),[a]=ae("Finding"),[l]=ae("Evidence"),[u]=ae("Decision"),f=Ht(null),m=Ht(null),p=b=>s(E=>[...E.slice(-12),b]),d=async(b,E)=>{n(!0),s([]);try{let S=Ne(b),C=Ne(E);if(!S.header.includes("finding_id")||!S.header.includes("amount"))throw new Error("findings.csv needs finding_id and amount columns");if(!C.header.includes("finding_id"))throw new Error("evidence.csv needs a finding_id column");let L=S.rows.map(O=>{let Y={};for(let j of Os)Y[j]=j==="amount"?Number(O[j]||0):String(O[j]??"");return Y}),N=C.rows.map(O=>({finding_id:O.finding_id,file:O.file||"",record:O.record||"",shows:O.shows||"",expected:O.expected||""}));await Yt("Finding",L,p),await Yt("Evidence",N,p);let A=L.reduce((O,Y)=>O+Math.round(Y.amount*100),0)/100;p(`Done: ${L.length} findings ($${A.toLocaleString("en-US",{minimumFractionDigits:2})} net), ${N.length} evidence rows. Decisions kept.`),re()}catch(S){p(`Stopped: ${S.message}`)}finally{n(!1)}},y=async()=>{if(!r.findings||!r.evidence)return p("Pick both files first.");await d(await r.findings.text(),await r.evidence.text())},g=async()=>{try{let[b,E]=await Promise.all(["findings","evidence"].map(S=>fetch(`/seed/kit/${S}.csv`).then(C=>{if(!C.ok||/html/.test(C.headers.get("content-type")||""))throw new Error(`${S}.csv is not served here; use the file pickers`);return C.text()})));await d(b,E)}catch(b){p(`Stopped: ${b.message}`)}};return D.createElement("div",{className:"grid gap-5 lg:grid-cols-12"},D.createElement("section",{className:"card p-6 lg:col-span-7"},D.createElement("p",{className:"brief-label"},"Load findings"),D.createElement("h1",{className:"mt-1 font-display text-[26px] text-[#1C1917]"},"findings.csv + evidence.csv"),D.createElement("p",{className:"mt-1 text-[13px] text-[#6B635A]"},"Our code reads the raw Northline files, applies billing_rules.md and writes these two files. Loading replaces Findings and Evidence and keeps every Decision, so October needs no rebuild."),D.createElement("div",{className:"mt-5 grid gap-3 sm:grid-cols-2"},[["findings",f,"Findings table \xB7 Dana's queue"],["evidence",m,"Evidence table \xB7 the proof"]].map(([b,E,S])=>D.createElement("label",{key:b,className:`kit-drop${r[b]?" is-set":""}`},D.createElement("input",{ref:E,type:"file",accept:".csv","aria-label":`Choose ${b}.csv`,onChange:C=>c(L=>({...L,[b]:C.target.files[0]}))}),D.createElement("span",{className:"kit-drop__name"},b,".csv"),D.createElement("span",{className:"kit-drop__file"},r[b]?`\u2713 ${r[b].name}`:S),D.createElement("span",{className:"kit-drop__file"},r[b]?"":"Click to choose a file")))),D.createElement("div",{className:"mt-5 flex flex-wrap items-center gap-3"},D.createElement("button",{type:"button",className:"btn-forest",disabled:o||e!=="admin",onClick:y},o?"Loading\u2026":"Replace findings (keep decisions)"),D.createElement("button",{type:"button",className:"fix-quiet",disabled:o||e!=="admin",onClick:g},"Load the September run")),t.length?D.createElement("pre",{className:"mt-4 whitespace-pre-wrap rounded-[10px] bg-[#F1ECE4] p-3 text-[12px] text-[#1C1917]",role:"status"},t.join(`
+`)):null),D.createElement("section",{className:"card p-6 lg:col-span-5"},D.createElement("p",{className:"brief-label"},"In the app now"),D.createElement("div",{className:"mt-3 grid grid-cols-3 gap-3 text-center"},D.createElement("div",null,D.createElement("p",{className:"font-display text-[26px]"},a.length),D.createElement("p",{className:"text-[11px] text-[#6B635A]"},"findings")),D.createElement("div",null,D.createElement("p",{className:"font-display text-[26px]"},l.length),D.createElement("p",{className:"text-[11px] text-[#6B635A]"},"evidence rows")),D.createElement("div",null,D.createElement("p",{className:"font-display text-[26px]"},u.length),D.createElement("p",{className:"text-[11px] text-[#6B635A]"},"decisions"))),D.createElement("p",{className:"mt-4 text-[12px] text-[#6B635A]"},"What we chose not to build: re-checking raw data inside the app. The checks live in code we can re-run and show (kit/detect.py), so every number is reproducible and the app never invents an amount.")))}import R,{useMemo as Is}from"react";function vt(){let[e,,,{decisions:t}]=ye(),s=Is(()=>new Map(e.map(n=>[n.finding_id,n])),[e]),o=[...t].sort((n,r)=>String(r.decided_at).localeCompare(String(n.decided_at)));return R.createElement("section",{className:"card p-6"},R.createElement("p",{className:"brief-label"},"Decisions \xB7 kept across reloads"),R.createElement("h1",{className:"mt-1 font-display text-[26px] text-[#1C1917]"},o.length," decisions"),R.createElement("div",{className:"mt-4 grid gap-2"},o.map(n=>{let r=s.get(n.finding_id);return R.createElement("details",{key:n.id,className:"evidence-row"},R.createElement("summary",{className:"flex cursor-pointer flex-wrap items-baseline justify-between gap-2"},R.createElement("span",{className:"text-[13px]"},R.createElement("strong",{className:n.status==="approved"?"text-[#1F4D3A]":"text-[#9F1239]"},n.status)," \xB7 ",r?r.title:n.finding_id,r?null:R.createElement("span",{className:"text-[#6B635A]"}," (no longer in findings: fixed)")),R.createElement("span",{className:"text-[12px] text-[#6B635A]"},r?_(r.signed_cents):""," \xB7 ",n.decided_by," \xB7 ",String(n.decided_at||"").slice(0,16).replace("T"," "))),n.reason?R.createElement("p",{className:"mt-2 text-[12px]"},"Reason: ",n.reason):null,n.draft?R.createElement("pre",{className:"mt-2 whitespace-pre-wrap text-[12px] text-[#44403C]"},n.draft):null)}),o.length?null:R.createElement("p",{className:"text-[13px] text-[#6B635A]"},"No decisions yet. Open a cause on Today and draft a fix.")))}var qs=[{id:"Today",label:"Today"},{id:"Decisions",label:"Decisions"},{id:"Data",label:"Load findings"}],we={admin:{name:"Dana",email:"dana@northline.example",roleLabel:"Controller",role:"admin"},sam:{name:"Sam",email:"sam@northline.example",roleLabel:"Controller, second approver",role:"admin"},user:{name:"Alex",email:"alex@northline.example",roleLabel:"Analyst",role:"user"}},Ge="seams:__user";function Qt(e){try{globalThis.localStorage?.setItem(Ge,JSON.stringify(e))}catch{}}async function js(){let e=!1;try{let s=globalThis.localStorage;if(s){let o=s.getItem(Ge);Qt({email:"probe@seams.local",role:"admin",full_name:"Probe"});let n=await ze.auth.me().catch(()=>null);o==null?s.removeItem(Ge):s.setItem(Ge,o),e=n?.email==="probe@seams.local"}}catch{e=!1}let t=e?null:await ze.auth.me().catch(()=>null);return{local:e,me:t}}function Jt(){return k.createElement("svg",{width:"14",height:"14",viewBox:"0 0 16 16",fill:"none","aria-hidden":"true"},k.createElement("circle",{cx:"7",cy:"7",r:"4.75",stroke:"currentColor",strokeWidth:"1.5"}),k.createElement("path",{d:"M10.5 10.5 14 14",stroke:"currentColor",strokeWidth:"1.5",strokeLinecap:"round"}))}function Ws(){let[e,t]=te({loaded:!1,n:0});return Be(()=>{let s=!0,o=["Flag","Invoice","Contract","Shipment","VendorBill"],n=()=>Promise.all(o.map(a=>ze.entities[a].list(void 0,1).catch(()=>[]))).then(a=>s&&t({loaded:!0,n:a.reduce((l,u)=>l+(u||[]).length,0)}));n();let r=ze.entities.Flag.subscribe?.(()=>n()),c=Te(()=>n());return()=>{s=!1,typeof r=="function"&&r(),c()}},[]),e}function Ks({role:e,onSwitchRole:t,realUser:s}){let[o,n]=te(!1),r=Gt(null),c=s||we[e]||we.admin;return Be(()=>{if(!o)return;let a=u=>r.current&&!r.current.contains(u.target)&&n(!1),l=u=>u.key==="Escape"&&n(!1);return document.addEventListener("mousedown",a),document.addEventListener("keydown",l),()=>{document.removeEventListener("mousedown",a),document.removeEventListener("keydown",l)}},[o]),k.createElement("div",{className:"relative",ref:r},k.createElement("button",{type:"button",className:"avatar","aria-haspopup":"true","aria-expanded":o,"aria-label":`Account: ${c.name}, ${c.roleLabel}`,onClick:()=>n(a=>!a)},c.name),o?k.createElement("div",{className:"card rise absolute right-0 top-[calc(100%+8px)] z-30 w-[240px] p-3 shadow-[0_10px_28px_-12px_rgba(28,25,23,0.18)]",role:"menu"},k.createElement("p",{className:"text-[13px] font-semibold text-[#1C1917]"},c.name),k.createElement("p",{className:"text-[11px] text-[#6B635A]"},c.email),s?k.createElement("p",{className:"mt-2 text-[11px] font-medium text-[#6B635A]"},c.roleLabel):k.createElement("label",{className:"mt-3 block text-[11px] font-medium text-[#6B635A]"},"Demo identity",k.createElement("select",{value:e,onChange:a=>t(a.target.value),className:"mt-1 min-h-[36px] w-full rounded-[10px] border border-[#ECE4D8] bg-[#FAF7F2] px-2 text-[13px] font-medium text-[#1C1917]"},k.createElement("option",{value:"admin"},"Dana \xB7 Controller"),k.createElement("option",{value:"sam"},"Sam \xB7 Controller, second approver"),k.createElement("option",{value:"user"},"Alex \xB7 Analyst")))):null)}function Us(){let[e,t]=te("Today"),[s,o]=te("admin"),[n,r]=te(null),c=n?n.role:we[s].role,[a,l]=te(!1),[u,f]=te(""),[m,p]=te(!1),[d,y]=te("");Be(()=>kt((v,B)=>{f(v),p(B),l(!0)}),[]);let[g,b]=te(!1),[E,S]=te(null),[C,L]=te([]),{setSelectedSeam:N,setSelectedFlagKey:A}=pe(),[O]=ae("Setting"),Y=Ws(),j=Gt(null),ne=v=>{o(v),Qt({email:we[v].email,role:we[v].role,full_name:we[v].name})};Be(()=>{js().then(({local:v,me:B})=>{if(v)ne("admin");else{if(!B){r({name:"Signed out",email:"",role:"user",roleLabel:"Analyst"});return}let h=B.role==="admin"?"admin":"user";r({name:B.full_name||B.email,email:B.email,role:h,roleLabel:h==="admin"?"Controller":"Analyst"})}})},[]);let ge=v=>{N(v.seam),A(v.stable_key),t("Today")},W=v=>{S(v.checks?.counts||{new:0,cleared:0});let B=[...v.dry?.new_recoverable||[],...v.dry?.new_credit||[]];L(B.map(I=>I.stable_key));let h=[...B].sort((I,F)=>(F.amount_cents||0)-(I.amount_cents||0))[0];h?.stable_key&&ze.entities.Flag.filter({stable_key:h.stable_key}).then(I=>{let F=(I||[])[0];F?.seam&&(N(F.seam),A(F.stable_key))}).catch(()=>{}),b(!1),t("Today"),requestAnimationFrame(()=>window.scrollTo({top:0,behavior:"smooth"}))},Z=Ps(v=>{(v.metaKey||v.ctrlKey)&&v.key.toLowerCase()==="k"&&(v.preventDefault(),l(!0))},[]);Be(()=>(window.addEventListener("keydown",Z),()=>window.removeEventListener("keydown",Z)),[Z]);let oe=O[0]?.as_of_date||$t.as_of_date,ie;return e==="Today"?ie=k.createElement(bt,{role:c,onGoData:()=>t("Data")}):e==="Decisions"?ie=k.createElement(vt,null):e==="Data"?ie=k.createElement(Le,{role:c}):ie=k.createElement(Le,{role:c}),k.createElement("div",{className:"seams-root min-h-screen bg-[#FAF7F2] text-[#1C1917]"},k.createElement("a",{href:"#main",className:"skip-link"},"Skip to main content"),k.createElement("header",{className:"sticky top-0 z-20 border-b border-[#ECE4D8] bg-[#FAF7F2]/95 backdrop-blur"},k.createElement("div",{className:"mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 md:px-8"},k.createElement("button",{type:"button",className:"flex items-center gap-2.5 text-left",onClick:()=>t("Today"),"aria-label":"Seams, go to Today"},k.createElement("span",{className:"brand-mark","aria-hidden":!0},"S"),k.createElement("span",{className:"font-display text-[19px] font-semibold leading-none text-[#1C1917]"},"Seams")),k.createElement("p",{className:"hidden text-[12px] text-[#6B635A] xl:block"},"Mind the gap \xB7 Northline Supply \xB7 as of ",Dt(oe)),k.createElement("nav",{className:"order-last flex w-full gap-1 overflow-x-auto md:order-none md:w-auto","aria-label":"Primary"},qs.map(v=>k.createElement("button",{key:v.id,type:"button",className:"nav-link","aria-current":e===v.id?"page":void 0,onClick:()=>t(v.id)},v.label))),k.createElement("div",{className:"ml-auto flex items-center gap-2.5"},k.createElement("div",{className:"relative hidden sm:block",role:"search"},k.createElement("span",{className:"pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6B635A]"},k.createElement(Jt,null)),k.createElement("label",{htmlFor:"global-search",className:"sr-only"},"Ask Seams or find a record"),k.createElement("input",{id:"global-search",ref:j,value:d,onChange:v=>y(v.target.value),onKeyDown:v=>{if(v.key==="Enter"){v.preventDefault();let B=d.trim();B?(f(B),p(!0),l(!0),y("")):l(!0)}},className:"search-input",placeholder:"Ask Seams anything\u2026","aria-label":"Ask Seams a question or find a record. Press Enter.",autoComplete:"off"}),k.createElement("kbd",{className:"pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#6B635A]"},"\u2318K")),k.createElement("button",{type:"button",className:"mobile-search","aria-label":"Ask Seams or find a record",onClick:()=>l(!0)},k.createElement(Jt,null)),k.createElement("button",{type:"button",className:"btn-forest",onClick:()=>b(!0)},"Load findings"),k.createElement(Ks,{role:s,onSwitchRole:ne,realUser:n})))),k.createElement("main",{id:"main",className:"mx-auto max-w-[1280px] px-5 py-6 md:px-8 md:py-7"},ie),k.createElement(rt,null),g?k.createElement(lt,{title:"Load findings",eyebrow:"findings.csv + evidence.csv \xB7 decisions kept",wide:!0,onClose:()=>b(!1)},k.createElement(Le,{role:c})):null,a?k.createElement(at,{key:u+(m?":ask":""),initialQuery:u,autoAsk:m,role:c,onClose:()=>{l(!1),f(""),p(!1)},onNavigate:t,onUpload:()=>b(!0)}):null)}function Vs(){return k.createElement(Et,null,k.createElement(dt,null),k.createElement(Us,null))}export{Vs as default};

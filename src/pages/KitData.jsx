@@ -11,7 +11,11 @@ const KIT_FINDING_COLS = ["finding_id", "problem", "delivery_id", "invoice_no", 
 async function kitReplace(entity, rows, say) {
   const old = await base44.entities[entity].list(undefined, 20000);
   say(`${entity}: removing ${old.length} old rows…`);
-  for (let i = 0; i < old.length; i += 50) await Promise.all(old.slice(i, i + 50).map((r) => base44.entities[entity].delete(r.id)));
+  let cleared = false;
+  if (old.length && base44.entities[entity].deleteMany) {
+    try { await base44.entities[entity].deleteMany({}); cleared = true; } catch { /* fall back to one by one */ }
+  }
+  if (!cleared) for (let i = 0; i < old.length; i += 50) await Promise.all(old.slice(i, i + 50).map((r) => base44.entities[entity].delete(r.id)));
   for (let i = 0; i < rows.length; i += 200) {
     await base44.entities[entity].bulkCreate(rows.slice(i, i + 200));
     say(`${entity}: ${Math.min(rows.length, i + 200)} of ${rows.length} loaded`);
