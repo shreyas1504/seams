@@ -1160,6 +1160,20 @@ button:active:not(:disabled), .fix-card:active { transform: scale(.98); }
 .finding-chart__title { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--s-muted); margin-bottom: 4px; }
 .finding-chart__caption { margin-top: 4px; font-size: 12px; color: #44403c; }
 .cause-group { padding: 14px 16px; }
+.ask-panel { width: min(720px, 100%); height: min(780px, 86vh); }
+.ask-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--s-line); }
+.ask-thread { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.ask-empty { padding: 4px 2px; }
+.ask-msg { max-width: 88%; border-radius: 14px; padding: 10px 12px; font-size: 13.5px; line-height: 1.55; }
+.ask-msg.is-user { align-self: flex-end; background: #1C1917; color: #fff; border-bottom-right-radius: 4px; }
+.ask-msg.is-bot { align-self: flex-start; background: #FAF7F2; border: 1px solid var(--s-line); color: #1C1917; border-bottom-left-radius: 4px; }
+.ask-text p + p { margin-top: 6px; }
+.ask-meta { margin-top: 8px; font-size: 10.5px; color: var(--s-muted); }
+.ask-typing { color: var(--s-muted); font-style: italic; }
+.ask-input { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--s-line); }
+.ask-input input { flex: 1; min-width: 0; border: 1px solid #E2D8CB; border-radius: 12px; padding: 10px 12px; font-size: 14px; background: #fff; }
+.ask-input input:focus { outline: 2px solid #1F4D3A33; border-color: #1F4D3A; }
+
 .iss-group { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--s-muted); margin: 0 0 6px 4px; }
 .iss-group span { margin-left: 6px; color: #A8A29E; }
 .iss-list { border: 1px solid var(--s-line); border-radius: 14px; background: #fff; overflow: hidden; }

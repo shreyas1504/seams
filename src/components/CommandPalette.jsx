@@ -1,167 +1,124 @@
-import React, { useEffect, useRef, useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { fmt } from "@/lib/engine/engine.js";
+// Ask Seams: a chat over the loaded findings. The AI (Nemotron or Base44 AI, server side) reads only
+// the totals, the issue list and the findings that match the question; every number it states is
+// checked against that context. Without AI, answers come from code over the same findings.
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelectedSeam } from "@/context/SelectedSeam.jsx";
-import { announceSeamsDataChanged } from "@/actions/dataChanged.js";
-import { seamsNotifyFeedback, seamsNotifySent, useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
-import { loadDemoData } from "@/actions/loadDemoData.js";
-import { paletteApprovalBlock } from "@/components/paletteActionGate.js";
+import { useSeamsDrawerLifecycle } from "@/components/InteractionFeedback.jsx";
 import { displayText } from "@/lib/displayText.js";
 import { useKitFlags, kitAsk } from "@/lib/kitData.js";
+import { kitAskContext, kitCheckChat, kitIssues } from "@/lib/kitIssues.js";
+import { issOpenRef } from "@/pages/KitIssues.jsx";
 
-const PALETTE_EXAMPLE_QUESTIONS = ["What did we lose this month?", "Which customer owes the most?", "Which customers do we owe money to?", "What changed after the returns file?"];
+function askSuggestions(flags) {
+  const issues = kitIssues(flags);
+  const top = issues.find((i) => i.cents > 0);
+  const bank = issues.find((i) => /bank account/i.test(i.rule));
+  const owe = issues.find((i) => i.cents < 0);
+  const s = ["Where are we losing the most money?", "What changed in October?", "What should Dana do first today?"];
+  if (bank) s.push(`Why is ${bank.rows[0].party} on hold?`);
+  if (top) s.push(`Explain ${top.ref}`);
+  if (owe) s.push("Which customers do we owe credits to?");
+  s.push("Write Frank's Monday summary in 3 lines");
+  return s.slice(0, 6);
+}
 
-export default function CommandPalette({ role, onClose, onNavigate, onUpload, initialQuery = "", autoAsk = false, showRuled = false }) {
+function AskBubble({ m, onRef }) {
+  if (m.role === "user") return <div className="ask-msg is-user"><p>{m.text}</p></div>;
+  return (
+    <div className="ask-msg is-bot">
+      {m.pending ? <p className="ask-typing" role="status">Reading the findings…</p> : (
+        <>
+          <div className="ask-text">{String(m.text).split(/\n+/).map((line, i) => <p key={i}>{displayText(line)}</p>)}</div>
+          {m.refs?.length ? <div className="mt-2 flex flex-wrap gap-1">{m.refs.map((r) => <button key={r} type="button" className="record-chip" onClick={() => onRef(r)}>{r}</button>)}</div> : null}
+          <p className="ask-meta">{m.source === "ai" ? `AI answer${m.model ? ` · ${m.model}` : ""} · numbers checked against findings.csv` : m.source === "checked-out" ? "AI answer had a number not in the findings, so this answer comes from code" : "Answer from code over findings.csv"}</p>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function CommandPalette({ onClose, onNavigate, initialQuery = "", autoAsk = false }) {
   useSeamsDrawerLifecycle(onClose);
   const { setSelectedSeam, setSelectedFlagKey } = useSelectedSeam();
-  const [query, setQuery] = useState(initialQuery);
-  const [lookup, setLookup] = useState(null);
-  const [answer, setAnswer] = useState(null);
-  const [ruled, setRuled] = useState(null);
+  const [flags] = useKitFlags();
+  const [input, setInput] = useState(autoAsk ? "" : initialQuery);
+  const [msgs, setMsgs] = useState([]);
   const [busy, setBusy] = useState(false);
-  const [working, setWorking] = useState(false);
-  const [error, setError] = useState("");
-  const [cursor, setCursor] = useState(-1);
-  const [actionBlocked, setActionBlocked] = useState("");
-  const [hasData, setHasData] = useState(false);
+  const box = useRef(null);
+  const field = useRef(null);
+  const asked = useRef(false);
+  const ai = globalThis.__seamsAsk;
+  const suggestions = useMemo(() => askSuggestions(flags), [flags]);
+
+  useEffect(() => { const id = setTimeout(() => field.current?.focus(), 30); return () => clearTimeout(id); }, []);
+  useEffect(() => { box.current?.scrollTo({ top: box.current.scrollHeight, behavior: "smooth" }); }, [msgs]);
   useEffect(() => {
-    base44.entities.Finding.list(undefined, 1).then((r) => setHasData((r || []).length > 0)).catch(() => {});
-  }, []);
-  const [kitFlags] = useKitFlags();
-  const root = useRef(null);
-  const input = useRef(null);
-  const generation = useRef(0);
-  const actionLock = useRef(false);
-  useEffect(() => { const id = setTimeout(() => input.current?.focus(), 20); return () => clearTimeout(id); }, []);
-  useEffect(() => {
-    if (showRuled) base44.entities.RuledOut.list(undefined,5000).then(setRuled);
-  }, [showRuled]);
-  useEffect(() => {
-    const token = ++generation.current;
-    setCursor(-1); setError(""); setLookup(null); setAnswer(null); setActionBlocked("");
-    if (!query.trim()) { setBusy(false); return; }
+    if (autoAsk && initialQuery && flags.length && !asked.current) { asked.current = true; send(initialQuery); }
+  }, [flags.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openRef = (r) => {
+    if (/^SEAM-\d{4}$/.test(r)) { issOpenRef(r); onNavigate("Issues"); onClose(); return; }
+    const hit = flags.find((f) => f.stable_key === r || f.ids.some((x) => String(x) === r));
+    if (hit) { setSelectedSeam("__all"); setSelectedFlagKey(hit.stable_key); onNavigate("Today"); onClose(); }
+  };
+
+  async function send(text) {
+    const q = String(text || "").trim();
+    if (!q || busy) return;
+    setInput("");
+    const history = msgs.filter((m) => !m.pending).slice(-6).map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: String(m.text).slice(0, 1500) }));
+    setMsgs((ms) => [...ms, { role: "user", text: q }, { role: "bot", pending: true }]);
     setBusy(true);
-    const id = setTimeout(async () => {
+    const codeAnswer = () => {
+      const a = kitAsk(q, flags);
+      return { text: a?.answer || "I couldn't find that in the findings. Try a customer, supplier, record ID or an issue like SEAM-1234.", refs: [...new Set(a?.ids || [])].slice(0, 8) };
+    };
+    let reply;
+    if (ai) {
       try {
-        // While typing: answer from the loaded findings in code. No AI call and nothing stored per keystroke.
-        const asked = kitAsk(query.trim(), kitFlags);
-        if (token === generation.current) { setLookup(null); setAnswer(asked ? { ...asked, routed_by: "rules" } : null); setActionBlocked(""); }
-      } catch (e) { if(token===generation.current) setError(e?.response?.data?.error || e.message); }
-      finally { if(token===generation.current) setBusy(false); }
-    }, 350);
-    return () => clearTimeout(id);
-  }, [query, kitFlags.length]);
-  // Enter: ask in full (the AI may route unusual wording). Still a preview: nothing is stored.
-  const askFull = async () => {
-    const q = query.trim();
-    if (!q || actionLock.current) return;
-    const token = ++generation.current;
-    setBusy(true); setError("");
-    try {
-      let ans = kitAsk(q, kitFlags);
-      let routed = "rules";
-      if (!ans || ans.refused) {
-        // Base44 AI only rewrites the question into a short query; the answer still comes from findings in code.
-        try {
-          const res = await base44.integrations.Core.InvokeLLM({
-            prompt: `Rewrite this question as a short search query for a list of billing findings. Use one of: a customer or supplier name, a record ID, "biggest causes", "what do we owe customers", "emails needing a reply", "supplier bills", "bank details", "total this month", or a problem type like "old price" or "delivery fee". Reply with the query only.\n\nQuestion: ${q}`,
-          });
-          const rq = String(typeof res === "string" ? res : res?.text || "").trim();
-          const again = rq ? kitAsk(rq, kitFlags) : null;
-          if (again && !again.refused) { ans = again; routed = "base44-ai"; }
-        } catch { /* AI offline: keep the code answer */ }
+        const ctx = kitAskContext(q, flags);
+        const raw = await ai({ question: q, context: ctx.text, history });
+        const ok = kitCheckChat(raw, ctx);
+        reply = ok && !ok.rejected ? { text: ok.answer, refs: ok.refs, source: "ai", model: ok.model } : { ...codeAnswer(), source: "checked-out" };
+      } catch {
+        reply = { ...codeAnswer(), source: "code" };
       }
-      if (token === generation.current) setAnswer(ans ? { ...ans, routed_by: routed, asked_full: true } : null);
-    } finally { if (token === generation.current) setBusy(false); }
-  };
-  // "Draft this fix": only now is a proposed SuggestedAction stored, and it still waits for Approve.
-  const draftFix = async () => {
-    const q = query.trim();
-    if (!q || actionLock.current) return;
-    actionLock.current = true; setWorking(true); setError("");
-    try {
-      const { data } = await base44.functions.invoke("askSeams", { question: q });
-      let blocked = "";
-      if (data.suggested_action_id) {
-        const suggestion = await base44.entities.SuggestedAction.get(data.suggested_action_id);
-        if (suggestion?.action_type === "send_correction") blocked = paletteApprovalBlock(suggestion, await base44.entities.Flag.filter({party:suggestion.params?.party}));
-      }
-      setAnswer({ ...data, asked_full: true }); setActionBlocked(blocked);
-    } catch (e) { setError(e?.response?.data?.error || e.message); }
-    finally { actionLock.current = false; setWorking(false); }
-  };
-  // Opened from the Today "Ask Seams" bar: ask in full straight away.
-  // Opened from the header: ask in full once the findings have loaded.
-  useEffect(() => {
-    if (!autoAsk || !initialQuery || !kitFlags.length) return;
-    const id = setTimeout(() => askFull(), 50);
-    return () => clearTimeout(id);
-  }, [kitFlags.length]);
-  const openFlag = (flag) => { setSelectedSeam(flag.seam); setSelectedFlagKey(flag.stable_key); onNavigate("Today"); onClose(); };
-  // Record chip: jump to the finding that contains this record ID.
-  const openRecord = async (id) => {
-    const hit = kitFlags.find((f) => f.ids.some((x) => String(x).toLowerCase() === String(id).toLowerCase()));
-    if (hit) openFlag({ ...hit, seam: "__all" });
-    else setQuery(id);
-  };
-  const act = async (approve) => {
-    if (actionLock.current || !answer?.suggested_action_id) return;
-    if (approve && actionBlocked) return;
-    actionLock.current = true; setWorking(true); setError("");
-    try {
-      const { data } = await base44.functions.invoke(approve ? "executeAction" : "rejectAction", {action_id:answer.suggested_action_id});
-      if (approve) {
-        announceSeamsDataChanged();
-        if (data.result?.letter_id) void seamsNotifySent(data.result);
-        else seamsNotifyFeedback({message:data.result?.pending_second ? "Waiting for a second Controller" : "Action approved."});
-      }
-      setAnswer((a)=>({...a,suggested_action_id:null}));
-      setError(approve ? "Approved. See Activity for the audit trail." : "Suggestion rejected.");
-    } catch(e) { const message=e?.response?.data?.error || e.message; setError(message); seamsNotifyFeedback({error:true,message}); }
-    finally { actionLock.current=false; setWorking(false); }
-  };
-  const load = async () => {
-    if (actionLock.current) return;
-    actionLock.current=true;setWorking(true);
-    try { await loadDemoData(); onNavigate("Today"); onClose(); }
-    catch(e){setError(e?.response?.data?.error || e.message);}
-    finally {actionLock.current=false;setWorking(false);}
-  };
-  const keys = (e) => {
-    if (!["ArrowDown","ArrowUp"].includes(e.key)) return;
-    e.preventDefault();
-    const targets=[...root.current.querySelectorAll("[data-command]:not(:disabled)")];
-    const next=Math.max(0,Math.min(targets.length-1,cursor+(e.key==="ArrowDown"?1:-1)));
-    setCursor(next); targets[next]?.focus();
-  };
-  return <div className="palette-overlay" onMouseDown={(e)=>{if(e.target===e.currentTarget)onClose();}}>
-    <section ref={root} role="dialog" aria-modal="true" aria-label="Look up, ask, act" className="command-palette card" onKeyDown={keys}>
-      <div className="palette-search"><input ref={input} value={query} onChange={(e)=>setQuery(e.target.value)} onKeyDown={(e)=>{ if (e.key === "Enter") { e.preventDefault(); askFull(); } }} aria-label="Look up a record or ask Seams" placeholder="Ask about the money, look up a record, or say “fix Greenpoint”…" /><button aria-label="Close command palette" className="chip chip-neutral" onClick={onClose}>esc</button></div>
-      <div className="palette-results">
-        <h2 className="brief-label mb-2">Records</h2>
-        {busy ? <p className="text-xs text-[#6B635A]" role="status">Looking through checked records…</p> : lookup?.kind==="flagged" ? lookup.flags.map((f)=><button data-command key={f.stable_key} className="palette-record" onClick={()=>openFlag(f)}>Flagged: {displayText(f.title)} · <span className="money">{fmt(f.amount_cents)}</span></button>) : lookup?.kind==="ruled_out" ? lookup.ruled.map((r,i)=><p className="palette-record" key={i}>Ruled out: {displayText(r.reason)}</p>) : query.trim() && lookup && /\d/.test(query) && !/\s/.test(query.trim()) ? <p className="palette-record">Not in any finding</p> : query.trim() && lookup ? <p className="text-xs text-[#6B635A]">No record ID in this question.</p> : <p className="text-xs text-[#6B635A]">Search a business ID such as INV-5078 or SH-3058.</p>}
-        <h2 className="brief-label mt-5 mb-2">Ask Seams</h2>
-        {!query.trim() ? <div className="grid gap-1">{PALETTE_EXAMPLE_QUESTIONS.map(q=><button data-command className="palette-action" key={q} onClick={()=>setQuery(q)}>{q}</button>)}</div> : answer ? <div className="card p-3 text-[13px]">
-          <p>{displayText(answer.answer)}</p>
-          {answer.refused && !answer.asked_full ? <p className="text-xs text-[#6B635A] mt-2">Press Enter to ask Seams in full.</p> : null}
-          {answer.routed_by === "base44-ai" ? <p className="text-[11px] text-[#0F766E] mt-2">Question understood by Base44 AI · numbers from findings.csv</p> : <p className="text-[11px] text-[#6B635A] mt-2">Numbers from findings.csv</p>}
-          {answer.would_propose ? <div className="flex gap-2 mt-3"><button data-command className="fix-pill" disabled={working||role!=="admin"} onClick={draftFix}>{working?"Drafting…":"Draft this fix"}</button><span className="text-xs text-[#6B635A] self-center">Nothing is sent until a Controller approves.</span></div> : null}
-          <div className="flex flex-wrap gap-1 mt-2">{[...new Set(answer.ids||[])].map(id=><button data-command className="record-chip" key={id} onClick={()=>openRecord(id)}>{id}</button>)}</div>
-          {answer.suggested_action_id ? <div className="flex gap-2 mt-3"><button data-command className="fix-pill" disabled={working||role!=="admin"||Boolean(actionBlocked)} onClick={()=>act(true)}>{working?"Sending…":"Approve"}</button><button data-command className="seam-chip" disabled={working} onClick={()=>act(false)}>Reject</button></div> : null}
-          {answer.suggested_action_id && actionBlocked ? <p className="text-xs text-[#6B635A] mt-2">{actionBlocked}</p> : null}
-          {answer.suggested_action_id && role!=="admin" ? <p className="text-xs text-[#6B635A] mt-2">Controller approval needed</p> : null}
-        </div> : null}
-        {error ? <p role="status" className="text-[12px] text-[#9F1239] mt-2">{error}</p> : null}
-        <h2 className="brief-label mt-5 mb-2">Actions</h2>
-        <button data-command className="palette-action" onClick={()=>{onClose();onUpload();}}>Upload new data <kbd>U</kbd></button>
-        {hasData
-          ? <button data-command className="palette-action" disabled={role!=="admin"} onClick={()=>{onNavigate("Data");onClose();}}>Reset demo data (on the Data page) <kbd>D</kbd></button>
-          : <button data-command className="palette-action" disabled={working||role!=="admin"} onClick={load}>{working?"Working…":"Load demo data"} <kbd>D</kbd></button>}
-        {role!=="admin" ? <p className="text-xs text-[#6B635A]">Controller approval needed to load demo data</p> : null}
-        <button data-command className="palette-action" onClick={async()=>setRuled(await base44.entities.RuledOut.list(undefined,5000))}>Show look-alikes ruled out <kbd>R</kbd></button>
-        {ruled ? <div className="mt-2"><p className="font-display text-lg">{ruled.length} look-alikes ruled out</p>{ruled.map((r,i)=><p className="text-xs text-[#6B635A] border-t border-[#ECE4D8] py-2" key={r.id||i}>{displayText(r.reason)}</p>)}</div> : null}
-      </div>
-      <footer className="palette-footer">Numbers come from records. AI only routes your question.</footer>
-    </section>
-  </div>;
+    } else {
+      reply = { ...codeAnswer(), source: "code" };
+    }
+    setMsgs((ms) => [...ms.slice(0, -1), { role: "bot", ...reply }]);
+    setBusy(false);
+  }
+
+  return (
+    <div className="palette-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <section role="dialog" aria-modal="true" aria-label="Ask Seams" className="command-palette card ask-panel">
+        <header className="ask-head">
+          <div>
+            <p className="font-display text-[17px] font-semibold text-[#1C1917]">Ask Seams</p>
+            <p className="text-[11.5px] text-[#6B635A]">{ai ? "AI over your findings · every number is checked" : "Answers from the findings · AI runs in the Base44 app"}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {msgs.length ? <button type="button" className="fix-quiet" onClick={() => setMsgs([])}>New chat</button> : null}
+            <button type="button" aria-label="Close Ask Seams" className="chip chip-neutral" onClick={onClose}>esc</button>
+          </div>
+        </header>
+        <div ref={box} className="ask-thread" aria-live="polite">
+          {!msgs.length ? (
+            <div className="ask-empty">
+              <p className="text-[13px] text-[#44403C]">Ask anything about the {flags.length} findings: a customer or supplier, a record ID, an issue (SEAM-…), what changed, or what to do first.</p>
+              <div className="mt-3 grid gap-1.5">
+                {suggestions.map((s) => <button key={s} type="button" className="palette-action" onClick={() => send(s)}>{s}</button>)}
+              </div>
+            </div>
+          ) : msgs.map((m, i) => <AskBubble key={i} m={m} onRef={openRef} />)}
+        </div>
+        <form className="ask-input" onSubmit={(e) => { e.preventDefault(); send(input); }}>
+          <input ref={field} value={input} onChange={(e) => setInput(e.target.value)} placeholder={msgs.length ? "Ask a follow-up…" : "e.g. Why is Raritan on hold?"} aria-label="Ask Seams a question" disabled={!flags.length} />
+          <button type="submit" className="fix-pill" disabled={busy || !input.trim()}>{busy ? "…" : "Ask"}</button>
+        </form>
+        <footer className="palette-footer">AI explains; amounts come only from findings.csv. Nothing is sent or changed from this chat.</footer>
+      </section>
+    </div>
+  );
 }

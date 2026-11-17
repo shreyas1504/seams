@@ -193,3 +193,49 @@ export function kitMondayNote(flags, now = new Date()) {
   ];
   return { back, risk, decide: decide.slice(0, 5), text: lines.join("\n"), weekLabel };
 }
+
+/** What the chat AI may read for one question: totals, every issue in one line, and the findings most
+ *  related to the question (record IDs, names, words). Small enough for one prompt; nothing else is sent. */
+export function kitAskContext(question, flags, max = 24) {
+  const q = String(question || "").toLowerCase();
+  const sum = (fs) => fs.reduce((a, f) => a + f.signed_cents, 0);
+  const money = (c) => (c / 100).toFixed(2);
+  const issues = kitIssues(flags);
+  const open = flags.filter((f) => f.status === "open");
+  const months = [...new Set(flags.map((f) => f.month).filter(Boolean))];
+  const totals = [
+    `findings ${flags.length}, open ${open.length}, approved ${flags.filter((f) => f.status === "sent").length}, dismissed ${flags.filter((f) => f.status === "dismissed").length}`,
+    `open to collect ${money(sum(open.filter((f) => f.signed_cents > 0)))}; open owed to customers ${money(-sum(open.filter((f) => f.signed_cents < 0)))}; net ${money(sum(flags))}`,
+    ...months.map((m) => `${m}: ${flags.filter((f) => f.month === m).length} findings, net ${money(sum(flags.filter((f) => f.month === m)))}`),
+  ];
+  const issueLines = issues.map((i) => `${i.ref} | ${i.cause} | ${i.seam} | owner ${i.assignee.name} (${i.assignee.role}) | ${i.priority.label} | ${i.status} | ${i.rows.length} lines | ${money(i.cents)} | ${i.firstDate || "?"} to ${i.lastDate || "?"} | months ${[...new Set(i.rows.map((r) => r.month))].join("+")}`);
+  const refOf = new Map(issues.map((i) => [i.cause, i.ref]));
+  const words = q.split(/[^a-z0-9-]+/).filter((w) => w.length >= 3 && !["the", "and", "what", "which", "who", "how", "why", "did", "does", "for", "are", "our", "with", "from", "this", "that", "much", "many"].includes(w));
+  const refHit = (q.match(/seam-\d{4}/g) || []).map((x) => x.toUpperCase());
+  const scored = flags.map((f) => {
+    const hay = `${f.ids.join(" ")} ${f.party} ${f.cause} ${f.rule} ${f.why}`.toLowerCase();
+    let s = 0;
+    for (const id of f.ids) if (q.includes(String(id).toLowerCase())) s += 20;
+    if (refHit.includes(refOf.get(f.cause))) s += 12;
+    for (const w of words) if (hay.includes(w)) s += /\d/.test(w) ? 6 : 1;
+    return [s + Math.abs(f.signed_cents) / 1e7, f];
+  }).filter(([s]) => s >= 1).sort((a, b) => b[0] - a[0]).slice(0, max).map(([, f]) => f);
+  const rows = scored.map((f) => `${f.stable_key} | ${refOf.get(f.cause)} | ${f.ids.join(" ")} | ${f.party} | ${f.rule} | ${money(f.signed_cents)} | ${f.date || ""} | ${f.status} | ${f.why} | ${(f.evidence || []).map((e) => `${e.file}: ${e.fields.shows}${e.fields.expected ? ` (rule: ${e.fields.expected})` : ""}`).join("; ")}`.slice(0, 420));
+  const text = ["TOTALS", ...totals, "", "ISSUES (ref | cause | seam | owner | priority | status | lines | amount | dates | months)", ...issueLines, "", "MATCHING FINDINGS (finding_id | issue | record IDs | party | problem | amount | date | status | why | evidence)", ...(rows.length ? rows : ["(none matched the question)"])].join("\n");
+  return { text: text.slice(0, 19000), refs: new Set(issues.map((i) => i.ref)), ids: new Set(flags.flatMap((f) => [f.stable_key, ...f.ids.map(String)])) };
+}
+
+/** Keep an AI chat answer only if every number it states appears in the context it was given. */
+export function kitCheckChat(raw, ctx) {
+  let obj = raw;
+  if (typeof obj === "string") { try { obj = JSON.parse(obj); } catch { obj = { answer: obj }; } }
+  obj = obj?.data ?? obj?.output ?? obj;
+  const answer = String(obj?.answer || "").trim();
+  if (!answer) return null;
+  const corpus = ctx.text.replace(/,/g, "");
+  const nums = (answer.replace(/,/g, "").match(/\d+(\.\d+)?/g) || []).filter((x) => !(x.length <= 2 && Number(x) <= 31));
+  const bad = nums.filter((n) => !corpus.includes(n) && !corpus.includes(Number(n).toFixed(2)));
+  if (bad.length) return { rejected: true, bad };
+  const refs = [...new Set([...(obj.cites || []), ...(answer.match(/SEAM-\d{4}/g) || [])])].filter((r) => ctx.refs.has(r) || ctx.ids.has(r)).slice(0, 8);
+  return { answer, refs, model: obj.model || "" };
+}
