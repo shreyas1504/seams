@@ -15,13 +15,15 @@ import SeamsTheme from "@/components/SeamsTheme.jsx";
 import KitToday from "@/pages/KitToday.jsx";
 import KitData from "@/pages/KitData.jsx";
 import KitDecisions from "@/pages/KitDecisions.jsx";
-import KitIssues, { issOpenCause } from "@/pages/KitIssues.jsx";
+import KitIssues, { issOpenCause, issOpenRef } from "@/pages/KitIssues.jsx";
+import KitMonday from "@/pages/KitMonday.jsx";
 
 // Accounts and Activity show the previous Overview and Ledger pages until they are rebuilt.
 // Kit mode: the app loads findings.csv + evidence.csv (from kit/detect.py) and keeps Decisions.
 const NAV = [
   { id: "Today", label: "Today" },
   { id: "Issues", label: "Issues" },
+  { id: "Monday", label: "Monday note" },
   { id: "Decisions", label: "Decisions" },
   { id: "Data", label: "Load findings" },
 ];
@@ -261,6 +263,8 @@ function SeamsAppShell() {
   let page;
   if (tab === "Today") {
     page = <KitToday role={role} onGoData={() => setTab("Data")} onOpenIssue={(cause) => { issOpenCause(cause); setTab("Issues"); }} />;
+  } else if (tab === "Monday") {
+    page = <KitMonday onOpenIssue={(ref) => { issOpenRef(ref); setTab("Issues"); }} />;
   } else if (tab === "Issues") {
     page = <KitIssues role={role} />;
   } else if (tab === "Decisions") {
@@ -290,8 +294,8 @@ function SeamsAppShell() {
               </span>
               <span className="font-display text-[19px] font-semibold leading-none text-[#1C1917]">Seams</span>
             </button>
-            <p className="hidden text-[12px] text-[#6B635A] xl:block">
-              Mind the gap · Northline Supply · as of {shortDate(asOf)}
+            <p className="text-[12px] text-[#6B635A] hidden 2xl:block">
+              Mind the gap · Northline Supply
             </p>
 
             <nav className="order-last flex w-full gap-1 overflow-x-auto md:order-none md:w-auto" aria-label="Primary">

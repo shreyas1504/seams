@@ -159,6 +159,9 @@ function IssDetail({ issue, onDraft }) {
 let issPendingCause = null;
 /** Ask the Issues tab to open a cause (Today's tiles call this before switching tabs). */
 export function issOpenCause(cause) { issPendingCause = cause; }
+let issPendingRef = null;
+/** Open an issue by its SEAM-#### reference (the Monday note links to issues this way). */
+export function issOpenRef(ref) { issPendingRef = ref; }
 
 export default function KitIssues({ role }) {
   const [flags, , meta] = useKitFlags();
@@ -167,6 +170,12 @@ export default function KitIssues({ role }) {
   const [selected, setSelected] = useState(() => issPendingCause);
   const [drafting, setDrafting] = useState(null);
   useEffect(() => { issPendingCause = null; }, []);
+  useEffect(() => {
+    if (!issPendingRef || !issues.length) return;
+    const hit = issues.find((i) => i.ref === issPendingRef);
+    issPendingRef = null;
+    if (hit) { setSelected(hit.key); setFilter("all"); }
+  }, [issues]);
   const shown = useMemo(() => issues.filter((i) => (filter === "all" ? true : filter === "active" ? i.status === "New" || i.status === "In progress" : i.status === "Done" || i.status === "Dismissed")), [issues, filter]);
   const current = issues.find((i) => i.key === selected) || shown[0] || null;
 

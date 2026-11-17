@@ -151,3 +151,45 @@ export function issCheckNarrative(raw, issue, rows) {
   }
   return { sentences: clean, source: "ai" };
 }
+
+/** Dana's Monday note for Frank: what came back last week, what is still at risk, what he needs to decide.
+ *  Built only from findings.csv amounts and the Decisions table, so every number matches the file. */
+export function kitMondayNote(flags, now = new Date()) {
+  const weekAgo = new Date(now.getTime() - 7 * 86400000);
+  const sum = (fs) => fs.reduce((a, f) => a + f.signed_cents, 0);
+  const decidedLastWeek = (f) => f.decision?.decided_at && new Date(f.decision.decided_at) >= weekAgo;
+  const approvedWeek = flags.filter((f) => f.status === "sent" && decidedLastWeek(f));
+  const back = { cents: sum(approvedWeek.filter((f) => f.signed_cents > 0)), n: approvedWeek.filter((f) => f.signed_cents > 0).length, credits: -sum(approvedWeek.filter((f) => f.signed_cents < 0)) };
+  const open = flags.filter((f) => f.status === "open");
+  const bank = open.filter((f) => /bank account/i.test(f.rule));
+  const owed = open.filter((f) => f.signed_cents > 0 && !/bank account/i.test(f.rule));
+  const weOwe = open.filter((f) => f.signed_cents < 0);
+  const risk = { collect: sum(owed), payments: sum(bank), credits: -sum(weOwe), total: sum(owed) + sum(bank) };
+  const issues = kitIssues(flags);
+  const decide = [];
+  for (const i of issues.filter((x) => /bank account/i.test(x.rule) && x.counts.open)) {
+    decide.push({ ref: i.ref, text: `Keep ${i.rows[0].party || "the supplier"}'s ${i.counts.open} bill(s) (${fmt(Math.abs(i.cents))}) on hold until the supplier confirms its bank by phone.`, cents: Math.abs(i.cents) });
+  }
+  const reopened = issues.filter((i) => i.labels.includes("Reopened") && i.counts.open && !/bank account/i.test(i.rule));
+  if (reopened.length) {
+    const top = reopened.slice(0, 3);
+    decide.push({ ref: top.map((i) => i.ref).join(", "), text: `${reopened.length} cause(s) slipped again in October (e.g. ${top.map((i) => i.cause.toLowerCase()).join("; ")}). Approve fixing the source, not just the invoices.`, cents: Math.abs(sum(reopened.flatMap((i) => i.rows))) });
+  }
+  const bigCredit = issues.filter((i) => i.cents <= -100000 && i.counts.open).slice(0, 2);
+  for (const i of bigCredit) decide.push({ ref: i.ref, text: `Approve ${fmt(-i.cents)} in credits we owe: ${i.cause.toLowerCase()}.`, cents: -i.cents });
+  const bigCollect = issues.filter((i) => i.cents >= 500000 && i.counts.open && !/bank/i.test(i.rule)).slice(0, 2);
+  for (const i of bigCollect) decide.push({ ref: i.ref, text: `Send catch-up invoices for ${fmt(i.cents)}: ${i.cause.toLowerCase()} (${i.rows.length} lines).`, cents: i.cents });
+  const weekLabel = `${weekAgo.toLocaleDateString("en-US", { month: "short", day: "numeric" })} to ${now.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+  const lines = [
+    `Frank, here is this week's money check (${weekLabel}).`,
+    "",
+    `1. What we got back: ${back.n ? `${fmt(back.cents)} approved to collect across ${back.n} line(s)` : "nothing approved to collect yet this week"}${back.credits ? `, and ${fmt(back.credits)} in credits issued to customers` : ""}.`,
+    `2. Still at risk: ${fmt(risk.total)}. That is ${fmt(risk.collect)} we have not billed or collected${risk.payments ? `, plus ${fmt(risk.payments)} in supplier payments on hold for bank-change checks` : ""}. We also owe customers ${fmt(risk.credits)} in credits.`,
+    `3. What I need from you:`,
+    ...(decide.length ? decide.slice(0, 5).map((d, k) => `   ${String.fromCharCode(97 + k)}) ${d.text} [${d.ref}]`) : ["   Nothing this week."]),
+    "",
+    "Every amount comes from our findings file; nothing goes out without my approval.",
+    "Dana",
+  ];
+  return { back, risk, decide: decide.slice(0, 5), text: lines.join("\n"), weekLabel };
+}
