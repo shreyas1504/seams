@@ -9,8 +9,11 @@ import { requireUser } from "@/lib/auth-middleware";
 // The browser re-checks every answer: numbers must appear in the context it sent.
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const NVIDIA_DEFAULT_MODEL = "nvidia/nemotron-3.5-bolt-e4b";
-function nvidiaModel() {
-  try { return secrets.get("NVIDIA_MODEL") || NVIDIA_DEFAULT_MODEL; } catch { return NVIDIA_DEFAULT_MODEL; }
+const NVIDIA_LARGER_MODEL = "nvidia/llama-3.3-nemotron-super-49b-v1.5";
+function nvidiaModels() {
+  let pinned = null;
+  try { pinned = secrets.get("NVIDIA_MODEL") || null; } catch { pinned = null; }
+  return pinned ? [pinned] : [NVIDIA_LARGER_MODEL, NVIDIA_DEFAULT_MODEL];
 }
 
 function nvidiaKey() {
@@ -25,16 +28,28 @@ function parseJson(text) {
   return JSON.parse(t.slice(a, b + 1));
 }
 
+// Tries the larger Nemotron first and falls back to the small one if it is unavailable or slow.
 async function nemotron(key, messages, maxTokens) {
-  const res = await fetch(NVIDIA_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ model: nvidiaModel(), messages, temperature: 0.2, max_tokens: maxTokens, stream: false, chat_template_kwargs: { enable_thinking: false } }),
-  });
-  if (!res.ok) throw new Error(`nemotron ${res.status}`);
-  const json = await res.json();
-  return parseJson(json?.choices?.[0]?.message?.content);
+  let last = null;
+  for (const model of nvidiaModels()) {
+    try {
+      const big = model === NVIDIA_LARGER_MODEL;
+      const msgs = big ? messages.map((m, i) => (i === 0 && m.role === "system" ? { ...m, content: `/no_think\n${m.content}` } : m)) : messages;
+      const res = await fetch(NVIDIA_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ model, messages: msgs, temperature: 0.2, max_tokens: maxTokens, stream: false, ...(big ? {} : { chat_template_kwargs: { enable_thinking: false } }) }),
+        signal: AbortSignal.timeout(big ? 15000 : 30000),
+      });
+      if (!res.ok) throw new Error(`nemotron ${model} ${res.status}`);
+      const json = await res.json();
+      const text = String(json?.choices?.[0]?.message?.content || "").replace(/<think>[\s\S]*?<\/think>/g, "");
+      return { ...parseJson(text), nvidiaModel: model };
+    } catch (e) { last = e; }
+  }
+  throw last || new Error("nemotron unavailable");
 }
+function nemotronLabel(r) { return r?.nvidiaModel === NVIDIA_LARGER_MODEL ? "Nemotron Super" : "Nemotron"; }
 
 // ---- Issues: "what happened" for one cause ----
 const ISSUE_SYSTEM = [
@@ -47,18 +62,22 @@ const ISSUE_SYSTEM = [
 ].join(" ");
 const IssueAnswer = z.object({ sentences: z.array(z.object({ text: z.string(), cites: z.array(z.string()) })) });
 
-export const explainIssue = createServerFn({ method: "POST" })
-  .middleware([requireUser])
-  .validator(z.object({ title: z.string().max(240), rows: z.array(z.object({ id: z.string().max(120), text: z.string().max(500) })).min(1).max(12) }))
-  .handler(async ({ data, context }) => {
-    const user = JSON.stringify({ issue: data.title, rows: data.rows });
-    const key = nvidiaKey();
-    if (key) {
-      try { return { ...IssueAnswer.parse(await nemotron(key, [{ role: "system", content: ISSUE_SYSTEM }, { role: "user", content: user }], 700)), model: "Nemotron" }; } catch { /* fall back */ }
-    }
-    const result = await chat({ adapter: gatewayModel(context.getBase44()), systemPrompts: [ISSUE_SYSTEM], messages: [{ role: "user", content: user }], outputSchema: IssueAnswer, agentLoopStrategy: maxIterations(1) });
-    return { ...result, model: "Base44 AI" };
-  });
+const IssueInput = z.object({ title: z.string().max(240), rows: z.array(z.object({ id: z.string().max(120), text: z.string().max(500) })).min(1).max(12) });
+async function explainIssueRun(data, base44) {
+  const user = JSON.stringify({ issue: data.title, rows: data.rows });
+  const key = nvidiaKey();
+  if (key) {
+    try { const r = await nemotron(key, [{ role: "system", content: ISSUE_SYSTEM }, { role: "user", content: user }], 700); return { ...IssueAnswer.parse(r), model: nemotronLabel(r) }; } catch { /* fall back */ }
+  }
+  if (!base44) throw new Error("AI unavailable");
+  const result = await chat({ adapter: gatewayModel(base44), systemPrompts: [ISSUE_SYSTEM], messages: [{ role: "user", content: user }], outputSchema: IssueAnswer, agentLoopStrategy: maxIterations(1) });
+  return { ...result, model: "Base44 AI" };
+}
+// Signed-in visitors also get the Base44 AI gateway; anyone with the link gets Nemotron.
+export const explainIssue = createServerFn({ method: "POST" }).middleware([requireUser]).validator(IssueInput)
+  .handler(async ({ data, context }) => explainIssueRun(data, context.getBase44()));
+export const explainIssuePublic = createServerFn({ method: "POST" }).validator(IssueInput)
+  .handler(async ({ data }) => explainIssueRun(data, null));
 
 // ---- Ask Seams: chat over the findings ----
 const ASK_SYSTEM = [
@@ -183,14 +202,18 @@ function unknownRefs(answer, ctx) {
   return (String(answer).match(/SEAM-\d+/g) || []).filter((r) => !/^SEAM-\d{4}$/.test(r) || !ctx.includes(`${r} |`));
 }
 
-export const askSeams = createServerFn({ method: "POST" })
-  .middleware([requireUser])
-  .validator(z.object({
-    question: z.string().min(1).max(600),
-    context: z.string().max(20000),
-    history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(1600) })).max(8),
-  }))
-  .handler(async ({ data, context }) => {
+const AskInput = z.object({
+  question: z.string().min(1).max(600),
+  context: z.string().max(20000),
+  history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(1600) })).max(8),
+});
+export const askSeams = createServerFn({ method: "POST" }).middleware([requireUser]).validator(AskInput)
+  .handler(async ({ data, context }) => askSeamsRun(data, context.getBase44()));
+export const askSeamsPublic = createServerFn({ method: "POST" }).validator(AskInput)
+  .handler(async ({ data }) => askSeamsRun(data, null));
+
+async function askSeamsRun(data, base44) {
+  {
     const changed = changedSection(data.context);
     const fullCtx = `${data.context}${changed.text}`;
     const system = `${ASK_SYSTEM}\n\nCONTEXT\n${fullCtx}`;
@@ -199,8 +222,8 @@ export const askSeams = createServerFn({ method: "POST" })
     const key = nvidiaKey();
     if (key) {
       try {
-        const a = normalise(AskAnswer.parse(await nemotron(key, [{ role: "system", content: system }, ...messages], 900)));
-        tries.push({ ...a, model: "Nemotron" });
+        const r = await nemotron(key, [{ role: "system", content: system }, ...messages], 900);
+        tries.push({ ...normalise(AskAnswer.parse(r)), model: nemotronLabel(r) });
       } catch (e) { tries.push({ answer: "", cites: [], model: `Nemotron failed: ${String(e?.message || e).slice(0, 120)}` }); }
     }
     // Drop any line that states a number the context does not have, then judge what is left.
@@ -212,9 +235,9 @@ export const askSeams = createServerFn({ method: "POST" })
     } };
     clean();
     const good = (t) => t && !!t.answer && !badNumbers(t.answer, data.context).length;
-    if (!(good(tries[0]) && !weakAnswer(tries[0].answer))) {
+    if (base44 && !(good(tries[0]) && !weakAnswer(tries[0].answer))) {
       try {
-        const r = await chat({ adapter: gatewayModel(context.getBase44()), systemPrompts: [system], messages, outputSchema: AskAnswer, agentLoopStrategy: maxIterations(1) });
+        const r = await chat({ adapter: gatewayModel(base44), systemPrompts: [system], messages, outputSchema: AskAnswer, agentLoopStrategy: maxIterations(1) });
         tries.push({ ...normalise(r), model: "Base44 AI" });
       } catch (e) { tries.push({ answer: "", cites: [], model: `Base44 AI failed: ${String(e?.message || e).slice(0, 120)}` }); }
       clean();
@@ -235,4 +258,5 @@ export const askSeams = createServerFn({ method: "POST" })
     }
     pick.trace = tries.map((t) => ({ model: t.model, chars: t.answer.length, dropped: t.dropped || [] }));
     return pick;
-  });
+  }
+}
