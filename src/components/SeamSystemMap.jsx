@@ -12,12 +12,12 @@ const SEAM_MAP_NEUTRAL = { bg: "#F1ECE4", ink: "#1C1917" };
 // Fixed slots for known systems (130×50 each).
 const SeamMapNodes = {
   CRM: { x: 40, y: 40, label: "CRM", sub: "contract prices", tint: SYSTEM_TINT.CRM },
-  Warehouse: { x: 40, y: 200, label: "Warehouse", sub: "shipments", tint: SYSTEM_TINT.Warehouse },
+  Warehouse: { x: 40, y: 170, label: "Warehouse", sub: "shipments", tint: SYSTEM_TINT.Warehouse },
   Billing: { x: 320, y: 120, label: "Billing", sub: "invoices", tint: SYSTEM_TINT.Billing },
   Cash: { x: 600, y: 120, label: "Cash in", sub: "customers pay", tint: SEAM_MAP_NEUTRAL },
   AP: { x: 320, y: 260, label: "AP", sub: "vendor bills", tint: SYSTEM_TINT.AP },
   Vendors: { x: 600, y: 260, label: "Vendors", sub: "we pay", tint: SEAM_MAP_NEUTRAL },
-  Inbox: { x: 40, y: 300, label: "Inbox", sub: "customer email", tint: SYSTEM_TINT.Inbox || SEAM_MAP_NEUTRAL },
+  Inbox: { x: 40, y: 280, label: "Inbox", sub: "customer email", tint: SYSTEM_TINT.Inbox || SEAM_MAP_NEUTRAL },
 };
 const SeamMapSpareSlots = [
   { x: 40, y: 300 },
@@ -32,10 +32,10 @@ const SEAM_MAP_NODE_H = 50;
 // CRM and Warehouse enter Billing at separate ports so they never merge into one blob.
 const SeamMapPaths = {
   "CRM→Billing": { d: "M178 65 C 250 65, 248 133, 308 133", mid: [243, 99], lift: 0 },
-  "Warehouse→Billing": { d: "M178 225 C 250 225, 248 157, 308 157", mid: [243, 191], lift: 0 },
+  "Warehouse→Billing": { d: "M178 195 C 250 195, 248 157, 308 157", mid: [243, 176], lift: 0 },
   "Billing→Cash": { d: "M458 145 L588 145", mid: [523, 145], lift: 26 },
   "AP→Vendors": { d: "M458 285 L588 285", mid: [523, 285], lift: 26 },
-  "Inbox→Billing": { d: "M178 325 C 262 325, 262 167, 308 167", mid: [222, 300], lift: 0 },
+  "Inbox→Billing": { d: "M178 305 C 262 305, 262 167, 308 167", mid: [226, 282], lift: 0 },
 };
 
 /** Build node positions: registry nodes plus spare slots for unknown systems found in the seams. */
@@ -51,8 +51,15 @@ function seamMapLayout(rows) {
       nodes[name] = { ...slot, label: name, sub: "", tint: SYSTEM_TINT[name] || SEAM_MAP_NEUTRAL, spare: true };
     }
   }
-  const bottom = Math.max(...Object.values(nodes).map((n) => n.y + SEAM_MAP_NODE_H));
-  return { nodes, height: Math.max(330, bottom + 20) };
+  // Fit the view to what is drawn (cards plus room for amount pills), so no empty band is left
+  // where a system has nothing flowing (e.g. no "Cash in" card on the kit data).
+  const all = Object.values(nodes);
+  if (!all.length) return { nodes, vb: "0 0 760 330" };
+  const minX = Math.min(...all.map((n) => n.x)) - 14;
+  const maxX = Math.max(...all.map((n) => n.x + SEAM_MAP_NODE_W)) + 14;
+  const minY = Math.min(...all.map((n) => n.y)) - 34;
+  const maxY = Math.max(...all.map((n) => n.y + SEAM_MAP_NODE_H)) + 14;
+  return { nodes, vb: `${minX} ${minY} ${maxX - minX} ${maxY - minY}` };
 }
 
 /** Smooth cubic from the right edge of `a` to the left edge of `b`. */
@@ -75,11 +82,11 @@ export function seamMapAriaLabel(rows) {
 }
 
 export default function SeamSystemMap({ rows, maxCents, activeSeam, onHover, onSelect }) {
-  const { nodes, height } = seamMapLayout(rows);
+  const { nodes, vb } = seamMapLayout(rows);
 
   return (
     <svg
-      viewBox={`0 0 760 ${height}`}
+      viewBox={vb}
       width="100%"
       role="group"
       aria-label={seamMapAriaLabel(rows)}
