@@ -60,9 +60,27 @@ for r in contracts.itertuples():
 def kc_group(cid):
     c = custs.get(cid)
     return c is not None and "kettle & crumb" in (c.group_name + c.customer_name).lower()
-def fee_waived(cid, d):
+# Fee waivers Dana approved in writing: (customer name, first day, last day, email).
+# Ramen Sparrow Bar is NOT here: Carlos said "Dana's fine with it" (M-001895) but Dana never approved it in writing.
+FEE_WAIVERS = [
+    ("copper biryani roasters", date(2026, 9, 21), date(2026, 10, 16), "M-001843"),
+    ("greco & lam capital", date(2026, 10, 5), date(2026, 10, 30), "M-001894"),
+]
+def fee_waiver(cid, d):
     c = custs.get(cid)
-    return c is not None and "copper biryani roasters" in c.customer_name.lower() and date(2026, 9, 21) <= d <= date(2026, 10, 16)
+    if c is None: return None
+    for name, a, b, msg in FEE_WAIVERS:
+        if name in c.customer_name.lower() and a <= d <= b: return msg
+    return None
+def fee_waived(cid, d):
+    return fee_waiver(cid, d) is not None
+# Contract prices Dana approved by email (the contract file was not updated): (customer, sku) -> (price, from, email)
+PRICE_EXCEPTIONS = {
+    ("fig catering", "NL-10161"): (Decimal("34.70"), date(2026, 10, 12), "M-001898"),
+    ("fig catering", "NL-10294"): (Decimal("60.95"), date(2026, 10, 12), "M-001898"),
+    ("reyes & brooks capital", "NL-12821"): (Decimal("14.80"), date(2026, 10, 12), "M-001901"),
+    ("reyes & brooks capital", "NL-12471"): (Decimal("58.25"), date(2026, 10, 12), "M-001901"),
+}
 BAGEL = {"NL-10154": Decimal("40.85"), "NL-10994": Decimal("16.10")}
 
 def tier_disc(c, d):
@@ -84,6 +102,9 @@ def expected_price(cid, sku, d):
     if c is None or p is None: return None, "", ""
     if "bagel kitchen" in c.customer_name.lower() and sku in BAGEL and d >= date(2026, 10, 1):
         return BAGEL[sku], f"Dana approved {BAGEL[sku]} from Oct 1 (email M-001846)", "exception"
+    exc = PRICE_EXCEPTIONS.get((c.customer_name.lower(), sku))
+    if exc and d >= exc[1]:
+        return exc[0], f"Dana approved {exc[0]} from {exc[1]:%b %d} (email {exc[2]})", "contract"
     for k in contract_rows.get((cid, sku), []):
         s, e = dt(k.start_date), dt(k.end_date)
         if s and s <= d and (not e or d <= e):
@@ -118,24 +139,35 @@ for r in dl.drop_duplicates("delivery_id").itertuples():
     c = custs.get(r.customer_id)
     if c is not None:
         _dl_key.setdefault((c.quickbooks_name, r.delivery_date), []).append(r.delivery_id)
+# Invoices with no usable delivery ID: match to the same customer's delivery whose items match best,
+# preferring deliveries no memo already claims. Score = shared SKUs / all SKUs (both sides), date as tie-break.
+_memo_claimed = set(inv.did) - {""}
+_dl_skus = {did: set(g.sku) for did, g in dl.groupby("delivery_id")}
+_dl_info = {r.delivery_id: r for r in dl.drop_duplicates("delivery_id").itertuples()}
+_by_cust = {}
+for did, r in _dl_info.items():
+    c = custs.get(r.customer_id)
+    if c is not None: _by_cust.setdefault(c.quickbooks_name, []).append(did)
+_cands = []
 for no, g in inv[(inv.transaction_type == "Invoice")].groupby("invoice_no"):
     if (g.did != "").any(): continue
     g0 = g.iloc[0]
-    cands = _dl_key.get((g0.customer, g0.ship_date)) or _dl_key.get((g0.customer, g0.date)) or []
-    if not cands:
-        # same customer, delivery within 3 days before the invoice, matching SKUs
-        skus = set(g.item) - {"DEL-FEE"}
-        best = None
-        for (qb, dd), ids in _dl_key.items():
-            if qb != g0.customer or not dt(dd) or not dt(g0.date): continue
-            if 0 <= (dt(g0.date) - dt(dd)).days <= 7:
-                for did in ids:
-                    ds = set(dl[dl.delivery_id == did].sku)
-                    ov = len(ds & skus)
-                    if ov and (best is None or ov > best[0]): best = (ov, did)
-        cands = [best[1]] if best else []
-    if len(cands) == 1:
-        inv.loc[inv.invoice_no == no, "did"] = cands[0]
+    skus = set(g.item) - {"DEL-FEE"}
+    ref = dt(g0.ship_date) or dt(g0.date)
+    if not skus or not ref: continue
+    for did in _by_cust.get(g0.customer, []):
+        dd = dt(_dl_info[did].delivery_date)
+        if not dd or not (-3 <= (ref - dd).days <= 10): continue
+        ds = _dl_skus[did]
+        ov = len(ds & skus)
+        if not ov: continue
+        score = ov / len(ds | skus) + (0.25 if did not in _memo_claimed else 0) - abs((ref - dd).days) * 0.005
+        if ov / len(skus) >= 0.5: _cands.append((score, no, did))
+_used_inv, _used_dl = set(), set()
+for score, no, did in sorted(_cands, reverse=True):
+    if no in _used_inv or did in _used_dl: continue
+    _used_inv.add(no); _used_dl.add(did)
+    inv.loc[inv.invoice_no == no, "did"] = did
 invl = inv[inv.transaction_type == "Invoice"].copy()
 cms = inv[inv.transaction_type == "Credit Memo"].copy()
 dl["qd"] = dl.qty_delivered.apply(lambda x: int(float(x or 0)))
@@ -316,7 +348,7 @@ for no, g in invl.groupby("invoice_no"):
             ("invoices.csv", f"invoice {no}", f"{nfee} DEL-FEE lines, ${fee_amt:.2f}", "At most one $35.00 fee")],
             party=cname, category="Warehouse→Billing", explanation="The same delivery was charged the fee more than once.", action="credit_memo", invoice_no=no, sku="DEL-FEE")
     elif nfee == 1 and not due:
-        reason = "free-delivery period" if in_free else ("fee waived by Dana (M-001843)" if fee_waived(dcid, d) else f"order ${merch_expected:.2f} is $300 or more")
+        reason = "free-delivery period" if in_free else (f"fee waived by Dana ({fee_waiver(dcid, d)})" if fee_waived(dcid, d) else f"order ${merch_expected:.2f} is $300 or more")
         add(f"FEE-EXTRA-{no}", "Delivery fee charged when not due", -fee_amt, mon, f"Delivery fee charged: {reason.split(' (')[0] if 'waived' in reason else ('free-delivery period' if in_free else 'order over $300')}", [
             ("invoices.csv", f"invoice {no}", f"DEL-FEE ${fee_amt:.2f}", "$0.00"),
             ("customers.csv" if in_free else "delivery_log.csv", cname if in_free else f"delivery {did}", reason, "No fee")],
