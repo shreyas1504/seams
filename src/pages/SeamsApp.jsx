@@ -15,11 +15,13 @@ import SeamsTheme from "@/components/SeamsTheme.jsx";
 import KitToday from "@/pages/KitToday.jsx";
 import KitData from "@/pages/KitData.jsx";
 import KitDecisions from "@/pages/KitDecisions.jsx";
+import KitIssues, { issOpenCause } from "@/pages/KitIssues.jsx";
 
 // Accounts and Activity show the previous Overview and Ledger pages until they are rebuilt.
 // Kit mode: the app loads findings.csv + evidence.csv (from kit/detect.py) and keeps Decisions.
 const NAV = [
   { id: "Today", label: "Today" },
+  { id: "Issues", label: "Issues" },
   { id: "Decisions", label: "Decisions" },
   { id: "Data", label: "Load findings" },
 ];
@@ -258,7 +260,9 @@ function SeamsAppShell() {
 
   let page;
   if (tab === "Today") {
-    page = <KitToday role={role} onGoData={() => setTab("Data")} />;
+    page = <KitToday role={role} onGoData={() => setTab("Data")} onOpenIssue={(cause) => { issOpenCause(cause); setTab("Issues"); }} />;
+  } else if (tab === "Issues") {
+    page = <KitIssues role={role} />;
   } else if (tab === "Decisions") {
     page = <KitDecisions />;
   } else if (tab === "Data") {

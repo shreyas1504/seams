@@ -9,6 +9,7 @@ import WhereItSlipped from "@/components/WhereItSlipped.jsx";
 import { SeamsSkeleton } from "@/components/InteractionFeedback.jsx";
 import FixDrawer from "@/components/FixDrawer.jsx";
 import { useKitFlags, kitMonthTotals, kitWhatChanged } from "@/lib/kitData.js";
+import { issRef } from "@/lib/kitIssues.js";
 import { displayText } from "@/lib/displayText.js";
 import { openSeamsLookup } from "@/actions/dataChanged.js";
 
@@ -238,7 +239,7 @@ function KitProof({ flag, causeRows, onDraft }) {
 }
 
 /** One clickable tile per cause. Picking it opens its lines and shows the biggest one in the proof. */
-function KitCauseTile({ cause, rows, seamMax, active, selectedKey, onPick, onSelect, onDraft }) {
+function KitCauseTile({ cause, rows, seamMax, active, selectedKey, onPick, onSelect, onDraft, onOpenIssue }) {
   const total = kitSum(rows);
   const pct = Math.max(4, Math.round((Math.abs(total) / Math.max(seamMax, 1)) * 100));
   const months = new Set(rows.map((r) => r.month));
@@ -269,18 +270,21 @@ function KitCauseTile({ cause, rows, seamMax, active, selectedKey, onPick, onSel
             ))}
           </ul>
           {rows.length > 12 ? <p className="mt-1 text-[11.5px] text-[#6B635A]">+{rows.length - 12} more lines in the draft</p> : null}
-          {rows.some((r) => r.status === "open") ? (
-            <button type="button" className="fix-pill mt-2" onClick={() => onDraft(rows.filter((r) => r.status === "open"))}>
-              Draft fix · {rows.filter((r) => r.status === "open").length} {rows.length === 1 ? "line" : "lines"}
-            </button>
-          ) : null}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {rows.some((r) => r.status === "open") ? (
+              <button type="button" className="fix-pill" onClick={() => onDraft(rows.filter((r) => r.status === "open"))}>
+                Draft fix · {rows.filter((r) => r.status === "open").length} {rows.length === 1 ? "line" : "lines"}
+              </button>
+            ) : null}
+            {onOpenIssue ? <button type="button" className="fix-quiet" onClick={() => onOpenIssue(cause)}>Open issue {issRef(cause)} →</button> : null}
+          </div>
         </div>
       ) : null}
     </li>
   );
 }
 
-export default function KitToday({ role, onGoData }) {
+export default function KitToday({ role, onGoData, onOpenIssue }) {
   const [flags, , meta, { decisions }] = useKitFlags();
   const { selectedSeam, selectedFlagKey, setSelectedFlagKey } = useSelectedSeam();
   const [drafting, setDrafting] = useState(null);
@@ -445,6 +449,7 @@ export default function KitToday({ role, onGoData }) {
                 onPick={(c, rs) => { setActiveCause(c === activeCause ? null : c); setSelectedFlagKey(rs[0].stable_key); }}
                 onSelect={(f) => setSelectedFlagKey(f.stable_key)}
                 onDraft={(rs) => setDrafting(rs)}
+                onOpenIssue={onOpenIssue}
               />
             ))}
           </ul>
